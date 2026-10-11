@@ -1,8 +1,9 @@
 import "./globals.css";
 
-import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { JetBrains_Mono, Outfit, Space_Grotesk } from "next/font/google";
 
 import { MotionProvider } from "@/components/MotionProvider";
+import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { listarTorneios } from "@/lib/estado";
 
@@ -18,6 +19,12 @@ const mono = JetBrains_Mono({
   display: "swap",
 });
 
+const display = Outfit({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+});
+
 export const metadata = {
   title: "Batalha de Memes",
   description:
@@ -29,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const torneioId = torneios[0]?.id;
 
   return (
-    <html lang="pt-BR" className={`${sans.variable} ${mono.variable}`}>
+    <html lang="pt-BR" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
       <body>
         <div className="aurora" aria-hidden>
           <span />
@@ -40,6 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <MotionProvider>
           <SiteHeader torneioId={torneioId} />
           <main>{children}</main>
+          <SiteFooter torneios={torneios} />
         </MotionProvider>
       </body>
     </html>
