@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Banco e mídia
+backend/batalha.db
+backend/media/
+backend/data/raw/
+tmp/
+
+# Node / Next
+node_modules/
+frontend/.next/
+frontend/out/
+
+# IDE / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,51 @@
+{
+  "_instrucoes": "MVP: primeiros 8 memes. youtube_url = primeiro resultado de busca (a confirmar). inicio/fim em segundos (ajustar). O campo 'confirmado' é ignorado pelo backend; sirva-se dele para revisar.",
+  "memes": [
+    {
+      "nome": "Devagar Pai",
+      "youtube_url": "https://www.youtube.com/watch?v=_R8Qh0uLdQ4",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube",
+      "tags": ["nacional"],
+      "confirmado": true
+    },
+    {
+      "nome": "Pai de Familia",
+      "youtube_url": "https://www.youtube.com/watch?v=9wVmCLtuUx0U",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube (Jailson Mendes)",
+      "tags": ["nacional", "classico"],
+      "confirmado": true,
+      "obs": "origem adulta (NSFW) - usar apenas o trecho do suco de laranja"
+    },
+    {
+      "nome": "Nissim",
+      "youtube_url": "https://www.youtube.com/watch?v=sBOsfhA-TGU",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube (Nissim Ourfali)",
+      "tags": ["nacional", "classico"],
+      "confirmado": true
+    },
+    {
+      "nome": "Bambam",
+      "youtube_url": "https://www.youtube.com/watch?v=NGH-PF00MEo",
+      "inicio": 56,
+      "fim": 71,
+      "autor_fonte": "YouTube (BIRL)",
+      "tags": ["nacional", "birl"],
+      "confirmado": true
+    },
+    {
+      "nome": "E Ai Gay",
+      "youtube_url": "https://www.youtube.com/shorts/v9NwfJ-H2Tks",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube",
+      "tags": ["nacional"],
+      "confirmado": true
+    }
+  ]
+}
