@@ -1,11 +1,18 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 import { Bracket } from "@/components/Bracket";
-import { obterTorneio } from "@/lib/api";
+import { listarTorneios, obterTorneio } from "@/lib/estado";
+
+// Export estático: pré-gera uma página por temporada existente em estado.json.
+export function generateStaticParams() {
+  return listarTorneios().map((t) => ({ id: String(t.id) }));
+}
 
 export default async function TorneioPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const torneio = await obterTorneio(Number(id));
+  const torneio = obterTorneio(Number(id));
+  if (!torneio) notFound();
 
   return (
     <main>

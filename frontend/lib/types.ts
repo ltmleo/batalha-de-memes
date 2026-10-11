@@ -38,3 +38,11 @@ export type TournamentDetail = Tournament & {
   memes: Meme[];
   matches: Match[];
 };
+
+// Formato de `backend/data/estado.json` (fonte única da verdade).
+export type Estado = {
+  memes: Meme[];
+  tournaments: Tournament[];
+  matches: Match[];
+  votes: unknown[];
+};

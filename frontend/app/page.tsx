@@ -1,32 +1,19 @@
 import Link from "next/link";
 
-import { listarTorneios } from "@/lib/api";
-import type { Tournament } from "@/lib/types";
+import { listarTorneios } from "@/lib/estado";
 
-export default async function Home() {
-  let torneios: Tournament[] = [];
-  let erro = false;
-  try {
-    torneios = await listarTorneios();
-  } catch {
-    erro = true;
-  }
+export default function Home() {
+  const torneios = listarTorneios();
 
   return (
     <main>
       <h1>Batalha de Memes</h1>
       <p className="sub">Chaveamento e acompanhamento das temporadas</p>
 
-      {erro && (
+      {torneios.length === 0 && (
         <div className="erro">
-          Não foi possível falar com a API. Suba o backend (`uvicorn app.main:app --reload`)
-          em http://localhost:8000.
-        </div>
-      )}
-
-      {!erro && torneios.length === 0 && (
-        <div className="erro">
-          Nenhuma temporada ainda. Rode `POST /memes/seed` e depois `POST /tournaments`.
+          Nenhuma temporada ainda. Rode `python -m app.cli seed` e depois
+          `python -m app.cli torneio --nome &quot;Temporada 1&quot;` e refaça o build.
         </div>
       )}
 

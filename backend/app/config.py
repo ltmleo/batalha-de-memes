@@ -20,7 +20,8 @@ MOLDURA_PATH = ASSETS_DIR / "modulra.png"
 FONTE_PATH = Path("C:/Windows/Fonts/arial.ttf")
 FONTE_TITULO_PATH = Path("C:/Windows/Fonts/arialbd.ttf")
 
-DATABASE_URL = f"sqlite:///{(BASE_DIR / 'batalha.db').as_posix()}"
+# Estado da aplicação (fonte única da verdade) e catálogo de entrada
+CAMINHO_ESTADO = DATA_DIR / "estado.json"
 CAMINHO_CATALOGO = DATA_DIR / "memes.json"
 
 for _dir in (DATA_DIR, MEDIA_DIR, RAW_DIR, CLIPS_DIR, TMP_DIR):

@@ -5,7 +5,6 @@ __pycache__/
 venv/
 
 # Banco e mídia
-backend/batalha.db
 backend/media/
 backend/data/raw/
 tmp/

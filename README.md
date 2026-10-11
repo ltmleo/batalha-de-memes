@@ -3,14 +3,34 @@
 Automatiza a produção de vídeos de "batalha de memes" para o TikTok: dois clipes de
 meme se enfrentam, o público vota nos comentários e o vencedor avança no chaveamento.
 
-- **Backend/worker:** Python 3.11 + FastAPI + SQLAlchemy (SQLite).
+- **Backend/worker:** Python 3.11, sem servidor. O pipeline lê e grava o estado em
+  `backend/data/estado.json` (fonte única da verdade — sem banco, sem API).
 - **Download/edição:** `yt-dlp` + `ffmpeg` (binário embutido via `imageio-ffmpeg`).
-- **Site:** Next.js (lista de temporadas + chaveamento).
+- **Site:** Next.js em **export estático** (`output: "export"`): o build lê
+  `data/estado.json` e gera HTML/CSS/JS puros em `frontend/out/`.
 
-Status atual: catálogo, chaveamento e API prontos; `downloader.py` e `assembler.py`
+Status atual: catálogo, chaveamento e CLI prontos; `downloader.py` e `assembler.py`
 já geram um vídeo de confronto (abertura + moldura + título + clipes). Coleta de votos
 do TikTok (`scraper`/`vote_parser`) e publicação (`publisher`) ainda não implementados —
 ver `SPEC.md`.
+
+---
+
+## Estado em JSON
+
+Tudo o que o app precisa vive em `backend/data/estado.json`:
+
+```json
+{
+  "memes":      [ { "id": 1, "nome": "...", "youtube_url": "...", "inicio": 0, "fim": 10, "tags": [], "status": "ativo" } ],
+  "tournaments":[ { "id": 1, "nome": "Temporada 1", "temporada": "1", "seed": 42, "tamanho": 8, "status": "em_andamento", "criado_em": "..." } ],
+  "matches":    [ { "id": 1, "tournament_id": 1, "round": 1, "posicao": 0, "meme_a_id": 4, "meme_b_id": 2, "winner_id": null, "status": "pendente", "votos_a": 0, "votos_b": 0 } ],
+  "votes":      []
+}
+```
+
+O catálogo editável em `backend/data/memes.json` alimenta o estado via `seed` (insere
+novos memes e atualiza os existentes por nome).
 
 ---
 
@@ -31,7 +51,7 @@ ver `SPEC.md`.
 
 ---
 
-## Backend (API + pipeline)
+## Backend (pipeline em CLI)
 
 Todos os comandos abaixo rodam a partir da pasta `backend`.
 
@@ -50,48 +70,41 @@ pip install -r requirements.txt
 
 > Se o venv já existir, pule a criação e só rode `pip install -r requirements.txt`.
 
-### 2. Subir a API
+### 2. Popular o catálogo e criar um torneio
 
 ```powershell
-cd backend
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
-```
-
-- API: http://localhost:8000
-- Documentação interativa (Swagger): http://localhost:8000/docs
-- Health check: http://localhost:8000/health
-
-O banco SQLite (`backend/batalha.db`) e as pastas de mídia são criados automaticamente.
-
-### 3. Popular o catálogo e criar um torneio
-
-Em outro terminal (PowerShell):
-
-```powershell
-# lê backend/data/memes.json e insere os memes no banco (ignora duplicados)
-Invoke-RestMethod -Method Post http://localhost:8000/memes/seed
+# lê backend/data/memes.json e grava no estado (ignora memes já existentes)
+.\.venv\Scripts\python.exe -m app.cli seed
 
 # cria a temporada com todos os memes ativos
-Invoke-RestMethod -Method Post http://localhost:8000/tournaments `
-  -ContentType "application/json" `
-  -Body '{"nome":"Temporada 1","temporada":"1"}'
+.\.venv\Scripts\python.exe -m app.cli torneio --nome "Temporada 1" --temporada 1
+
+# lista temporadas e mostra o chaveamento
+.\.venv\Scripts\python.exe -m app.cli torneios
+.\.venv\Scripts\python.exe -m app.cli mostrar --torneio 1
 ```
 
-O `POST /tournaments` aceita também `seed` (sorteio reprodutível) e `meme_ids`
-(lista explícita). Sem `seed`, um valor aleatório é usado.
+O comando `torneio` aceita `--seed` (sorteio reprodutível) e `--ids` (lista explícita
+de memes). Sem `--seed`, um valor aleatório é usado.
+
+Os IDs de confronto aparecem na saída de `mostrar` (coluna `id`).
+
+### 3. Definir um vencedor e propagar na chave
+
+```powershell
+.\.venv\Scripts\python.exe -m app.cli vencedor --match 2 --winner 5
+```
 
 ### 4. Montar o vídeo de um confronto
 
-Os IDs de confronto aparecem em `GET /tournaments/{id}` (campo `matches[].id`).
-
-**Via API** (baixa os trechos, normaliza e monta):
+**Via CLI integrada** (baixa os trechos, normaliza e monta):
 
 ```powershell
-Invoke-RestMethod -Method Post http://localhost:8000/matches/1/montar
-# grava backend/media/clips/match_1.mp4 e retorna video_path
+.\.venv\Scripts\python.exe -m app.cli montar --match 1
+# grava backend/media/clips/match_1.mp4 e imprime o caminho
 ```
 
-**Via linha de comando** (útil para testar sem subir a API):
+**Serviços avulsos** (úteis para testar sem o estado):
 
 ```powershell
 cd backend
@@ -102,58 +115,49 @@ cd backend
 
 # monta a batalha (abertura + moldura) e imprime o caminho do vídeo
 .\.venv\Scripts\python.exe -m app.services.assembler --a 1 --b 2
-# flags: --sem-abertura  --sem-moldura  --saida "caminho\saida.mp4"
+# flags: --sem-abertura  --sem-moldura  --sem-encerramento  --saida "caminho\saida.mp4"
 ```
 
 Arquivos gerados (git-ignored):
 
 - `backend/media/raw/meme_{id}.mp4` — trecho bruto baixado
 - `backend/media/clips/clip_meme_{id}.mp4` — clipe normalizado 1080x1920
-- `backend/media/clips/match_{id}.mp4` — vídeo final do confronto (via API)
-- `tmp/batalha_{a}_{b}.mp4` — vídeo final gerado pela CLI
+- `backend/media/clips/match_{id}.mp4` — vídeo final do confronto
+- `tmp/batalha_{a}_{b}.mp4` — vídeo final gerado pelo assembler avulso
 
-### Endpoints da API
+### Comandos da CLI
 
-| Método | Rota | Descrição |
-| --- | --- | --- |
-| GET | `/health` | Status |
-| GET | `/memes` | Lista memes |
-| POST | `/memes` | Cria meme |
-| POST | `/memes/seed` | Carrega `data/memes.json` |
-| GET | `/tournaments` | Lista temporadas |
-| POST | `/tournaments` | Cria torneio (sorteia as chaves) |
-| GET | `/tournaments/{id}` | Detalhe (memes + matches) |
-| GET | `/matches` | Lista confrontos (`?tournament_id=`) |
-| GET | `/matches/{id}` | Detalhe do confronto |
-| POST | `/matches/{id}/vencedor` | Define vencedor e propaga (`{"winner_id": N}`) |
-| POST | `/matches/{id}/montar` | Baixa, normaliza e monta o vídeo |
+| Comando | Descrição |
+| --- | --- |
+| `seed` | Carrega `data/memes.json` no estado |
+| `memes` | Lista os memes |
+| `torneio --nome ...` | Cria torneio (sorteia as chaves) |
+| `torneios` | Lista temporadas |
+| `mostrar --torneio N` | Mostra o chaveamento |
+| `vencedor --match N --winner M` | Define vencedor e propaga |
+| `montar --match N` | Baixa, normaliza e monta o vídeo |
 
 ---
 
-## Frontend (site)
+## Frontend (site estático)
+
+O site é **estático**: o build lê `backend/data/estado.json` e pré-renderiza as
+páginas. Não há servidor de aplicação em tempo de execução.
 
 ```powershell
 cd frontend
 npm install
-npm run dev
+npm run dev        # desenvolvimento: http://localhost:3000
+npm run build      # gera o site estático em frontend/out/
 ```
 
-- Site: http://localhost:3000
-- Página inicial: lista de temporadas
-- `/torneio/[id]`: chaveamento visual
+Para publicar, sirva a pasta `frontend/out/` em qualquer host estático (ou
+`npx serve out`). Sempre que o estado mudar, rode `npm run build` de novo.
 
-Por padrão o site consome a API em `http://localhost:8000`. Para apontar para outro
-endereço, crie `frontend/.env.local`:
-
-```
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
-
-Build de produção:
+Se o JSON estiver em outro caminho, defina `ESTADO_JSON` no ambiente antes do build:
 
 ```powershell
-npm run build
-npm run start
+$env:ESTADO_JSON = "C:\caminho\para\estado.json"; npm run build
 ```
 
 ---
@@ -166,19 +170,22 @@ batalha-de-memes/
   videos/abertura.mp4       # intro
   backend/
     app/
-      main.py               # FastAPI (CORS para localhost:3000)
-      config.py             # caminhos (mídia, moldura, fontes, tmp)
-      db.py models.py schemas.py
-      routers/              # memes, tournaments, matches
+      cli.py                # CLI do pipeline (seed, torneio, vencedor, montar...)
+      config.py             # caminhos (estado, mídia, moldura, fontes, tmp)
+      store.py              # lê/grava data/estado.json (fonte única da verdade)
       services/
-        catalog.py          # lê data/memes.json
+        catalog.py          # lê data/memes.json  -> estado
         bracket.py          # sorteio das chaves + propagação do vencedor
         downloader.py       # yt-dlp + normalização 9:16   (CLI: --id)
         assembler.py        # ffmpeg: abertura + moldura + título (CLI: --a --b)
-    data/memes.json         # catálogo
+    data/
+      memes.json            # catálogo editável (entrada do seed)
+      estado.json           # estado da aplicação (fonte única da verdade)
     media/                  # cache de clipes (git-ignored)
     requirements.txt
-  frontend/                 # Next.js (App Router)
+  frontend/                 # Next.js (App Router) com output: "export"
+    lib/estado.ts           # lê data/estado.json em tempo de build
+    out/                    # site estático gerado (git-ignored)
   tmp/                      # saída temporária (git-ignored)
   SPEC.md                   # especificação e roadmap
 ```
@@ -190,10 +197,14 @@ batalha-de-memes/
 Cada clipe é exibido em tela cheia, em sequência: **abertura → meme A → meme B**.
 Sobre cada clipe aplica-se a moldura (`assets/modulra.png`) com:
 
-- o clipe encaixado na área do "telão" (11%–89% da largura × 25%–81% da altura);
+- o clipe preenchendo toda a área do "telão" (11%–89% da largura × 25%–81% da
+  altura) por recorte central ("cover"): ele ocupa 100% do espaço reservado,
+  mesmo que isso corte as bordas — sem fundo desfocado nem barras;
 - o nome do meme como título centralizado (faixa 13%–23%), em Arial Bold, com o
   tamanho ajustado automaticamente para preencher a área;
 - o áudio original de cada clipe.
+
+Reescalas usam `flags=lanczos` para manter a nitidez (sem aspecto "borrado").
 
 Parâmetros ficam em `backend/app/services/assembler.py` (constantes `MEME_*` e
 `TITULO_*`) e os caminhos em `backend/app/config.py`.
@@ -207,9 +218,7 @@ Parâmetros ficam em `backend/app/services/assembler.py` (constantes `MEME_*` e
   Se faltar, rode `pip install imageio-ffmpeg`.
 - **Título com acento errado / quadrado:** confira que `arial.ttf` e `arialbd.ttf`
   existem em `C:\Windows\Fonts`.
-- **Site mostra "Não foi possível falar com a API":** o backend não está rodando em
-  `http://localhost:8000` (ou ajuste `NEXT_PUBLIC_API_URL`).
-- **CORS:** a API libera apenas `http://localhost:3000` (ajuste em
-  `backend/app/main.py` se mudar a porta do site).
+- **Site vazio / temporada antiga:** o site lê o JSON no **build**. Rode `seed` e
+  `torneio` na CLI e refaça `npm run build` em `frontend/`.
 - **Download falha / vídeo indisponível:** verifique `youtube_url`, `inicio`/`fim`
-  (em segundos) em `backend/data/memes.json`.
+  (em segundos) em `backend/data/estado.json` (ou no catálogo `memes.json`).

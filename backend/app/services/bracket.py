@@ -1,8 +1,7 @@
 import random
+from typing import Any
 
-from sqlalchemy.orm import Session
-
-from .. import models
+from ..store import Estado, agora
 
 
 def _ordem_sementes(tamanho: int) -> list[int]:
@@ -18,35 +17,36 @@ def _ordem_sementes(tamanho: int) -> list[int]:
     return ordem
 
 
-def definir_vencedor(db: Session, match: models.Match, winner_id: int) -> None:
+def definir_vencedor(estado: Estado, match: dict[str, Any], winner_id: int) -> None:
     """Marca o vencedor e o propaga para a próxima rodada (slot A/B pela paridade)."""
-    match.winner_id = winner_id
-    match.status = "finalizado"
+    match["winner_id"] = winner_id
+    match["status"] = "finalizado"
 
-    proximo = (
-        db.query(models.Match)
-        .filter_by(
-            tournament_id=match.tournament_id,
-            round=match.round + 1,
-            posicao=match.posicao // 2,
-        )
-        .first()
+    proximo = next(
+        (
+            m
+            for m in estado.matches
+            if m["tournament_id"] == match["tournament_id"]
+            and m["round"] == match["round"] + 1
+            and m["posicao"] == match["posicao"] // 2
+        ),
+        None,
     )
     if proximo is None:
         return
-    if match.posicao % 2 == 0:
-        proximo.meme_a_id = winner_id
+    if match["posicao"] % 2 == 0:
+        proximo["meme_a_id"] = winner_id
     else:
-        proximo.meme_b_id = winner_id
+        proximo["meme_b_id"] = winner_id
 
 
 def gerar_torneio(
-    db: Session,
+    estado: Estado,
     nome: str,
     meme_ids: list[int],
     seed: int,
     temporada: str = "1",
-) -> models.Tournament:
+) -> dict[str, Any]:
     n = len(meme_ids)
     if n < 2:
         raise ValueError("São necessários ao menos 2 memes.")
@@ -62,35 +62,53 @@ def gerar_torneio(
     # byes vão para as melhores sementes, evitando confrontos "None vs None"
     slots: list[int | None] = [embaralhado[s - 1] if s <= n else None for s in _ordem_sementes(tamanho)]
 
-    torneio = models.Tournament(
-        nome=nome, temporada=temporada, seed=seed, tamanho=tamanho, status="em_andamento"
+    torneio = estado.adicionar(
+        estado.tournaments,
+        {
+            "nome": nome,
+            "temporada": temporada,
+            "seed": seed,
+            "tamanho": tamanho,
+            "status": "em_andamento",
+            "criado_em": agora(),
+        },
     )
-    db.add(torneio)
-    db.flush()
 
-    matches: dict[tuple[int, int], models.Match] = {}
+    matches: dict[tuple[int, int], dict[str, Any]] = {}
     for r in range(1, rodadas + 1):
         for p in range(tamanho >> r):
-            match = models.Match(tournament_id=torneio.id, round=r, posicao=p, status="pendente")
-            db.add(match)
+            match = estado.adicionar(
+                estado.matches,
+                {
+                    "tournament_id": torneio["id"],
+                    "round": r,
+                    "posicao": p,
+                    "meme_a_id": None,
+                    "meme_b_id": None,
+                    "winner_id": None,
+                    "video_path": None,
+                    "tiktok_url": None,
+                    "publicado_em": None,
+                    "deadline": None,
+                    "status": "pendente",
+                    "votos_a": 0,
+                    "votos_b": 0,
+                },
+            )
             matches[(r, p)] = match
-    db.flush()
 
     for p in range(tamanho // 2):
         match = matches[(1, p)]
-        match.meme_a_id = slots[2 * p]
-        match.meme_b_id = slots[2 * p + 1]
-    db.flush()
+        match["meme_a_id"] = slots[2 * p]
+        match["meme_b_id"] = slots[2 * p + 1]
 
     for p in range(tamanho // 2):
         match = matches[(1, p)]
-        if match.meme_a_id is None and match.meme_b_id is None:
-            match.status = "cancelado"
-        elif match.meme_b_id is None:
-            definir_vencedor(db, match, match.meme_a_id)
-        elif match.meme_a_id is None:
-            definir_vencedor(db, match, match.meme_b_id)
+        if match["meme_a_id"] is None and match["meme_b_id"] is None:
+            match["status"] = "cancelado"
+        elif match["meme_b_id"] is None:
+            definir_vencedor(estado, match, match["meme_a_id"])
+        elif match["meme_a_id"] is None:
+            definir_vencedor(estado, match, match["meme_b_id"])
 
-    db.commit()
-    db.refresh(torneio)
     return torneio

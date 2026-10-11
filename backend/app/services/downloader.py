@@ -6,7 +6,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from .. import models
+from typing import Any
+
 from ..config import CLIPS_DIR, MEDIA_DIR, RAW_DIR
 
 logger = logging.getLogger("batalha.downloader")
@@ -72,17 +73,18 @@ def _garantir_ffmpeg_no_path() -> None:
     os.environ["PATH"] = str(tools) + os.pathsep + os.environ.get("PATH", "")
 
 
-def baixar_trecho(meme: models.Meme, forcar: bool = False, dir_saida: Path | None = None) -> Path:
+def baixar_trecho(meme: dict[str, Any], forcar: bool = False, dir_saida: Path | None = None) -> Path:
     """Baixa apenas o trecho [inicio, fim] (em segundos) e remuxa para mp4."""
+    meme_id = meme["id"]
     pasta = dir_saida or RAW_DIR
     pasta.mkdir(parents=True, exist_ok=True)
-    destino = pasta / f"meme_{meme.id}.mp4"
+    destino = pasta / f"meme_{meme_id}.mp4"
     if destino.exists() and not forcar:
         logger.info("cache hit: %s", destino.name)
         return destino
 
-    if not meme.youtube_url:
-        raise DownloadError(f"meme {meme.id} sem youtube_url")
+    if not meme.get("youtube_url"):
+        raise DownloadError(f"meme {meme_id} sem youtube_url")
 
     try:
         import yt_dlp
@@ -94,8 +96,8 @@ def baixar_trecho(meme: models.Meme, forcar: bool = False, dir_saida: Path | Non
 
     _garantir_ffmpeg_no_path()
 
-    inicio = float(meme.inicio or 0)
-    fim = float(meme.fim or 0)
+    inicio = float(meme.get("inicio") or 0)
+    fim = float(meme.get("fim") or 0)
     if fim <= inicio:
         raise DownloadError(f"trecho inválido: {_hhmmss(inicio)}-{_hhmmss(fim)}")
 
@@ -104,7 +106,7 @@ def baixar_trecho(meme: models.Meme, forcar: bool = False, dir_saida: Path | Non
 
     opts = {
         "format": FORMATO,
-        "outtmpl": str(pasta / f"meme_{meme.id}.%(ext)s"),
+        "outtmpl": str(pasta / f"meme_{meme_id}.%(ext)s"),
         "merge_output_format": "mp4",
         "postprocessors": [{"key": "FFmpegVideoRemuxer", "preferedformat": "mp4"}],
         "download_ranges": _ranges,
@@ -120,12 +122,12 @@ def baixar_trecho(meme: models.Meme, forcar: bool = False, dir_saida: Path | Non
         "noplaylist": True,
     }
 
-    logger.info("baixando meme %s [%s-%s]", meme.id, _hhmmss(inicio), _hhmmss(fim))
+    logger.info("baixando meme %s [%s-%s]", meme_id, _hhmmss(inicio), _hhmmss(fim))
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
-            ydl.download([meme.youtube_url])
+            ydl.download([meme["youtube_url"]])
     except yt_dlp.utils.DownloadError as exc:
-        raise DownloadError(f"falha ao baixar meme {meme.id}: {exc}") from exc
+        raise DownloadError(f"falha ao baixar meme {meme_id}: {exc}") from exc
 
     if not destino.exists():
         raise DownloadError(f"yt-dlp não produziu {destino}")
@@ -145,7 +147,13 @@ def normalizar_vertical(
     forcar: bool = False,
     dir_saida: Path | None = None,
 ) -> Path:
-    """Normaliza para 1080x1920 (9:16) com fundo desfocado."""
+    """Normaliza para 1080x1920 (9:16) preenchendo todo o quadro.
+
+    Usa escala com ``force_original_aspect_ratio=increase`` seguida de recorte
+    central: o vídeo ocupa a área inteira, mesmo que corte as bordas — sem
+    fundo desfocado nem barras (letterbox). ``flags=lanczos`` mantém a nitidez
+    para evitar o aspecto "borrado" do reescalonamento.
+    """
     destino = destino or ((dir_saida or CLIPS_DIR) / f"clip_{origem.stem}.mp4")
     destino.parent.mkdir(parents=True, exist_ok=True)
     if destino.exists() and not forcar:
@@ -156,7 +164,7 @@ def normalizar_vertical(
         raise DownloadError("ffmpeg não encontrado (instale no PATH ou 'imageio-ffmpeg')")
 
     filtro = (
-        "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,"
+        "[0:v]scale=1080:1920:force_original_aspect_ratio=increase:flags=lanczos,"
         "crop=1080:1920:exact=1,setsar=1[v]"
     )
     cmd = [
@@ -173,7 +181,7 @@ def normalizar_vertical(
     return destino
 
 
-def preparar_clip(meme: models.Meme, forcar: bool = False, dir_saida: Path | None = None) -> Path:
+def preparar_clip(meme: dict[str, Any], forcar: bool = False, dir_saida: Path | None = None) -> Path:
     """Baixa o trecho e devolve o clipe já normalizado em 9:16."""
     bruto = baixar_trecho(meme, forcar=forcar, dir_saida=dir_saida)
     return normalizar_vertical(bruto, forcar=forcar, dir_saida=dir_saida)
@@ -182,10 +190,10 @@ def preparar_clip(meme: models.Meme, forcar: bool = False, dir_saida: Path | Non
 def _cli() -> None:
     import argparse
 
-    from ..db import SessionLocal
+    from ..store import Estado
 
     parser = argparse.ArgumentParser(description="Baixa e normaliza o trecho de um meme")
-    parser.add_argument("--id", type=int, required=True, help="id do meme no banco")
+    parser.add_argument("--id", type=int, required=True, help="id do meme no estado")
     parser.add_argument("--forcar", action="store_true", help="ignora cache")
     args = parser.parse_args()
 
@@ -196,14 +204,11 @@ def _cli() -> None:
     if deps["ffmpeg"] is None:
         raise SystemExit("ffmpeg não encontrado")
 
-    db = SessionLocal()
-    try:
-        meme = db.get(models.Meme, args.id)
-        if meme is None:
-            raise SystemExit(f"meme {args.id} não encontrado")
-        print(preparar_clip(meme, forcar=args.forcar))
-    finally:
-        db.close()
+    estado = Estado.carregar()
+    meme = estado.buscar_meme(args.id)
+    if meme is None:
+        raise SystemExit(f"meme {args.id} não encontrado")
+    print(preparar_clip(meme, forcar=args.forcar))
 
 
 if __name__ == "__main__":

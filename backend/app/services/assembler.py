@@ -49,9 +49,15 @@ class AssembleError(RuntimeError):
 
 
 def _escalar(indice: int, label: str, largura: int, altura: int) -> str:
+    """Preenche o quadro inteiro recortando o centro (cover/crop).
+
+    `force_original_aspect_ratio=increase` aumenta o vídeo até cobrir toda a
+    área reservada e `crop` remove o excesso no centro — sem fundo desfocado
+    nem barras. `flags=lanczos` evita o aspecto desfocado/borrado do reescalão.
+    """
     return (
-        f"[{indice}:v]scale={largura}:{altura}:force_original_aspect_ratio=increase,"
-        f"crop={largura}:{altura},fps={FPS},format=yuv420p,setsar=1[{label}]"
+        f"[{indice}:v]scale={largura}:{altura}:force_original_aspect_ratio=increase:"
+        f"flags=lanczos,crop={largura}:{altura},fps={FPS},format=yuv420p,setsar=1[{label}]"
     )
 
 
@@ -202,9 +208,8 @@ def _cli() -> None:
     import argparse
     import logging
 
-    from .. import models
     from ..config import TMP_DIR
-    from ..db import SessionLocal
+    from ..store import Estado
     from .downloader import preparar_clip
 
     parser = argparse.ArgumentParser(description="Monta a batalha de dois memes com abertura")
@@ -219,33 +224,30 @@ def _cli() -> None:
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
-    db = SessionLocal()
-    try:
-        meme_a = db.get(models.Meme, args.a)
-        meme_b = db.get(models.Meme, args.b)
-        if meme_a is None or meme_b is None:
-            raise SystemExit("meme A ou B não encontrado")
+    estado = Estado.carregar()
+    meme_a = estado.buscar_meme(args.a)
+    meme_b = estado.buscar_meme(args.b)
+    if meme_a is None or meme_b is None:
+        raise SystemExit("meme A ou B não encontrado")
 
-        clip_a = preparar_clip(meme_a, forcar=args.forcar, dir_saida=TMP_DIR)
-        clip_b = preparar_clip(meme_b, forcar=args.forcar, dir_saida=TMP_DIR)
+    clip_a = preparar_clip(meme_a, forcar=args.forcar, dir_saida=TMP_DIR)
+    clip_b = preparar_clip(meme_b, forcar=args.forcar, dir_saida=TMP_DIR)
 
-        abertura = None if args.sem_abertura else ABERTURA_PATH
-        encerramento = None if args.sem_encerramento else ENCERRAMENTO_PATH
-        moldura = None if args.sem_moldura else MOLDURA_PATH
-        destino = Path(args.saida) if args.saida else TMP_DIR / f"batalha_{meme_a.id}_{meme_b.id}.mp4"
-        saida = montar_video(
-            clip_a,
-            clip_b,
-            texto_a=meme_a.nome,
-            texto_b=meme_b.nome,
-            abertura=abertura,
-            encerramento=encerramento,
-            moldura=moldura,
-            destino=destino,
-        )
-        print(saida)
-    finally:
-        db.close()
+    abertura = None if args.sem_abertura else ABERTURA_PATH
+    encerramento = None if args.sem_encerramento else ENCERRAMENTO_PATH
+    moldura = None if args.sem_moldura else MOLDURA_PATH
+    destino = Path(args.saida) if args.saida else TMP_DIR / f"batalha_{meme_a['id']}_{meme_b['id']}.mp4"
+    saida = montar_video(
+        clip_a,
+        clip_b,
+        texto_a=meme_a["nome"],
+        texto_b=meme_b["nome"],
+        abertura=abertura,
+        encerramento=encerramento,
+        moldura=moldura,
+        destino=destino,
+    )
+    print(saida)
 
 
 if __name__ == "__main__":

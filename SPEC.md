@@ -7,7 +7,8 @@ vencedor avança no chaveamento.
 ## Decisões
 - **Votação:** TikTok (comentários via scraping).
 - **Origem dos clipes:** download do YouTube (fair use).
-- **Stack:** Python (pipeline/API) + Next.js (site).
+- **Estado:** JSON único (`backend/data/estado.json`) — sem banco de dados e sem API.
+- **Stack:** Python (pipeline/CLI) + Next.js em export estático (site).
 
 ## Fluxo
 ```
@@ -17,21 +18,22 @@ Catálogo → Sorteio das chaves → Download+recorte → Montagem → Publicaç
 ```
 
 ## Stack
-- **Backend / worker:** Python 3.11, FastAPI, SQLAlchemy, SQLite (migra p/ Postgres depois), APScheduler.
+- **Backend / worker:** Python 3.11, sem servidor. O estado é lido/gravado em
+  `data/estado.json`; a CLI (`app.cli`) orquestra o pipeline.
 - **Download/edição:** `yt-dlp` + `ffmpeg` (CLI).
 - **Coleta TikTok:** Playwright (headless) + fallback no endpoint interno de comentários.
-- **Site:** Next.js.
+- **Site:** Next.js com `output: "export"` — lê o JSON em tempo de build e gera HTML/CSS/JS.
 
 ## Estrutura
 ```
 batalha-de-memes/
   backend/
     app/
-      main.py            # FastAPI
-      db.py models.py schemas.py config.py
-      routers/           # memes, tournaments, matches
+      cli.py             # pipeline: seed, torneio, vencedor, montar...
+      store.py           # lê/grava data/estado.json (fonte única da verdade)
+      config.py          # caminhos (estado, mídia, moldura, fontes, tmp)
       services/
-        catalog.py       # lê data/memes.json
+        catalog.py       # lê data/memes.json -> estado
         bracket.py       # sorteio das chaves + propagação
         downloader.py    # yt-dlp + crop 9:16
         assembler.py     # ffmpeg (montagem)
@@ -39,20 +41,23 @@ batalha-de-memes/
         vote_parser.py   # apuração A vs B            (a implementar)
         publisher.py     # upload/publicação          (a implementar)
       workers/pipeline.py
-    data/memes.json
+    data/
+      memes.json         # catálogo editável (entrada do seed)
+      estado.json        # estado da aplicação (fonte única da verdade)
     media/               # cache de clipes (git-ignored)
     requirements.txt
-  frontend/              # Next.js
+  frontend/              # Next.js (export estático)
 ```
 
 ## Modelo de dados
+Persistidos como listas de objetos em `backend/data/estado.json`:
 ```
-Meme{id, nome, youtube_url, inicio, fim, autor_fonte, tags[], status}
-Tournament{id, nome, temporada, seed, tamanho, status, criado_em}
-Match{id, tournament_id, round, posicao, meme_a_id, meme_b_id,
-      video_path, tiktok_url, publicado_em, deadline, status,
-      votos_a, votos_b, winner_id}
-Vote{id, match_id, user_hash, raw_comment, escolha(A|B), valido, criado_em}
+Memes[]      Meme{id, nome, youtube_url, inicio, fim, autor_fonte, tags[], status}
+Tournaments[] Tournament{id, nome, temporada, seed, tamanho, status, criado_em}
+Matches[]    Match{id, tournament_id, round, posicao, meme_a_id, meme_b_id,
+                   video_path, tiktok_url, publicado_em, deadline, status,
+                   votos_a, votos_b, winner_id}
+Votes[]      Vote{id, match_id, user_hash, raw_comment, escolha(A|B), valido, criado_em}
 ```
 `user_hash` = hash do autor do comentário (dedupe sem guardar dado pessoal).
 `inicio`/`fim` são em **segundos**.
@@ -63,8 +68,9 @@ yt-dlp -f "bv*[height<=1080]+ba/b" --download-sections "*HH:MM:SS-HH:MM:SS" `
   --force-keyframes-at-cuts --merge-output-format mp4 `
   -o "media/raw/meme_{id}.mp4" "{youtube_url}"
 ```
-Depois `ffmpeg` normaliza para 1080x1920 (fundo desfocado) em `media/clips/`.
-Trechos já baixados são cacheados.
+Depois `ffmpeg` normaliza para 1080x1920 por **recorte central (cover/crop)** —
+o vídeo preenche todo o quadro, cortando as bordas quando necessário, sem fundo
+desfocado — em `media/clips/`. Trechos já baixados são cacheados.
 
 ## 2. Sorteio das chaves (`bracket.py`)
 - `N` memes → potência de 2 (16/8/4). `random.Random(seed)` torna o sorteio **reprodutível**.
@@ -100,10 +106,12 @@ rate-limit/captcha. Mitigação: cookies de sessão, retry com backoff e JSON br
 TikTok tem **Content Posting API oficial** (requer app aprovado) — caminho sancionado;
 fallback: upload manual assistido. Após publicar, grava `tiktok_url` e agenda a coleta.
 
-## 6. Site (Next.js)
-- `/` lista de temporadas; `/torneio/[id]` chaveamento visual; `/match/[id]` placar.
-- Backend: `GET /memes`, `POST /memes/seed`, `POST /tournaments`, `GET /tournaments/{id}`,
-  `GET /matches/{id}`, `POST /matches/{id}/vencedor`, `POST /matches/{id}/montar`.
+## 6. Site (Next.js, export estático)
+- `/` lista de temporadas; `/torneio/[id]` chaveamento visual (pré-renderizado por
+  `generateStaticParams`). `/match/[id]` placar (a implementar).
+- O site lê `backend/data/estado.json` em **tempo de build** (`frontend/lib/estado.ts`)
+  e gera HTML/CSS/JS puros em `frontend/out/`. Não há API em tempo de execução;
+  após o pipeline atualizar o JSON, basta refazer o build.
 
 ## 7. Monetização
 TikTok Creator Rewards (requer **10k seguidores + 100k views/30d**), brand deals,
@@ -114,7 +122,7 @@ tráfego para o site (ranking/votação) e "inscrição de memes" patrocinada.
 - **Scraping TikTok:** frágil e sensível a ToS; manter publicação (API oficial) separada da votação.
 
 ## Roadmap
-1. `catalog.py` + `bracket.py` + API/site com chaveamento. **(feito neste scaffold)**
+1. `catalog.py` + `bracket.py` + CLI com chaveamento. **(feito neste scaffold)**
 2. `downloader.py` + `assembler.py`: gerar um match manualmente. **(scaffold pronto)**
 3. `scraper.py` + `vote_parser.py` com coleta simulada.
 4. `pipeline.py` automatiza o ciclo; `publisher.py` fecha.
