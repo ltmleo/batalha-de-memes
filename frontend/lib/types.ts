@@ -36,10 +36,12 @@ export type Tournament = {
   id: number;
   nome: string;
   temporada: string;
-  seed: number;
+  seed: number | null;
   tamanho: number;
   status: string;
   criado_em: string;
+  /** Memes reservados num torneio que ainda aguarda oponentes (status "aguardando"). */
+  participantes?: number[];
 };
 
 export type TournamentDetail = Tournament & {

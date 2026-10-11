@@ -18,7 +18,7 @@ from pathlib import Path
 
 from .config import ABERTURA_PATH, CLIPS_DIR, ENCERRAMENTO_PATH
 from .services import assembler, downloader
-from .services.bracket import definir_vencedor, gerar_torneio
+from .services.bracket import criar_torneio_aguardando, definir_vencedor, gerar_torneio
 from .services.catalog import carregar_catalogo
 from .store import Estado
 
@@ -43,8 +43,16 @@ def _cmd_torneio(args: argparse.Namespace) -> None:
     else:
         ids = [m["id"] for m in estado.memes if m.get("status", "ativo") == "ativo"]
 
-    seed = args.seed if args.seed is not None else random.randrange(1, 2**31)
-    torneio = gerar_torneio(estado, args.nome, ids, seed, str(args.temporada))
+    if args.aguardando:
+        tamanho = args.tamanho
+        if tamanho is None:
+            tamanho = 2
+            while tamanho < len(ids):
+                tamanho *= 2
+        torneio = criar_torneio_aguardando(estado, args.nome, ids, tamanho, str(args.temporada))
+    else:
+        seed = args.seed if args.seed is not None else random.randrange(1, 2**31)
+        torneio = gerar_torneio(estado, args.nome, ids, seed, str(args.temporada))
     estado.salvar()
     print(json.dumps(torneio, ensure_ascii=False))
 
@@ -133,6 +141,17 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--temporada", default="1")
     p.add_argument("--seed", type=int, default=None, help="sorteio reprodutível")
     p.add_argument("--ids", type=int, nargs="*", default=None, help="ids explícitos de memes")
+    p.add_argument(
+        "--aguardando",
+        action="store_true",
+        help="torneio incompleto: reserva os memes e espera o resto dos oponentes",
+    )
+    p.add_argument(
+        "--tamanho",
+        type=int,
+        default=None,
+        help="vagas da chave (padrão: próxima potência de 2 do nº de memes)",
+    )
     p.set_defaults(func=_cmd_torneio)
 
     p = sub.add_parser("torneios", help="lista as temporadas")

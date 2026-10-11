@@ -112,3 +112,33 @@ def gerar_torneio(
             definir_vencedor(estado, match, match["meme_b_id"])
 
     return torneio
+
+
+def criar_torneio_aguardando(
+    estado: Estado,
+    nome: str,
+    meme_ids: list[int],
+    tamanho: int,
+    temporada: str = "2",
+) -> dict[str, Any]:
+    """Cria um torneio **incompleto** que aguarda o resto dos oponentes.
+
+    Os memes já ficam reservados (``participantes``) e a chave só é sorteada
+    quando o número de participantes alcançar ``tamanho``. Enquanto isso o
+    torneio fica com ``status = "aguardando"`` e sem confrontos.
+    """
+    if tamanho < len(meme_ids):
+        raise ValueError("tamanho não pode ser menor que o nº de memes.")
+
+    return estado.adicionar(
+        estado.tournaments,
+        {
+            "nome": nome,
+            "temporada": temporada,
+            "seed": None,
+            "tamanho": tamanho,
+            "status": "aguardando",
+            "participantes": list(meme_ids),
+            "criado_em": agora(),
+        },
+    )

@@ -57,6 +57,8 @@ export function confrontosDoMeme(memeId: number): Match[] {
 /** IDs dos memes que efetivamente disputam um torneio. */
 export function memesDoTorneio(detail: TournamentDetail): Meme[] {
   const ids = new Set<number>();
+  // Torneio aguardando oponentes: participantes ficam reservados sem confrontos.
+  for (const id of detail.participantes ?? []) ids.add(id);
   for (const m of detail.matches) {
     if (m.meme_a_id) ids.add(m.meme_a_id);
     if (m.meme_b_id) ids.add(m.meme_b_id);
@@ -64,6 +66,11 @@ export function memesDoTorneio(detail: TournamentDetail): Meme[] {
   return detail.memes
     .filter((m) => ids.has(m.id))
     .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" }));
+}
+
+/** Torneio que ainda aguarda oponentes para completar a chave. */
+export function estaAguardando(torneio: Pick<Tournament, "status">): boolean {
+  return torneio.status === "aguardando";
 }
 
 export type Estatisticas = {

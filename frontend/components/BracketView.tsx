@@ -74,19 +74,12 @@ function MatchCard({
   onHover: (id: number | null) => void;
 }) {
   const bye = match.status === "finalizado" && (match.meme_a_id === null || match.meme_b_id === null);
-  // Fase 2: confrontos com apenas 1 competidor confirmado aguardando o rival.
-  const waiting =
-    match.round === 2 &&
-    match.status !== "finalizado" &&
-    (match.meme_a_id === null || match.meme_b_id === null);
   const onPath = caminho ? caminho.has(match.id) : false;
   const dimmed = caminho !== null && !onPath;
 
   return (
     <div
-      className={`bmatch${onPath ? " on-path" : ""}${dimmed ? " dimmed" : ""}${
-        waiting ? " waiting" : ""
-      }`}
+      className={`bmatch${onPath ? " on-path" : ""}${dimmed ? " dimmed" : ""}`}
       style={{ left: x, top: y + TOPO, "--delay": `${delay}ms` } as React.CSSProperties}
       onMouseEnter={() => onHover(match.id)}
       onMouseLeave={() => onHover(null)}
@@ -133,28 +126,6 @@ export function BracketView({
     [focusedId, detail.matches],
   );
   const focado = focusedId ? memes.get(focusedId) : null;
-
-  // Fase 2 (2ª rodada): confrontos com apenas 1 competidor confirmado → aguardam
-  // um novo meme/rival para fechar as 64 vagas. Renderizados numa lista separada.
-  const fase2 = layout.rodadas.find((r) => r.index === 1);
-  const aguardando = useMemo(() => {
-    if (!fase2) return [];
-    return fase2.matches
-      .filter((n) => {
-        const m = n.match;
-        return (
-          m.status !== "finalizado" &&
-          (m.meme_a_id === null) !== (m.meme_b_id === null)
-        );
-      })
-      .map((n) => {
-        const m = n.match;
-        const memeId: number = (m.meme_a_id ?? m.meme_b_id) as number;
-        return { matchId: m.id, memeId, meme: memes.get(memeId) ?? null };
-      })
-      .filter((x) => x.meme !== null);
-  }, [fase2, memes]);
-  const vagasFase2 = fase2?.vagas ?? 0;
 
   const scrollParaRodada = useCallback(
     (index: number) => {
@@ -312,42 +283,6 @@ export function BracketView({
           </div>
         </div>
       </div>
-
-      {aguardando.length > 0 && (
-        <section className="aguardando" aria-labelledby="aguardando-titulo">
-          <header className="aguardando-head">
-            <h3 id="aguardando-titulo" className="aguardando-title">
-              Aguardando novos memes
-            </h3>
-            <span className="aguardando-tag">Fase 2</span>
-            <span className="aguardando-count">
-              {aguardando.length}/{vagasFase2}
-            </span>
-          </header>
-          <p className="aguardando-note">
-            Estes {aguardando.length} confrontos da Fase 2 já têm 1 competidor garantido e
-            aguardam um novo meme para fechar a disputa — o rival sai dos duelos da
-            Qualificatória. No chaveamento eles aparecem como vaga em aberto (borda
-            tracejada) e estão listados aqui abaixo.
-          </p>
-          <ul className="aguardando-list">
-            {aguardando.map(({ matchId, memeId, meme }) => (
-              <li key={matchId} className="aguardando-row">
-                <Link
-                  href={`/meme/${memeId}`}
-                  className="aguardando-link"
-                  style={hueStyle(memeId)}
-                  title={`Abrir o card de ${meme?.nome ?? ""}`}
-                >
-                  {meme?.nome ?? "—"}
-                </Link>
-                <span className="aguardando-status">estará na fase 2</span>
-                <span className="aguardando-rival">rival: a definir</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
 
       <div className="bracket-hint">
         {focado

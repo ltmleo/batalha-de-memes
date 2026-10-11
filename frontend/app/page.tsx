@@ -9,7 +9,7 @@ export default function Home() {
   const memes = listarMemes();
   const stats = estatisticas();
   const destaque = memes.slice(0, 8);
-  const principal = torneios[0];
+  const principal = torneios.find((t) => t.status !== "aguardando") ?? torneios[0];
 
   return (
     <div className="wrap">
@@ -89,7 +89,11 @@ export default function Home() {
                   <div className="tmeta">
                     <span className="badge">temporada {t.temporada}</span>
                     <span className="badge">{t.tamanho} vagas</span>
-                    <span className="badge">{t.status.replace("_", " ")}</span>
+                    <span className="badge">
+                      {t.status === "aguardando"
+                        ? "aguardando oponentes"
+                        : t.status.replace("_", " ")}
+                    </span>
                   </div>
                 </Link>
               </Reveal>

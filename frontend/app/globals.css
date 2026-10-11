@@ -908,11 +908,14 @@ h3 {
   background: rgba(10, 11, 14, 0.45);
 }
 
-/* ---------- lista separada: Fase 2 aguardando novos memes ---------- */
+/* ---------- torneio aguardando oponentes (lista de espera) ---------- */
 .aguardando {
-  border-top: 1px solid var(--border);
-  padding: 16px 16px 18px;
-  background: rgba(10, 11, 14, 0.5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  background:
+    linear-gradient(180deg, rgba(244, 244, 245, 0.02), transparent),
+    rgba(10, 11, 14, 0.6);
 }
 .aguardando-head {
   display: flex;
@@ -1005,12 +1008,6 @@ h3 {
   color: var(--win);
   white-space: nowrap;
 }
-.aguardando-rival {
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 10px;
-  color: var(--muted-2);
-  white-space: nowrap;
-}
 @media (max-width: 560px) {
   .aguardando-list {
     grid-template-columns: 1fr;
@@ -1079,21 +1076,6 @@ h3 {
 .bmatch.dimmed {
   opacity: 0.2;
   filter: grayscale(0.55);
-}
-/* Fase 2: confronto com 1 competidor confirmado, aguardando novo meme/rival. */
-.bmatch.waiting {
-  border-style: dashed;
-  border-color: rgba(244, 244, 245, 0.13);
-  background: linear-gradient(180deg, rgba(24, 25, 33, 0.5), rgba(14, 15, 20, 0.5));
-  box-shadow: none;
-}
-.bmatch.waiting:hover {
-  border-color: var(--border-2);
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3);
-}
-.bmatch.waiting.on-path {
-  border-color: rgba(217, 89, 111, 0.65);
-  box-shadow: 0 12px 28px rgba(217, 89, 111, 0.14), var(--ring-inset);
 }
 
 .bslot {

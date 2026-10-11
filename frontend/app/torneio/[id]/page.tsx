@@ -1,9 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { AguardandoView } from "@/components/AguardandoView";
 import { Reveal } from "@/components/Reveal";
 import { TorneioExplorer } from "@/components/TorneioExplorer";
-import { estatisticas, listarTorneios, memesDoTorneio, obterTorneio } from "@/lib/estado";
+import {
+  estatisticas,
+  estaAguardando,
+  listarTorneios,
+  memesDoTorneio,
+  obterTorneio,
+} from "@/lib/estado";
 
 // Export estático: pré-gera uma página por temporada existente em estado.json.
 export function generateStaticParams() {
@@ -25,15 +32,22 @@ export default async function TorneioPage({ params }: { params: Promise<{ id: st
   const torneio = obterTorneio(Number(id));
   if (!torneio) notFound();
 
+  const aguardando = estaAguardando(torneio);
   const competidores = memesDoTorneio(torneio);
   const stats = estatisticas(torneio);
 
-  const cartoes = [
-    { n: stats.totalMemes, l: "competidores" },
-    { n: stats.totalConfrontos, l: "confrontos" },
-    { n: stats.decididos, l: "decididos" },
-    { n: torneio.tamanho, l: "vagas" },
-  ];
+  const cartoes = aguardando
+    ? [
+        { n: competidores.length, l: "na espera" },
+        { n: Math.max(torneio.tamanho - competidores.length, 0), l: "vagas abertas" },
+        { n: torneio.tamanho, l: "vagas" },
+      ]
+    : [
+        { n: stats.totalMemes, l: "competidores" },
+        { n: stats.totalConfrontos, l: "confrontos" },
+        { n: stats.decididos, l: "decididos" },
+        { n: torneio.tamanho, l: "vagas" },
+      ];
 
   return (
     <div className="wrap" style={{ paddingTop: 40 }}>
@@ -46,9 +60,9 @@ export default async function TorneioPage({ params }: { params: Promise<{ id: st
           {torneio.nome}
         </h1>
         <p className="sub">
-          Chaveamento de {torneio.tamanho} vagas com {stats.totalMemes} competidores. Clique em
-          qualquer meme para destacar o caminho dele até a final — ou abra os cards para ver a
-          história e o vídeo original.
+          {aguardando
+            ? `${competidores.length} competidores reservados aguardando o resto dos oponentes para completar a chave de ${torneio.tamanho} vagas.`
+            : `Chaveamento de ${torneio.tamanho} vagas com ${stats.totalMemes} competidores. Clique em qualquer meme para destacar o caminho dele até a final — ou abra os cards para ver a história e o vídeo original.`}
         </p>
       </Reveal>
 
@@ -64,7 +78,11 @@ export default async function TorneioPage({ params }: { params: Promise<{ id: st
       </Reveal>
 
       <div style={{ marginTop: 30 }}>
-        <TorneioExplorer detail={torneio} competidores={competidores} />
+        {aguardando ? (
+          <AguardandoView torneio={torneio} competidores={competidores} />
+        ) : (
+          <TorneioExplorer detail={torneio} competidores={competidores} />
+        )}
       </div>
     </div>
   );

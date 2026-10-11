@@ -3,9 +3,6 @@ import type { Match, Rodada } from "./types";
 // --- agrupamento ---------------------------------------------------------
 
 export function tituloRodada(round: number, totalRodadas: number, vagas: number): string {
-  // A 1ª rodada é a qualificatória (85 memes entram numa chave de 128 → 43 byes).
-  if (round === 1) return "Qualificatória";
-  if (round === 2) return "Fase 2";
   if (round === totalRodadas) return "Final";
   if (round === totalRodadas - 1 && totalRodadas > 1) return "Semifinal";
   if (vagas === 8) return "Quartas de final";
