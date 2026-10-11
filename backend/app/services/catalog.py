@@ -21,6 +21,11 @@ def carregar_catalogo(estado: Estado) -> int:
             "fim": float(item.get("fim", 15.0)),
             "autor_fonte": item.get("autor_fonte", ""),
             "tags": item.get("tags", []),
+            # metadados exibidos no site (card/história do meme)
+            "ano": item.get("ano"),
+            "origem": item.get("origem", ""),
+            "historia": item.get("historia", ""),
+            "confianca": item.get("confianca", "media"),
         }
         existente = next((m for m in estado.memes if m["nome"] == item["nome"]), None)
         if existente:

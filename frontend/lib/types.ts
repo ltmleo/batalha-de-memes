@@ -7,6 +7,14 @@ export type Meme = {
   autor_fonte: string;
   tags: string[];
   status: string;
+  /** Ano aproximado de origem do meme (pode ser nulo quando desconhecido). */
+  ano?: number | null;
+  /** Onde o meme nasceu: TV, YouTube, Vine, rádio, política... */
+  origem?: string;
+  /** História/contexto do meme em poucas frases. */
+  historia?: string;
+  /** Confiança no link do vídeo original: alta | media | baixa. */
+  confianca?: string;
 };
 
 export type Match = {
@@ -46,3 +54,14 @@ export type Estado = {
   matches: Match[];
   votes: unknown[];
 };
+
+// Uma rodada do chaveamento agrupada para renderização.
+export type Rodada = {
+  round: number;
+  titulo: string;
+  matches: Match[];
+  /** Número de vagas/competidores que entram nesta rodada. */
+  vagas: number;
+};
+
+export type Confianca = "alta" | "media" | "baixa";
