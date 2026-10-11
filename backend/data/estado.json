@@ -1,0 +1,193 @@
+{
+  "memes": [
+    {
+      "nome": "Devagar Pai",
+      "status": "ativo",
+      "youtube_url": "https://www.youtube.com/watch?v=_R8Qh0uLdQ4",
+      "inicio": 0.0,
+      "fim": 10.0,
+      "autor_fonte": "YouTube",
+      "tags": [
+        "nacional"
+      ],
+      "id": 1
+    },
+    {
+      "nome": "Pai de Familia",
+      "status": "ativo",
+      "youtube_url": "https://www.youtube.com/watch?v=9wVmCLtuUx0U",
+      "inicio": 0.0,
+      "fim": 10.0,
+      "autor_fonte": "YouTube (Jailson Mendes)",
+      "tags": [
+        "nacional",
+        "classico"
+      ],
+      "id": 2
+    },
+    {
+      "nome": "Nissim",
+      "status": "ativo",
+      "youtube_url": "https://www.youtube.com/watch?v=sBOsfhA-TGU",
+      "inicio": 0.0,
+      "fim": 10.0,
+      "autor_fonte": "YouTube (Nissim Ourfali)",
+      "tags": [
+        "nacional",
+        "classico"
+      ],
+      "id": 3
+    },
+    {
+      "nome": "Bambam",
+      "status": "ativo",
+      "youtube_url": "https://www.youtube.com/watch?v=NGH-PF00MEo",
+      "inicio": 56.0,
+      "fim": 71.0,
+      "autor_fonte": "YouTube (BIRL)",
+      "tags": [
+        "nacional",
+        "birl"
+      ],
+      "id": 4
+    },
+    {
+      "nome": "E Ai Gay",
+      "status": "ativo",
+      "youtube_url": "https://www.youtube.com/shorts/v9NwfJ-H2Tks",
+      "inicio": 0.0,
+      "fim": 10.0,
+      "autor_fonte": "YouTube",
+      "tags": [
+        "nacional"
+      ],
+      "id": 5
+    }
+  ],
+  "tournaments": [
+    {
+      "nome": "Temporada 1",
+      "temporada": "1",
+      "seed": 42,
+      "tamanho": 8,
+      "status": "em_andamento",
+      "criado_em": "2026-10-11T15:10:44Z",
+      "id": 1
+    }
+  ],
+  "matches": [
+    {
+      "tournament_id": 1,
+      "round": 1,
+      "posicao": 0,
+      "meme_a_id": 4,
+      "meme_b_id": null,
+      "winner_id": 4,
+      "video_path": null,
+      "tiktok_url": null,
+      "publicado_em": null,
+      "deadline": null,
+      "status": "finalizado",
+      "votos_a": 0,
+      "votos_b": 0,
+      "id": 1
+    },
+    {
+      "tournament_id": 1,
+      "round": 1,
+      "posicao": 1,
+      "meme_a_id": 5,
+      "meme_b_id": 1,
+      "winner_id": 5,
+      "video_path": null,
+      "tiktok_url": null,
+      "publicado_em": null,
+      "deadline": null,
+      "status": "finalizado",
+      "votos_a": 0,
+      "votos_b": 0,
+      "id": 2
+    },
+    {
+      "tournament_id": 1,
+      "round": 1,
+      "posicao": 2,
+      "meme_a_id": 2,
+      "meme_b_id": null,
+      "winner_id": 2,
+      "video_path": null,
+      "tiktok_url": null,
+      "publicado_em": null,
+      "deadline": null,
+      "status": "finalizado",
+      "votos_a": 0,
+      "votos_b": 0,
+      "id": 3
+    },
+    {
+      "tournament_id": 1,
+      "round": 1,
+      "posicao": 3,
+      "meme_a_id": 3,
+      "meme_b_id": null,
+      "winner_id": 3,
+      "video_path": null,
+      "tiktok_url": null,
+      "publicado_em": null,
+      "deadline": null,
+      "status": "finalizado",
+      "votos_a": 0,
+      "votos_b": 0,
+      "id": 4
+    },
+    {
+      "tournament_id": 1,
+      "round": 2,
+      "posicao": 0,
+      "meme_a_id": 4,
+      "meme_b_id": 5,
+      "winner_id": null,
+      "video_path": null,
+      "tiktok_url": null,
+      "publicado_em": null,
+      "deadline": null,
+      "status": "pendente",
+      "votos_a": 0,
+      "votos_b": 0,
+      "id": 5
+    },
+    {
+      "tournament_id": 1,
+      "round": 2,
+      "posicao": 1,
+      "meme_a_id": 2,
+      "meme_b_id": 3,
+      "winner_id": null,
+      "video_path": null,
+      "tiktok_url": null,
+      "publicado_em": null,
+      "deadline": null,
+      "status": "pendente",
+      "votos_a": 0,
+      "votos_b": 0,
+      "id": 6
+    },
+    {
+      "tournament_id": 1,
+      "round": 3,
+      "posicao": 0,
+      "meme_a_id": null,
+      "meme_b_id": null,
+      "winner_id": null,
+      "video_path": null,
+      "tiktok_url": null,
+      "publicado_em": null,
+      "deadline": null,
+      "status": "pendente",
+      "votos_a": 0,
+      "votos_b": 0,
+      "id": 7
+    }
+  ],
+  "votes": []
+}
