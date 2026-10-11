@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "preview": "node scripts/serve-static.mjs out 8138 /batalha-de-memes"
   },
   "dependencies": {
     "motion": "^14.1.0",

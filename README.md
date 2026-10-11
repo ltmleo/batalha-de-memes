@@ -154,6 +154,30 @@ npm run build      # gera o site estático em frontend/out/
 Para publicar, sirva a pasta `frontend/out/` em qualquer host estático (ou
 `npx serve out`). Sempre que o estado mudar, rode `npm run build` de novo.
 
+### Publicação no GitHub Pages
+
+O site é publicado em **https://ltmleo.github.io/batalha-de-memes/** pelo workflow
+de `/.github/workflows/deploy.yml` a cada push na `master`:
+
+- o job do Actions roda `npm ci` + `npm run build` em `frontend/` e envia a pasta
+  `frontend/out/` para o GitHub Pages (via artefato);
+- o `basePath` em `frontend/next.config.mjs` é `/batalha-de-memes` (slug do
+  repositório), então todos os links e assets são gerados com esse prefixo.
+
+Ative uma única vez: **Settings → Pages → Source: "GitHub Actions"** (a partir do
+primeiro push o workflow já publica sozinho).
+
+Preview local com a mesma estrutura de URL do Pages:
+
+```powershell
+cd frontend
+npm run build
+npm run preview   # http://localhost:8138/batalha-de-memes/
+```
+
+> O prefixo `/batalha-de-memes/` vem do nome do repositório. Se o repositório
+> mudar de nome, atualize também o `basePath` em `next.config.mjs`.
+
 Se o JSON estiver em outro caminho, defina `ESTADO_JSON` no ambiente antes do build:
 
 ```powershell
