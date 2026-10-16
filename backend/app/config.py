@@ -16,7 +16,7 @@ VIDEOS_DIR = REPO_DIR / "videos"
 ASSETS_DIR = REPO_DIR / "assets"
 ABERTURA_PATH = VIDEOS_DIR / "abertura.mp4"
 ENCERRAMENTO_PATH = VIDEOS_DIR / "encerramento.mp4"
-MOLDURA_PATH = ASSETS_DIR / "modulra.png"
+MOLDURA_PATH = ASSETS_DIR / "moldura2.png"
 FONTE_PATH = Path("C:/Windows/Fonts/arial.ttf")
 # Fonte de display do título (empacotada no repo; ver assets/fonts/LEIA-ME.txt)
 FONTE_TITULO_PATH = ASSETS_DIR / "fonts" / "Dream MMA.ttf"

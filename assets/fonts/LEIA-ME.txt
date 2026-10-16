@@ -1,0 +1,16 @@
+Fonte do título: Dream MMA
+==========================
+
+Arquivo: Dream MMA.ttf
+Autor:   mmafont ("i remember halloween")
+Origem:  https://www.dafont.com/dream-mma.font
+Licença: disponibilizada como "100% Free" / donationware no DaFont e em sites
+         espelhos. Uso pessoal liberado; para uso comercial, considere doar ao
+         autor pela página de origem.
+
+Observações técnicas (importantes para o código):
+- A fonte desenha CAIXA-ALTA usando os glifos MINÚSCULOS; as maiúsculas (com
+  exceção de "D") são vazias. Por isso o texto é normalizado para minúsculas.
+- Não possui glifos acentuados (á, ã, ç, é, ...). O título converte acentos para
+  a letra-base (á->a, ç->c) antes de desenhar (ver app/titulo.py).
+- Codepoints presentes: espaço, ".", ":", dígitos 0-9, "D" maiúsculo e a-z.

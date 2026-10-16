@@ -7,7 +7,8 @@ Ajusta com preview ao vivo:
 
 O layout global é salvo em ``data/layout.json`` e passa a valer para todo o
 pipeline (``montar`` da CLI inclusive). "Frame exato" renderiza um quadro com o
-ffmpeg para conferir o resultado real; "Gerar vídeo" monta o mp4 do confronto.
+ffmpeg para conferir o resultado real; "Salvar e gerar vídeo" salva e monta o mp4
+do confronto (com "Salvar só o layout" para gravar sem gerar).
 """
 
 from __future__ import annotations
@@ -24,6 +25,7 @@ from ..config import CLIPS_DIR, MOLDURA_PATH
 from .. import titulo
 from ..layout import Layout, carregar_layout, salvar_layout
 from ..services import assembler, downloader
+from ..services.catalog import carregar_catalogo
 from ..store import Estado
 from .preview import _carregar_moldura, compor_preview, extrair_frame, renderizar_frame_exato
 
@@ -78,7 +80,7 @@ class Editor(tk.Tk):
         self._sincronizar_campos()
         self._carregar_matches()
         self._aplicar()
-        self.bind("<Control-s>", lambda _e: self._salvar())
+        self.bind("<Control-s>", lambda _e: self._salvar_e_gerar())
         self.protocol("WM_DELETE_WINDOW", self.destroy)
 
     # ------------------------------------------------------------------ UI
@@ -107,6 +109,16 @@ class Editor(tk.Tk):
         ttk.Button(f_match, text="Baixar clipes p/ preview", command=self._baixar_clipes).grid(
             sticky="ew", pady=(6, 0)
         )
+
+        # -- dados (json) ----------------------------------------------
+        f_dados = ttk.LabelFrame(painel, text="Dados (json)", padding=8)
+        f_dados.grid(sticky="ew", pady=(8, 0))
+        ttk.Button(f_dados, text="Sincronizar catálogo (seed)",
+                   command=self._sincronizar_catalogo).grid(sticky="ew")
+        ttk.Button(f_dados, text="Recarregar do disco",
+                   command=self._recarregar).grid(sticky="ew", pady=(4, 0))
+        ttk.Label(f_dados, text="memes.json → estado.json → editor",
+                  foreground="#666").grid(sticky="w", pady=(4, 0))
 
         # -- ver lado ---------------------------------------------------
         f_lado = ttk.LabelFrame(painel, text="Ver no preview", padding=8)
@@ -191,15 +203,17 @@ class Editor(tk.Tk):
         # -- ações ------------------------------------------------------
         f_acoes = ttk.Frame(painel, padding=(0, 8, 0, 0))
         f_acoes.grid(sticky="ew")
-        ttk.Button(f_acoes, text="Salvar", command=self._salvar).grid(sticky="ew")
+        self.botao_gerar = ttk.Button(f_acoes, text="Salvar e gerar vídeo", command=self._salvar_e_gerar)
+        self.botao_gerar.grid(sticky="ew")
+        ttk.Button(f_acoes, text="Salvar só o layout", command=self._salvar).grid(
+            sticky="ew", pady=(4, 0)
+        )
         ttk.Button(f_acoes, text="Restaurar padrão", command=self._restaurar).grid(
             sticky="ew", pady=(4, 0)
         )
         ttk.Button(f_acoes, text="Frame exato (ffmpeg)", command=self._frame_exato).grid(
             sticky="ew", pady=(4, 0)
         )
-        self.botao_gerar = ttk.Button(f_acoes, text="Gerar vídeo", command=self._gerar_video)
-        self.botao_gerar.grid(sticky="ew", pady=(4, 0))
 
         # -- status -----------------------------------------------------
         self.progresso = ttk.Progressbar(raiz, mode="determinate", maximum=100)
@@ -208,7 +222,8 @@ class Editor(tk.Tk):
         self.barra_status.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(4, 0))
 
     # --------------------------------------------------------------- dados
-    def _carregar_matches(self) -> None:
+    def _carregar_matches(self, manter_selecao: bool = True) -> None:
+        selecionado = self.match.get("id") if (manter_selecao and self.match) else None
         completos = [
             m for m in self.estado.matches if m.get("meme_a_id") and m.get("meme_b_id")
         ]
@@ -219,7 +234,12 @@ class Editor(tk.Tk):
             for m in completos
         ]
         if completos:
-            self.combo.current(0)
+            indice = 0
+            if selecionado is not None:
+                indice = next(
+                    (i for i, m in enumerate(completos) if m["id"] == selecionado), 0
+                )
+            self.combo.current(indice)
             self._selecionar_match(silencioso=True)
 
     def _selecionar_match(self, silencioso: bool = False) -> None:
@@ -470,6 +490,49 @@ class Editor(tk.Tk):
         self._aplicar()
         self._status("padrão restaurado (área, título e preenchimento) — clique em Salvar para aplicar")
 
+    def _sincronizar_catalogo(self) -> None:
+        """Copia memes.json -> estado.json (mesmo que o `seed` da CLI)."""
+        if not messagebox.askyesno(
+            "Sincronizar catálogo",
+            "Copiar memes.json para o estado.json?\n\n"
+            "Atualiza link/trecho/metadados dos memes existentes (casados por nome) e "
+            "insere os novos. O chaveamento e os votos não mudam.\n\n"
+            "Útil quando você edita o memes.json e quer ver no editor.",
+        ):
+            self._status("sincronização cancelada")
+            return
+        try:
+            estado = Estado.carregar()
+            inseridos = carregar_catalogo(estado)
+            caminho = estado.salvar()
+            self.estado = Estado.carregar()
+            self.frames.clear()
+            self._carregar_matches()
+            self._status(
+                f"catálogo sincronizado: {inseridos} novo(s), {caminho.name} atualizado"
+            )
+        except Exception as exc:  # noqa: BLE001 — a UI precisa mostrar qualquer erro
+            messagebox.showerror("Falha ao sincronizar catálogo", str(exc))
+            self._status(f"erro ao sincronizar catálogo: {exc}")
+
+    def _recarregar(self) -> None:
+        """Relê estado.json + layout.json do disco (descarta edições não salvas)."""
+        if not messagebox.askyesno(
+            "Recarregar do disco",
+            "Relê estado.json e layout.json, descartando ajustes não salvos no editor.\n\n"
+            "Continuar?",
+        ):
+            self._status("recarga cancelada")
+            return
+        self.estado = Estado.carregar()
+        self.layout = carregar_layout()
+        self.frames.clear()
+        self._preenchimento.set(self.layout.preenchimento)
+        self._sincronizar_campos()
+        self._carregar_matches()
+        self._aplicar()
+        self._status("recarregado do disco (estado.json + layout.json)")
+
     # ------------------------------------------------------------ progresso
     def _progresso_de(self, valor: float) -> None:
         """Agenda a atualização da barra (pode ser chamado de outra thread)."""
@@ -487,10 +550,15 @@ class Editor(tk.Tk):
         self.progresso["value"] = 0
 
     def _progresso_montagem(self) -> None:
-        """Montagem não tem % previsível: usa a barra animada."""
-        self.progresso.config(mode="indeterminate")
-        self.progresso.start(12)
-        self._status("montando o vídeo com ffmpeg…")
+        """Marco da montagem: mantém a barra determinada e explica a demora."""
+        self.progresso.stop()
+        self.progresso.config(mode="determinate")
+        self.progresso["value"] = 50
+        self._status("renderizando o vídeo com ffmpeg… (pode demorar alguns minutos)")
+
+    def _progresso_render(self, valor: float) -> None:
+        """Fração da renderização (0..1) -> metade direita da barra (50..100%)."""
+        self._progresso_de(0.5 + 0.5 * max(0.0, min(1.0, valor)))
 
     def _progresso_fim(self, sucesso: bool) -> None:
         self.progresso.stop()
@@ -586,11 +654,17 @@ class Editor(tk.Tk):
         self._exibir_imagem(img)
         self._status(f"frame exato: {destino.name} (qualquer ajuste volta ao preview rápido)")
 
-    def _gerar_video(self) -> None:
+    def _salvar_e_gerar(self) -> None:
+        """Salva o layout/títulos e, em seguida, gera o vídeo do confronto."""
+        self._salvar()
+        self._gerar_video(salvar=False)
+
+    def _gerar_video(self, salvar: bool = True) -> None:
         if self.match is None:
             self._status("selecione um confronto primeiro")
             return
-        self._salvar()
+        if salvar:
+            self._salvar()
         match_id = self.match["id"]
         titulo_a, titulo_b = self._override_titulo("a"), self._override_titulo("b")
         self.match["titulo_a"], self.match["titulo_b"] = titulo_a, titulo_b
@@ -616,8 +690,9 @@ class Editor(tk.Tk):
             saida = assembler.montar_match(
                 estado,
                 match,
-                progresso_download=self._progresso_de,
+                progresso_download=lambda p: self._progresso_de(0.5 * p),
                 ao_montar=lambda: self.after(0, self._progresso_montagem),
+                progresso_montagem=self._progresso_render,
             )
             estado.salvar()
             self.after(0, self._gerado, saida, None)

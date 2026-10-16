@@ -48,7 +48,7 @@ novos memes e atualiza os existentes por nome).
 | Caminho | Para quê |
 | --- | --- |
 | `videos/abertura.mp4` | Intro (vertical 1080x1920) concatenada no início do vídeo |
-| `assets/modulra.png` | Moldura 9:16 com espaço para título e para o meme |
+| `assets/moldura2.png` | Moldura 9:16 com **janela transparente** — o clipe aparece por trás dela |
 | `assets/fonts/Dream MMA.ttf` | Fonte de display do título (empacotada; ver `assets/fonts/LEIA-ME.txt`) |
 | `C:\Windows\Fonts\arial.ttf` | Fonte usada fora do título |
 
@@ -170,18 +170,34 @@ A janela (Tkinter + Pillow) tem:
 - **preenchimento** do clipe na área: `cover` (corta as bordas) ou `contain`
   (barras pretas, nada é cortado);
 - campos numéricos da área (X/Y/Largura/Altura em %) sincronizados com o arraste;
-- botões **Salvar** (grava o layout global em `data/layout.json` e os títulos no
-  confronto), **Restaurar padrão**, **Baixar clipes p/ preview**,
-  **Frame exato (ffmpeg)** (renderiza um quadro 1080x1920 idêntico ao vídeo) e
-  **Gerar vídeo** (monta o mp4 do confronto em `media/clips/match_N.mp4`).
+- botões **Salvar e gerar vídeo** (grava o layout global em `data/layout.json` e os
+  títulos no confronto **e já monta o mp4** do confronto em
+  `media/clips/match_N.mp4`), **Salvar só o layout** (grava sem gerar), **Restaurar
+  padrão**, **Baixar clipes p/ preview** e **Frame exato (ffmpeg)** (renderiza um
+  quadro 1080x1920 idêntico ao vídeo);
+- quadro **Dados (json)**: **Sincronizar catálogo (seed)** copia `memes.json` →
+  `estado.json` (mesmo efeito do `seed` da CLI, sem sair do editor) e
+  **Recarregar do disco** relê `estado.json`/`layout.json` descartando edições não
+  salvas.
 
-Os dois botões que acessam a rede (**Baixar clipes p/ preview** e **Gerar
-vídeo**) pedem **confirmação antes de baixar**: uma janela lista os memes do
-confronto, o link de origem e o trecho (`inicio–fim`) que será baixado. Durante o
-download a barra de progresso mostra o **percentual real** (frações do yt-dlp por
-clipe, com ~85% para o download e ~15% para a normalização); na montagem, sem
-percentual previsível, a barra vira **animada** até concluir. Os clipes já
-baixados são reaproveitados (cache), e uma confirmação cancelada não baixa nada.
+⚠️ O editor lê o **`estado.json`**, não o `memes.json`. Se você editar o
+`memes.json` (catálogo), clique em **Sincronizar catálogo (seed)** para ver a
+mudança no editor.
+
+Os botões que geram vídeo (**Salvar e gerar vídeo**) e que baixam para o preview
+(**Baixar clipes p/ preview**) pedem **confirmação antes de baixar**: uma janela
+lista os memes do confronto, o link de origem e o trecho (`inicio–fim`) que será
+baixado. Ao confirmar, o layout/título já foi salvo, então cancelar a geração não
+perde as edições. Durante o download a barra de progresso mostra o **percentual
+real** (frações do yt-dlp por clipe, com ~85% para o download e ~15% para a
+normalização) e vai até **50%**; na **renderização** ela continua **determinada**
+(0→100%, lendo o `-progress` do ffmpeg) e sobe de 50% a 100% — como renderizar um
+confronto leva alguns minutos, dá para acompanhar o andamento em vez de parecer
+travado. Os clipes já baixados são reaproveitados (cache), e uma confirmação
+cancelada não baixa nada.
+O cache é **invalidado automaticamente** quando o `youtube_url`/`inicio`/`fim` do
+meme muda (uma assinatura do trecho é gravada ao lado do clipe), então editar o
+trecho e baixar de novo já traz o vídeo novo.
 
 O preview é instantâneo (PIL); use "Frame exato" para conferir a fidelidade
 (fonte, sombra, recorte) antes de gerar o vídeo. O `layout.json` passa a valer
@@ -238,7 +254,7 @@ $env:ESTADO_JSON = "C:\caminho\para\estado.json"; npm run build
 
 ```
 batalha-de-memes/
-  assets/modulra.png        # moldura usada na montagem
+  assets/moldura2.png       # moldura usada na montagem (janela transparente)
   videos/abertura.mp4       # intro
   backend/
     app/
@@ -273,7 +289,11 @@ batalha-de-memes/
 ## Como o vídeo final é montado
 
 Cada clipe é exibido em tela cheia, em sequência: **abertura → meme A → meme B**.
-Sobre cada clipe aplica-se a moldura (`assets/modulra.png`) com:
+Sobre cada clipe aplica-se a moldura (`assets/moldura2.png`). Como a moldura tem
+**fundo transparente (janela)**, o clipe é composto **por trás dela** — o vídeo
+aparece pela janela e as bordas opacas fazem o acabamento. (Se a moldura for opaca
+— sem canal alfa —, mantém-se o comportamento antigo: a moldura vai ao fundo e o
+clipe por cima.) A composição fica assim:
 
 - o clipe preenchendo a área do "telão" definida em `backend/data/layout.json`
   (padrão: 11%–89% da largura × 25%–81% da altura) em `cover` (recorte central:

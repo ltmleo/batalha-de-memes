@@ -255,9 +255,9 @@
     {
       "nome": "Churrasqueira de controle",
       "status": "ativo",
-      "youtube_url": "https://www.youtube.com/results?search_query=churrasqueira+de+controle+Faust%C3%A3o+pegando+fogo",
-      "inicio": 0.0,
-      "fim": 10.0,
+      "youtube_url": "https://www.youtube.com/watch?v=iEwfczXUc-A",
+      "inicio": 5.0,
+      "fim": 30.0,
       "autor_fonte": "TV Globo / Domingão do Faustão",
       "tags": [
         "nacional",
@@ -417,9 +417,9 @@
     {
       "nome": "Galo cego",
       "status": "ativo",
-      "youtube_url": "https://www.youtube.com/results?search_query=galo+cego+Daniel+Orivaldo",
-      "inicio": 0.0,
-      "fim": 10.0,
+      "youtube_url": "https://www.youtube.com/watch?v=hAx4Lql_-VI",
+      "inicio": 12.0,
+      "fim": 52.0,
       "autor_fonte": "TV regional (Maringá/PB)",
       "tags": [
         "tv",
@@ -1589,7 +1589,9 @@
       "status": "finalizado",
       "votos_a": 0,
       "votos_b": 0,
-      "id": 1
+      "id": 1,
+      "titulo_a": null,
+      "titulo_b": null
     },
     {
       "tournament_id": 1,

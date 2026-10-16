@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import logging
 import os
 import shutil
@@ -30,6 +31,34 @@ def _reportar(progresso: Progresso | None, fracao: float) -> None:
         progresso(max(0.0, min(1.0, fracao)))
     except Exception:  # noqa: BLE001 — a UI nunca deve derrubar o download
         logger.debug("callback de progresso falhou", exc_info=True)
+
+
+def _assinatura(meme: dict[str, Any]) -> str:
+    """Assinatura do trecho: muda quando link/inicio/fim mudam (invalida o cache)."""
+    bruto = "|".join(str(meme.get(k)) for k in ("youtube_url", "inicio", "fim"))
+    return hashlib.sha1(bruto.encode("utf-8")).hexdigest()
+
+
+def _arquivo_assinatura(pasta: Path, meme_id: Any) -> Path:
+    return pasta / f"meme_{meme_id}.assinatura"
+
+
+def _assinatura_salva(pasta: Path, meme_id: Any) -> str | None:
+    arq = _arquivo_assinatura(pasta, meme_id)
+    if not arq.exists():
+        return None
+    try:
+        return arq.read_text(encoding="utf-8").strip()
+    except OSError:
+        return None
+
+
+def _guardar_assinatura(pasta: Path, meme_id: Any, assinatura: str) -> None:
+    try:
+        _arquivo_assinatura(pasta, meme_id).write_text(assinatura, encoding="utf-8")
+    except OSError:
+        logger.debug("não consegui gravar a assinatura do meme %s", meme_id, exc_info=True)
+
 
 
 def resolver_ffmpeg() -> str | None:
@@ -101,10 +130,18 @@ def baixar_trecho(
     pasta = dir_saida or RAW_DIR
     pasta.mkdir(parents=True, exist_ok=True)
     destino = pasta / f"meme_{meme_id}.mp4"
+    assinatura = _assinatura(meme)
     if destino.exists() and not forcar:
-        logger.info("cache hit: %s", destino.name)
-        _reportar(progresso, 1.0)
-        return destino
+        salva = _assinatura_salva(pasta, meme_id)
+        if salva is None:
+            # cache anterior à assinatura: adota como válido (não rebaixa sem motivo)
+            _guardar_assinatura(pasta, meme_id, assinatura)
+            salva = assinatura
+        if salva == assinatura:
+            logger.info("cache hit: %s", destino.name)
+            _reportar(progresso, 1.0)
+            return destino
+        logger.info("trecho mudou (link/inicio/fim): rebaixando %s", destino.name)
 
     if not meme.get("youtube_url"):
         raise DownloadError(f"meme {meme_id} sem youtube_url")
@@ -169,6 +206,7 @@ def baixar_trecho(
     if not destino.exists():
         raise DownloadError(f"yt-dlp não produziu {destino}")
     logger.info("baixado: %s", destino.name)
+    _guardar_assinatura(pasta, meme_id, assinatura)
     _reportar(progresso, 1.0)
     return destino
 
@@ -196,8 +234,11 @@ def normalizar_vertical(
     destino = destino or ((dir_saida or CLIPS_DIR) / f"clip_{origem.stem}.mp4")
     destino.parent.mkdir(parents=True, exist_ok=True)
     if destino.exists() and not forcar:
-        _reportar(progresso, 1.0)
-        return destino
+        # clipe mais novo que o bruto => cache válido; se o bruto foi rebaixado
+        # (trecho mudou), ele fica mais novo e a normalização roda de novo.
+        if not origem.exists() or destino.stat().st_mtime >= origem.stat().st_mtime:
+            _reportar(progresso, 1.0)
+            return destino
 
     ffmpeg = resolver_ffmpeg()
     if ffmpeg is None:

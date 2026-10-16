@@ -84,7 +84,10 @@ desfocado — em `media/clips/`. Trechos já baixados são cacheados.
 
 ## 3. Montagem (`assembler.py`, ffmpeg)
 Sequência **abertura → meme A → meme B** (+ encerramento opcional), com a moldura
-`assets/modulra.png` sobreposta e o clipe no "telão":
+`assets/moldura2.png` e o clipe no "telão". A moldura tem **janela transparente**,
+então o clipe é composto **atrás** dela (o vídeo aparece pela janela; detecção de
+alpha via PIL em `_moldura_tem_alpha` — moldura opaca volta ao comportamento
+antigo, com a moldura ao fundo):
 
 - a área do vídeo e o **preenchimento** (`cover` = recorte central / `contain` =
   barras pretas) vêm de `data/layout.json` (editável no editor desktop);
@@ -98,23 +101,41 @@ Sequência **abertura → meme A → meme B** (+ encerramento opcional), com a m
 
 `montar_match(estado, match)` centraliza download + montagem + gravação de
 `video_path`/`status`, usado pela CLI (`montar`) e pelo editor (`Gerar vídeo`).
-Aceita `progresso_download` (fração 0–1 somando os clipes) e `ao_montar` (chamado
-ao terminar os downloads), usados pela barra de progresso do editor.
+Aceita `progresso_download` (fração 0–1 somando os clipes), `ao_montar` (chamado
+ao terminar os downloads) e `progresso_montagem` (fração 0–1 da renderização),
+usados pela barra de progresso do editor. `montar_video(..., progresso=)` roda o
+ffmpeg com `-progress pipe:1` e calcula a fração pela **duração total** dos
+trechos (lida de `ffmpeg -i`), então a barra da renderização é determinada.
 
 ### Editor visual (`app.cli editor`)
 Janela Tkinter + Pillow com preview 9:16: arrasta/redimensiona a área do clipe,
 edita os títulos, ajusta o enquadramento do título (posição Y, largura da faixa,
 tamanho automático — com quebra em até duas linhas — ou manual; arraste vertical
 da faixa) e escolhe cover/contain. O título usa a fonte empacotada Dream MMA
-(`app/titulo.py`: gradiente + contorno, renderizado em PNG). **Salvar** grava
-`data/layout.json` (global) e os títulos no confronto; **Frame exato** renderiza
-um quadro via ffmpeg para conferência; **Gerar vídeo** monta o mp4.
+(`app/titulo.py`: gradiente + contorno, renderizado em PNG). **Salvar e gerar
+vídeo** grava `data/layout.json` (global) e os títulos no confronto **e já monta o
+mp4**; **Salvar só o layout** grava sem gerar; **Frame exato** renderiza um quadro
+via ffmpeg para conferência. `Ctrl+S` faz o mesmo que "Salvar e gerar vídeo".
 
-**Baixar clipes p/ preview** e **Gerar vídeo** acessam a rede (yt-dlp) e por isso
-pedem **confirmação antes de baixar** (lista meme, link e trecho `inicio–fim`).
-Durante o download a barra de progresso exibe o percentual real (`progresso` do
-yt-dlp em `app/services/downloader.py`: ~85% download + ~15% normalização por
-clipe); a montagem usa a barra em modo indeterminado.
+**Salvar e gerar vídeo** e **Baixar clipes p/ preview** acessam a rede (yt-dlp) e
+por isso pedem **confirmação antes de baixar** (lista meme, link e trecho
+`inicio–fim`). Como o save acontece primeiro, cancelar a geração não perde as
+edições. Durante o download a barra de progresso exibe o percentual real
+(`progresso` do yt-dlp em `app/services/downloader.py`: ~85% download + ~15%
+normalização por clipe) e sobe até 50%; na renderização ela segue **determinada**
+(50%→100%, via `-progress` do ffmpeg), já que um confronto pode levar alguns
+minutos.
+
+O quadro **Dados (json)** expõe o fluxo de dados sem CLI: **Sincronizar catálogo
+(seed)** roda `carregar_catalogo` (`memes.json` → `estado.json`) e **Recarregar do
+disco** relê `estado.json`/`layout.json`. O editor lê o `estado.json`, não o
+`memes.json` — daí a necessidade do seed.
+
+O cache de clipes (`media/raw`, `media/clips`) é invalidado automaticamente:
+`baixar_trecho` grava uma **assinatura** do trecho (`youtube_url`+`inicio`+`fim`)
+ao lado do arquivo e rebaixa quando ela muda (cache antigo sem assinatura é
+adotado uma vez); `normalizar_vertical` compara o **mtime** do clipe com o do
+bruto, re-normalizando quando o bruto foi rebaixado.
 
 ## 4. Coleta e apuração de votos
 - `scraper.py`: Playwright abre o vídeo público (cookies de sessão), rola e salva os

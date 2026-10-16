@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import subprocess
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable
@@ -70,6 +71,75 @@ def _audio(indice: int, label: str) -> str:
     )
 
 
+def _moldura_tem_alpha(caminho: Path) -> bool:
+    """True se a moldura tem janela transparente (canal alfa).
+
+    Nesse caso o clipe é composto **atrás** da moldura e aparece pela janela;
+    caso contrário mantém-se o comportamento histórico (clipe sobre a moldura).
+    """
+    try:
+        from PIL import Image
+
+        with Image.open(caminho) as imagem:
+            return imagem.mode in ("RGBA", "LA") or "transparency" in imagem.info
+    except Exception:  # moldura ilegível/sem PIL: trata como opaca
+        return False
+
+
+def _duracao(caminho: Path, ffmpeg: str) -> float:
+    """Duração em segundos do arquivo, lida do log do ``ffmpeg -i``.
+
+    (O ``ffprobe`` pode não estar disponível — ``imageio-ffmpeg`` só traz o
+    ``ffmpeg`` — então lemos a linha ``Duration:`` do stderr.)
+    """
+    try:
+        proc = subprocess.run(
+            [ffmpeg, "-hide_banner", "-i", str(caminho)],
+            capture_output=True,
+            text=True,
+        )
+        achado = re.search(
+            r"Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)", proc.stderr or ""
+        )
+        if achado is None:
+            return 0.0
+        horas, minutos, segundos = achado.groups()
+        return int(horas) * 3600 + int(minutos) * 60 + float(segundos)
+    except Exception:  # noqa: BLE001 — sem duração não há % (barra fica indeterminada)
+        return 0.0
+
+
+def _executar_com_progresso(
+    cmd: list[str],
+    progresso: Callable[[float], None],
+    duracao_total: float,
+) -> tuple[int, str]:
+    """Roda o ffmpeg lendo ``-progress pipe:1`` e reportando a fração (0..1)."""
+    import tempfile
+
+    with tempfile.TemporaryFile() as arquivo_erro:
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=arquivo_erro,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+        assert proc.stdout is not None
+        for linha in proc.stdout:
+            linha = linha.strip()
+            campo, _, valor = linha.partition("=")
+            if campo in ("out_time_us", "out_time_ms") and valor.strip("-").isdigit():
+                segundos = int(valor) / 1_000_000
+                if duracao_total > 0:
+                    progresso(max(0.0, min(1.0, segundos / duracao_total)))
+        proc.wait()
+        arquivo_erro.seek(0)
+        erro = arquivo_erro.read().decode("utf-8", "replace")
+    return proc.returncode, erro
+
+
 def montar_video(
     clip_a: Path,
     clip_b: Path,
@@ -80,11 +150,13 @@ def montar_video(
     moldura: Path | None = None,
     destino: Path | None = None,
     layout: Layout | None = None,
+    progresso: Callable[[float], None] | None = None,
 ) -> Path:
     """Mostra o clipe A e depois o clipe B dentro da moldura, com o título no topo.
 
     ``layout`` (padrão: ``data/layout.json``) define a área do clipe na moldura
-    e o preenchimento (``cover``/``contain``).
+    e o preenchimento (``cover``/``contain``). ``progresso`` recebe a fração
+    renderizada (0.0 a 1.0), calculada pela duração total esperada dos trechos.
     """
     ffmpeg = resolver_ffmpeg()
     if ffmpeg is None:
@@ -96,6 +168,8 @@ def montar_video(
 
     moldura = MOLDURA_PATH if moldura is None else moldura
     usar_moldura = moldura is not None and Path(moldura).exists()
+    # moldura com transparência -> o clipe vai ATRÁS e aparece pela janela
+    moldura_transparente = usar_moldura and _moldura_tem_alpha(Path(moldura))
     usar_abertura = abertura is not None and Path(abertura).exists()
     usar_encerramento = encerramento is not None and Path(encerramento).exists()
 
@@ -121,10 +195,16 @@ def montar_video(
 
     base_moldura = {"va": "fr_a", "vb": "fr_b"}
     if usar_moldura:
-        filtros.append(
-            f"[{idx_frame}:v]scale={LARGURA}:{ALTURA}:flags=lanczos,setsar=1,"
-            f"format=yuv420p,loop=loop=-1:size=1:start=0,fps={FPS}[framebase]"
-        )
+        comum = f"[{idx_frame}:v]scale={LARGURA}:{ALTURA}:flags=lanczos,setsar=1"
+        if moldura_transparente:
+            # moldura vai POR CIMA (overlay): 1 quadro basta — o overlay repete
+            # (loop infinito aqui travaria a renderização)
+            filtros.append(f"{comum},format=rgba[framebase]")
+        else:
+            # moldura é o FUNDO: precisa durar todo o clipe (loop + shortest no overlay)
+            filtros.append(
+                f"{comum},format=yuv420p,loop=loop=-1:size=1:start=0,fps={FPS}[framebase]"
+            )
         filtros.append("[framebase]split=2[fr_a][fr_b]")
 
     if usar_abertura:
@@ -134,7 +214,24 @@ def montar_video(
 
     trechos = ((idx_a, "va", "aa", texto_a), (idx_b, "vb", "ab", texto_b))
     for indice, vtag, atag, texto in trechos:
-        if usar_moldura:
+        vbase = f"{vtag}b"
+        if usar_moldura and moldura_transparente:
+            # vídeo ATRÁS: clipe posicionado na janela (canvas preto via pad, finito)
+            # e a moldura (com alfa) por cima — o vídeo aparece pela janela.
+            filtros.append(_escalar_meme(indice, f"{vtag}m", layout))
+            x_m, y_m = layout.px_x(), layout.px_y()
+            x_m = max(0, min(x_m, LARGURA - layout.px_l()))
+            y_m = max(0, min(y_m, ALTURA - layout.px_a()))
+            filtros.append(
+                f"[{vtag}m]format=rgba,pad={LARGURA}:{ALTURA}:{x_m}:{y_m}:"
+                f"color=black[{vtag}p]"
+            )
+            filtros.append(
+                f"[{vtag}p][{base_moldura[vtag]}]overlay=0:0:"
+                f"eof_action=repeat[{vtag}b]"
+            )
+        elif usar_moldura:
+            # moldura opaca ao fundo: clipe por cima (comportamento anterior)
             filtros.append(_escalar_meme(indice, f"{vtag}m", layout))
             filtros.append(
                 f"[{base_moldura[vtag]}][{vtag}m]overlay={layout.px_x()}:{layout.px_y()}:"
@@ -142,7 +239,6 @@ def montar_video(
             )
         else:
             filtros.append(_escalar(indice, f"{vtag}b", LARGURA, ALTURA))
-        vbase = f"{vtag}b"
 
         if texto:
             caminho_titulo = titulo.caminho_png(texto, layout)
@@ -152,8 +248,10 @@ def montar_video(
             filtros.append(f"[{vbase}][tit_{vtag}]overlay=0:0:eof_action=repeat[{vtag}]")
             vbase = vtag
 
+        # concat exige o mesmo pix_fmt em todos os segmentos (yuv420p)
+        filtros.append(f"[{vbase}]format=yuv420p[{vtag}out]")
         filtros.append(_audio(indice, atag))
-        segmentos.append((vbase, atag))
+        segmentos.append((f"{vtag}out", atag))
 
     if usar_encerramento:
         filtros.append(_escalar(idx_enc, "ev", LARGURA, ALTURA))
@@ -163,6 +261,14 @@ def montar_video(
     entrada_concat = "".join(f"[{v}][{a}]" for v, a in segmentos)
     filtros.append(f"{entrada_concat}concat=n={len(segmentos)}:v=1:a=1[outv][outa]")
 
+    # trechos cuja duração soma o total esperado do vídeo (para a barra de progresso)
+    trechos_duracao: list[Path] = []
+    if usar_abertura:
+        trechos_duracao.append(Path(abertura))
+    trechos_duracao += [Path(clip_a), Path(clip_b)]
+    if usar_encerramento:
+        trechos_duracao.append(Path(encerramento))
+
     cmd = [ffmpeg, "-y"]
     for entrada in entradas:
         cmd += ["-i", str(entrada)]
@@ -171,12 +277,22 @@ def montar_video(
         "-c:v", "libx264", "-pix_fmt", "yuv420p", "-r", str(FPS),
         "-c:a", "aac", "-b:a", "160k",
         "-movflags", "+faststart",
-        str(destino),
     ]
+    if progresso is not None:
+        cmd += ["-progress", "pipe:1", "-nostats"]
+    cmd += [str(destino)]
 
-    proc = subprocess.run(cmd, capture_output=True, text=True)
-    if proc.returncode != 0:
-        raise AssembleError(f"ffmpeg falhou ({proc.returncode}): {proc.stderr[-800:]}")
+    if progresso is None:
+        proc = subprocess.run(cmd, capture_output=True, text=True)
+        codigo, erro = proc.returncode, proc.stderr
+    else:
+        duracao_total = 0.0
+        for trecho in trechos_duracao:
+            duracao_total += _duracao(trecho, ffmpeg)
+        codigo, erro = _executar_com_progresso(cmd, progresso, duracao_total)
+
+    if codigo != 0:
+        raise AssembleError(f"ffmpeg falhou ({codigo}): {(erro or '')[-800:]}")
     return destino
 
 
@@ -188,6 +304,7 @@ def montar_match(
     destino: Path | None = None,
     progresso_download: Callable[[float], None] | None = None,
     ao_montar: Callable[[], None] | None = None,
+    progresso_montagem: Callable[[float], None] | None = None,
 ) -> Path:
     """Baixa os clipes do confronto e monta o vídeo com o layout atual.
 
@@ -197,7 +314,7 @@ def montar_match(
 
     ``progresso_download`` recebe a fração baixada (0.0 a 1.0) somando os dois
     clipes; ``ao_montar`` é chamado quando os downloads terminam e a montagem
-    começa (útil para trocar a barra para o modo indeterminado).
+    começa; ``progresso_montagem`` recebe a fração da renderização (0.0 a 1.0).
     """
     meme_a = estado.buscar_meme(match["meme_a_id"])
     meme_b = estado.buscar_meme(match["meme_b_id"])
@@ -227,6 +344,7 @@ def montar_match(
         encerramento=ENCERRAMENTO_PATH,
         layout=layout,
         destino=destino,
+        progresso=progresso_montagem,
     )
     match["video_path"] = str(saida)
     match["status"] = "pronto"
