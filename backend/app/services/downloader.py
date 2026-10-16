@@ -6,7 +6,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from typing import Any
+from typing import Any, Callable
 
 from ..config import CLIPS_DIR, MEDIA_DIR, RAW_DIR
 
@@ -14,9 +14,22 @@ logger = logging.getLogger("batalha.downloader")
 
 FORMATO = "bv*[height<=1080]+ba/b[height<=1080]/b"
 
+# Callback de progresso: recebe a fração concluída (0.0 a 1.0) de um download.
+Progresso = Callable[[float], None]
+
 
 class DownloadError(RuntimeError):
     """Erro ao baixar/recortar/normalizar um trecho."""
+
+
+def _reportar(progresso: Progresso | None, fracao: float) -> None:
+    """Chama o callback de progresso sem deixar uma falha dele quebrar o download."""
+    if progresso is None:
+        return
+    try:
+        progresso(max(0.0, min(1.0, fracao)))
+    except Exception:  # noqa: BLE001 — a UI nunca deve derrubar o download
+        logger.debug("callback de progresso falhou", exc_info=True)
 
 
 def resolver_ffmpeg() -> str | None:
@@ -73,14 +86,24 @@ def _garantir_ffmpeg_no_path() -> None:
     os.environ["PATH"] = str(tools) + os.pathsep + os.environ.get("PATH", "")
 
 
-def baixar_trecho(meme: dict[str, Any], forcar: bool = False, dir_saida: Path | None = None) -> Path:
-    """Baixa apenas o trecho [inicio, fim] (em segundos) e remuxa para mp4."""
+def baixar_trecho(
+    meme: dict[str, Any],
+    forcar: bool = False,
+    dir_saida: Path | None = None,
+    progresso: Progresso | None = None,
+) -> Path:
+    """Baixa apenas o trecho [inicio, fim] (em segundos) e remuxa para mp4.
+
+    ``progresso`` (opcional) recebe a fração baixada (0.0 a 1.0) para a barra da
+    interface.
+    """
     meme_id = meme["id"]
     pasta = dir_saida or RAW_DIR
     pasta.mkdir(parents=True, exist_ok=True)
     destino = pasta / f"meme_{meme_id}.mp4"
     if destino.exists() and not forcar:
         logger.info("cache hit: %s", destino.name)
+        _reportar(progresso, 1.0)
         return destino
 
     if not meme.get("youtube_url"):
@@ -104,6 +127,18 @@ def baixar_trecho(meme: dict[str, Any], forcar: bool = False, dir_saida: Path | 
     def _ranges(_info: dict, _ydl: object) -> list[dict[str, float]]:
         return [{"start_time": inicio, "end_time": fim}]
 
+    def _progresso_ytdlp(d: dict[str, Any]) -> None:
+        status = d.get("status")
+        if status == "finished":
+            _reportar(progresso, 1.0)
+        elif status == "downloading":
+            total = d.get("total_bytes") or d.get("total_bytes_estimate")
+            baixado = d.get("downloaded_bytes") or 0
+            if total:
+                _reportar(progresso, baixado / total)
+            elif d.get("fragment_index") and d.get("fragment_count"):
+                _reportar(progresso, d["fragment_index"] / d["fragment_count"])
+
     opts = {
         "format": FORMATO,
         "outtmpl": str(pasta / f"meme_{meme_id}.%(ext)s"),
@@ -120,9 +155,11 @@ def baixar_trecho(meme: dict[str, Any], forcar: bool = False, dir_saida: Path | 
         "fragment_retries": 5,
         "socket_timeout": 30,
         "noplaylist": True,
+        "progress_hooks": [_progresso_ytdlp],
     }
 
     logger.info("baixando meme %s [%s-%s]", meme_id, _hhmmss(inicio), _hhmmss(fim))
+    _reportar(progresso, 0.0)
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
             ydl.download([meme["youtube_url"]])
@@ -132,6 +169,7 @@ def baixar_trecho(meme: dict[str, Any], forcar: bool = False, dir_saida: Path | 
     if not destino.exists():
         raise DownloadError(f"yt-dlp não produziu {destino}")
     logger.info("baixado: %s", destino.name)
+    _reportar(progresso, 1.0)
     return destino
 
 
@@ -146,6 +184,7 @@ def normalizar_vertical(
     destino: Path | None = None,
     forcar: bool = False,
     dir_saida: Path | None = None,
+    progresso: Progresso | None = None,
 ) -> Path:
     """Normaliza para 1080x1920 (9:16) preenchendo todo o quadro.
 
@@ -157,6 +196,7 @@ def normalizar_vertical(
     destino = destino or ((dir_saida or CLIPS_DIR) / f"clip_{origem.stem}.mp4")
     destino.parent.mkdir(parents=True, exist_ok=True)
     if destino.exists() and not forcar:
+        _reportar(progresso, 1.0)
         return destino
 
     ffmpeg = resolver_ffmpeg()
@@ -177,14 +217,32 @@ def normalizar_vertical(
         str(destino),
     ]
     logger.info("normalizando -> %s", destino.name)
+    _reportar(progresso, 0.0)
     _executar(cmd)
+    _reportar(progresso, 1.0)
     return destino
 
 
-def preparar_clip(meme: dict[str, Any], forcar: bool = False, dir_saida: Path | None = None) -> Path:
-    """Baixa o trecho e devolve o clipe já normalizado em 9:16."""
-    bruto = baixar_trecho(meme, forcar=forcar, dir_saida=dir_saida)
-    return normalizar_vertical(bruto, forcar=forcar, dir_saida=dir_saida)
+def preparar_clip(
+    meme: dict[str, Any],
+    forcar: bool = False,
+    dir_saida: Path | None = None,
+    progresso: Progresso | None = None,
+) -> Path:
+    """Baixa o trecho e devolve o clipe já normalizado em 9:16.
+
+    O progresso reportado (0.0 a 1.0) reserva ~85% para o download e ~15% para
+    a normalização.
+    """
+
+    def _download(fracao: float) -> None:
+        _reportar(progresso, fracao * 0.85)
+
+    def _normalizar(fracao: float) -> None:
+        _reportar(progresso, 0.85 + fracao * 0.15)
+
+    bruto = baixar_trecho(meme, forcar=forcar, dir_saida=dir_saida, progresso=_download)
+    return normalizar_vertical(bruto, forcar=forcar, dir_saida=dir_saida, progresso=_normalizar)
 
 
 def _cli() -> None:

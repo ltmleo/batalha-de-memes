@@ -39,7 +39,7 @@ batalha-de-memes/
       services/
         catalog.py       # lê data/memes.json -> estado
         bracket.py       # sorteio das chaves + propagação
-        downloader.py    # yt-dlp + crop 9:16
+        downloader.py    # yt-dlp + crop 9:16 (+ progresso p/ barra)
         assembler.py     # ffmpeg (montagem; cover/contain; montar_match)
         scraper.py       # comentários TikTok        (a implementar)
         vote_parser.py   # apuração A vs B            (a implementar)
@@ -98,6 +98,8 @@ Sequência **abertura → meme A → meme B** (+ encerramento opcional), com a m
 
 `montar_match(estado, match)` centraliza download + montagem + gravação de
 `video_path`/`status`, usado pela CLI (`montar`) e pelo editor (`Gerar vídeo`).
+Aceita `progresso_download` (fração 0–1 somando os clipes) e `ao_montar` (chamado
+ao terminar os downloads), usados pela barra de progresso do editor.
 
 ### Editor visual (`app.cli editor`)
 Janela Tkinter + Pillow com preview 9:16: arrasta/redimensiona a área do clipe,
@@ -107,6 +109,12 @@ da faixa) e escolhe cover/contain. O título usa a fonte empacotada Dream MMA
 (`app/titulo.py`: gradiente + contorno, renderizado em PNG). **Salvar** grava
 `data/layout.json` (global) e os títulos no confronto; **Frame exato** renderiza
 um quadro via ffmpeg para conferência; **Gerar vídeo** monta o mp4.
+
+**Baixar clipes p/ preview** e **Gerar vídeo** acessam a rede (yt-dlp) e por isso
+pedem **confirmação antes de baixar** (lista meme, link e trecho `inicio–fim`).
+Durante o download a barra de progresso exibe o percentual real (`progresso` do
+yt-dlp em `app/services/downloader.py`: ~85% download + ~15% normalização por
+clipe); a montagem usa a barra em modo indeterminado.
 
 ## 4. Coleta e apuração de votos
 - `scraper.py`: Playwright abre o vídeo público (cookies de sessão), rola e salva os

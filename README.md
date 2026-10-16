@@ -175,6 +175,14 @@ A janela (Tkinter + Pillow) tem:
   **Frame exato (ffmpeg)** (renderiza um quadro 1080x1920 idêntico ao vídeo) e
   **Gerar vídeo** (monta o mp4 do confronto em `media/clips/match_N.mp4`).
 
+Os dois botões que acessam a rede (**Baixar clipes p/ preview** e **Gerar
+vídeo**) pedem **confirmação antes de baixar**: uma janela lista os memes do
+confronto, o link de origem e o trecho (`inicio–fim`) que será baixado. Durante o
+download a barra de progresso mostra o **percentual real** (frações do yt-dlp por
+clipe, com ~85% para o download e ~15% para a normalização); na montagem, sem
+percentual previsível, a barra vira **animada** até concluir. Os clipes já
+baixados são reaproveitados (cache), e uma confirmação cancelada não baixa nada.
+
 O preview é instantâneo (PIL); use "Frame exato" para conferir a fidelidade
 (fonte, sombra, recorte) antes de gerar o vídeo. O `layout.json` passa a valer
 para todo o pipeline — inclusive o `montar` da CLI.

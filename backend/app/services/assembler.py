@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import subprocess
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Callable
 
 from ..config import (
     ABERTURA_PATH,
@@ -186,20 +186,36 @@ def montar_match(
     layout: Layout | None = None,
     forcar: bool = False,
     destino: Path | None = None,
+    progresso_download: Callable[[float], None] | None = None,
+    ao_montar: Callable[[], None] | None = None,
 ) -> Path:
     """Baixa os clipes do confronto e monta o vídeo com o layout atual.
 
     O título de cada lado é ``titulo_a``/``titulo_b`` do confronto (override
     feito no editor) ou, na ausência, o nome do meme. Grava ``video_path`` e
     marca o confronto como ``pronto`` (persistir o estado é com o chamador).
+
+    ``progresso_download`` recebe a fração baixada (0.0 a 1.0) somando os dois
+    clipes; ``ao_montar`` é chamado quando os downloads terminam e a montagem
+    começa (útil para trocar a barra para o modo indeterminado).
     """
     meme_a = estado.buscar_meme(match["meme_a_id"])
     meme_b = estado.buscar_meme(match["meme_b_id"])
     if meme_a is None or meme_b is None:
         raise AssembleError(f"confronto {match.get('id')}: meme A ou B não encontrado")
 
-    clip_a = preparar_clip(meme_a, forcar=forcar)
-    clip_b = preparar_clip(meme_b, forcar=forcar)
+    memes = (meme_a, meme_b)
+    clips: list[Path] = []
+    for indice, meme in enumerate(memes):
+        def _callback(fracao: float, _i: int = indice) -> None:
+            if progresso_download is not None:
+                progresso_download((_i + fracao) / len(memes))
+
+        clips.append(preparar_clip(meme, forcar=forcar, progresso=_callback))
+    clip_a, clip_b = clips
+
+    if ao_montar is not None:
+        ao_montar()
 
     destino = destino or CLIPS_DIR / f"match_{match['id']}.mp4"
     saida = montar_video(

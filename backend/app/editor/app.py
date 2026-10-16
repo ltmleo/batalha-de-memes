@@ -33,6 +33,13 @@ ALCA_RAIO = 8  # tolerância de clique nas alças (px do canvas)
 LADO_MIN = 0.02  # tamanho mínimo da área (fração do quadro)
 
 
+def _hhmmss(segundos: float) -> str:
+    h = int(segundos // 3600)
+    m = int((segundos % 3600) // 60)
+    s = int(segundos % 60)
+    return f"{h:02d}:{m:02d}:{s:02d}"
+
+
 class Editor(tk.Tk):
     """Janela do editor: preview à esquerda, controles à direita."""
 
@@ -195,8 +202,10 @@ class Editor(tk.Tk):
         self.botao_gerar.grid(sticky="ew", pady=(4, 0))
 
         # -- status -----------------------------------------------------
+        self.progresso = ttk.Progressbar(raiz, mode="determinate", maximum=100)
+        self.progresso.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(8, 0))
         self.barra_status = ttk.Label(raiz, text="Pronto.", anchor="w", relief="sunken")
-        self.barra_status.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(8, 0))
+        self.barra_status.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(4, 0))
 
     # --------------------------------------------------------------- dados
     def _carregar_matches(self) -> None:
@@ -461,20 +470,82 @@ class Editor(tk.Tk):
         self._aplicar()
         self._status("padrão restaurado (área, título e preenchimento) — clique em Salvar para aplicar")
 
+    # ------------------------------------------------------------ progresso
+    def _progresso_de(self, valor: float) -> None:
+        """Agenda a atualização da barra (pode ser chamado de outra thread)."""
+        self.after(0, self._set_progresso, valor)
+
+    def _set_progresso(self, valor: float) -> None:
+        if str(self.progresso.cget("mode")) != "determinate":
+            self.progresso.stop()
+            self.progresso.config(mode="determinate")
+        self.progresso["value"] = max(0.0, min(1.0, valor)) * 100
+
+    def _progresso_iniciar(self) -> None:
+        self.progresso.stop()
+        self.progresso.config(mode="determinate")
+        self.progresso["value"] = 0
+
+    def _progresso_montagem(self) -> None:
+        """Montagem não tem % previsível: usa a barra animada."""
+        self.progresso.config(mode="indeterminate")
+        self.progresso.start(12)
+        self._status("montando o vídeo com ffmpeg…")
+
+    def _progresso_fim(self, sucesso: bool) -> None:
+        self.progresso.stop()
+        self.progresso.config(mode="determinate")
+        self.progresso["value"] = 100 if sucesso else 0
+
+    def _confirmar_download(self, acao: str) -> bool:
+        """Mostra o que será baixado e pede confirmação antes de acessar a rede."""
+        if self.match is None:
+            self._status("selecione um confronto primeiro")
+            return False
+        blocos = []
+        for lado in ("a", "b"):
+            meme = self._meme(lado)
+            if meme is None:
+                continue
+            url = meme.get("youtube_url") or "(sem link definido)"
+            inicio = float(meme.get("inicio") or 0)
+            fim = float(meme.get("fim") or 0)
+            blocos.append(
+                f"{lado.upper()} — {meme['nome']}\n"
+                f"   {url}\n"
+                f"   trecho {_hhmmss(inicio)}–{_hhmmss(fim)}"
+            )
+        texto = (
+            f"{acao}\n\n"
+            + "\n\n".join(blocos)
+            + "\n\nOs clipes já baixados são reaproveitados.\nDeseja continuar?"
+        )
+        return messagebox.askyesno("Confirmar download dos vídeos", texto)
+
     def _baixar_clipes(self) -> None:
         if self.match is None:
             self._status("selecione um confronto primeiro")
             return
         lados = [l for l in ("a", "b") if self._meme(l)]
+        if not self._confirmar_download("Baixar os clipes deste confronto para o preview?"):
+            self._status("download cancelado")
+            return
+        self._progresso_iniciar()
         self._status("baixando/normalizando clipes… (pode demorar)")
         threading.Thread(target=self._thread_baixar, args=(lados,), daemon=True).start()
 
     def _thread_baixar(self, lados: list[str]) -> None:
         try:
-            for lado in lados:
+            total = max(1, len(lados))
+            for indice, lado in enumerate(lados):
                 meme = self._meme(lado)
-                if meme is not None:
-                    downloader.preparar_clip(meme)
+                if meme is None:
+                    continue
+
+                def _callback(fracao: float, _i: int = indice) -> None:
+                    self._progresso_de((_i + fracao) / total)
+
+                downloader.preparar_clip(meme, progresso=_callback)
             self.after(0, self._baixados_ok, None)
         except Exception as exc:  # noqa: BLE001 — a UI precisa mostrar qualquer erro
             self.after(0, self._baixados_ok, exc)
@@ -482,9 +553,11 @@ class Editor(tk.Tk):
     def _baixados_ok(self, erro: Exception | None) -> None:
         self.frames.clear()
         if erro is not None:
+            self._progresso_fim(False)
             messagebox.showerror("Falha ao baixar clipes", str(erro))
             self._status(f"erro no download: {erro}")
         else:
+            self._progresso_fim(True)
             self._status("clipes prontos — preview atualizado")
         self._aplicar()
 
@@ -521,7 +594,13 @@ class Editor(tk.Tk):
         match_id = self.match["id"]
         titulo_a, titulo_b = self._override_titulo("a"), self._override_titulo("b")
         self.match["titulo_a"], self.match["titulo_b"] = titulo_a, titulo_b
+        if not self._confirmar_download(
+            "Gerar o vídeo deste confronto? (os clipes são baixados, se necessário)"
+        ):
+            self._status("geração cancelada")
+            return
         self.botao_gerar.config(state="disabled")
+        self._progresso_iniciar()
         self._status("baixando clipes e montando o vídeo… (pode demorar)")
         threading.Thread(
             target=self._thread_gerar, args=(match_id, titulo_a, titulo_b), daemon=True
@@ -534,7 +613,12 @@ class Editor(tk.Tk):
             if match is None:
                 raise RuntimeError(f"confronto {match_id} não encontrado")
             match["titulo_a"], match["titulo_b"] = titulo_a, titulo_b
-            saida = assembler.montar_match(estado, match)
+            saida = assembler.montar_match(
+                estado,
+                match,
+                progresso_download=self._progresso_de,
+                ao_montar=lambda: self.after(0, self._progresso_montagem),
+            )
             estado.salvar()
             self.after(0, self._gerado, saida, None)
         except Exception as exc:  # noqa: BLE001 — a UI precisa mostrar qualquer erro
@@ -543,9 +627,11 @@ class Editor(tk.Tk):
     def _gerado(self, saida: Path | None, erro: Exception | None) -> None:
         self.botao_gerar.config(state="normal")
         if erro is not None:
+            self._progresso_fim(False)
             messagebox.showerror("Falha ao gerar vídeo", str(erro))
             self._status(f"erro na montagem: {erro}")
         else:
+            self._progresso_fim(True)
             self._status(f"vídeo gerado: {saida}")
 
     def _status(self, msg: str) -> None:
