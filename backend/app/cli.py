@@ -6,6 +6,7 @@ Manipula ``data/estado.json`` (fonte única da verdade) sem API nem banco::
     python -m app.cli torneio --nome "Temporada 1" --temporada 1
     python -m app.cli mostrar --torneio 1
     python -m app.cli vencedor --match 1 --winner 2
+    python -m app.cli video --match 1 --tiktok URL --instagram URL --youtube URL
     python -m app.cli montar --match 1
 """
 
@@ -124,6 +125,37 @@ def _cmd_montar(args: argparse.Namespace) -> None:
     print(saida)
 
 
+def _cmd_video(args: argparse.Namespace) -> None:
+    estado = Estado.carregar()
+    match = estado.buscar_match(args.match)
+    if match is None:
+        raise SystemExit(f"confronto {args.match} não encontrado")
+
+    campos = {
+        "tiktok_url": args.tiktok,
+        "instagram_url": args.instagram,
+        "youtube_url": args.youtube,
+    }
+    if not args.limpar and all(v is None for v in campos.values()):
+        raise SystemExit(
+            "informe ao menos um link (--tiktok / --instagram / --youtube) ou use --limpar"
+        )
+
+    for campo, valor in campos.items():
+        if args.limpar:
+            match[campo] = None
+        elif valor is not None:
+            match[campo] = valor
+
+    estado.salvar()
+    print(
+        json.dumps(
+            {"id": match["id"], **{campo: match.get(campo) for campo in campos}},
+            ensure_ascii=False,
+        )
+    )
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         prog="app.cli", description="Pipeline da Batalha de Memes (estado em data/estado.json)"
@@ -170,6 +202,14 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--match", type=int, required=True)
     p.add_argument("--saida", type=str, default=None)
     p.set_defaults(func=_cmd_montar)
+
+    p = sub.add_parser("video", help="define os links de vídeo (TikTok/Instagram/YouTube) de um confronto")
+    p.add_argument("--match", type=int, required=True)
+    p.add_argument("--tiktok", type=str, default=None, help="URL do vídeo no TikTok")
+    p.add_argument("--instagram", type=str, default=None, help="URL do Reels no Instagram")
+    p.add_argument("--youtube", type=str, default=None, help="URL do YouTube Shorts")
+    p.add_argument("--limpar", action="store_true", help="remove todos os links do confronto")
+    p.set_defaults(func=_cmd_video)
 
     args = parser.parse_args(argv)
     args.func(args)

@@ -4,8 +4,6 @@ import { SuggestForm } from "@/components/SuggestForm";
 import type { Tournament } from "@/lib/types";
 
 export function SiteFooter({ torneios }: { torneios: Tournament[] }) {
-  const principal =
-    torneios.find((t) => t.status !== "aguardando") ?? torneios[0];
   const t2 = torneios.find((t) => t.status === "aguardando");
 
   return (
@@ -13,32 +11,41 @@ export function SiteFooter({ torneios }: { torneios: Tournament[] }) {
       <div className="wrap">
         <div className="footer-grid">
           <div className="footer-col footer-brand">
-            <Link href="/" className="brand" aria-label="Batalha de Memes — início">
+            <Link href="/" className="brand" aria-label="Copa do Meme — início">
               <span className="logo" aria-hidden>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-                  <path d="M12 3v18" />
-                  <path d="M4 7h8" />
-                  <path d="M4 17h8" />
-                  <path d="M12 12h8" />
-                  <path d="M20 9.5v5" />
+                <svg viewBox="0 0 48 48" fill="none">
+                  <defs>
+                    <linearGradient id="trofeu-ouro-rodape" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stopColor="#fff2b0" />
+                      <stop offset="0.55" stopColor="#ffd93d" />
+                      <stop offset="1" stopColor="#e09a00" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M12 8.5h24v9.5a12 12 0 0 1-24 0z" fill="url(#trofeu-ouro-rodape)" stroke="#8a5a00" strokeWidth="2" />
+                  <circle cx="20" cy="16.4" r="1.9" fill="#4a2c00" />
+                  <circle cx="28" cy="16.4" r="1.9" fill="#4a2c00" />
+                  <path d="M20.4 20.6c1.7 2.1 5.5 2.1 7.2 0" stroke="#4a2c00" strokeWidth="1.8" strokeLinecap="round" />
+                  <path d="M24 30v6M18 36.5h12l-1.4 5h-9.2z" stroke="#8a5a00" strokeWidth="2" strokeLinejoin="round" />
                 </svg>
               </span>
-              <b>Batalha de Memes</b>
+              <b className="brand-nome">
+                copa do <em>meme</em>
+              </b>
             </Link>
             <p>
               A Copa do Mundo da internet: dois clipes entram, o público vota e só
               um meme leva a taça.
             </p>
             <nav className="footer-links" aria-label="Navegação do rodapé">
-              {principal ? (
-                <Link href={`/torneio/${principal.id}`}>Chaveamento</Link>
-              ) : null}
+              <Link href="/#ringue">Batalhas</Link>
+              <Link href="/#chave">Chaveamento</Link>
+              <Link href="/#cemiterio">Cemitério dos caídos</Link>
               <Link href="/competidores">Competidores</Link>
               {t2 ? <Link href={`/torneio/${t2.id}`}>Fila de espera</Link> : null}
             </nav>
           </div>
 
-          <div className="footer-col">
+          <div className="footer-col" id="var">
             <h3>O VAR da internet</h3>
             <ul className="rules">
               <li>Uso de bots resulta em desclassificação sumária e cancelamento no Twitter.</li>
@@ -59,7 +66,7 @@ export function SiteFooter({ torneios }: { torneios: Tournament[] }) {
         </div>
 
         <div className="footer-bottom">
-          <span>Batalha de Memes · site estático gerado a partir de backend/data/estado.json</span>
+          <span>Copa do Meme · site estático gerado a partir de backend/data/estado.json</span>
           <span className="mono">
             {torneios.length} temporadas ·{" "}
             {torneios.reduce((s, t) => s + (t.participantes?.length ?? 0), 0)} reservas

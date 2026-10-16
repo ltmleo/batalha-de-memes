@@ -88,6 +88,8 @@ def gerar_torneio(
                     "winner_id": None,
                     "video_path": None,
                     "tiktok_url": None,
+                    "instagram_url": None,
+                    "youtube_url": None,
                     "publicado_em": None,
                     "deadline": None,
                     "status": "pendente",

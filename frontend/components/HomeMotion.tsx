@@ -8,10 +8,9 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 /**
- * Camadas de movimento da home ("A Copa do Mundo da Internet"):
+ * Camadas de movimento da home ("Copa do Meme"):
  * - `.home-rise`: seções entram com subida suave conforme o scroll.
- * - `.home-scale`: cards do ringue entram em lote, crescendo de 0.94.
- * - faixa da chave: translação horizontal scrub (desktop apenas).
+ * - `.home-scale`: cards do ringue/cemitério entram em lote, crescendo de 0.94.
  * Tudo desligado com `prefers-reduced-motion: reduce` (fallback estático).
  */
 export function HomeMotion({ children }: { children: React.ReactNode }) {
@@ -57,31 +56,6 @@ export function HomeMotion({ children }: { children: React.ReactNode }) {
           );
         }
       });
-
-      mm.add(
-        "(min-width: 1024px) and (prefers-reduced-motion: no-preference)",
-        () => {
-          const scope = raiz.current;
-          if (!scope) return;
-          const track = scope.querySelector<HTMLElement>(".chave-track");
-          const wrap = scope.querySelector<HTMLElement>(".chave-overflow");
-          if (!track || !wrap) return;
-          const dist = () => Math.max(track.scrollWidth - wrap.clientWidth, 0) + 160;
-          if (dist() <= 0) return;
-
-          gsap.to(track, {
-            x: () => -dist(),
-            ease: "none",
-            scrollTrigger: {
-              trigger: ".chave-wrap",
-              start: "top 68%",
-              end: () => "+=" + dist(),
-              scrub: 0.9,
-              invalidateOnRefresh: true,
-            },
-          });
-        },
-      );
 
       return () => mm.revert();
     },

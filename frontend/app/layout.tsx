@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { listarTorneios } from "@/lib/estado";
 
+
 const sans = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-sans",
@@ -26,14 +27,13 @@ const display = Outfit({
 });
 
 export const metadata = {
-  title: "Batalha de Memes",
+  title: "Copa do Meme — a Copa do Mundo da internet",
   description:
-    "Chaveamento animado da Batalha de Memes: veja todos os competidores, o caminho de cada meme e assista aos vídeos originais.",
+    "Batalha de memes em formato de Copa do Mundo: vote no ringue, acompanhe o chaveamento e visite o cemitério dos caídos.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const torneios = listarTorneios();
-  const torneioId = torneios[0]?.id;
 
   return (
     <html lang="pt-BR" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
@@ -45,7 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
 
         <MotionProvider>
-          <SiteHeader torneioId={torneioId} />
+          <SiteHeader />
           <main>{children}</main>
           <SiteFooter torneios={torneios} />
         </MotionProvider>

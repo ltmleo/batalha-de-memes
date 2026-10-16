@@ -1,50 +1,29 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 
+import { ChaveGlimpse } from "@/components/ChaveGlimpse";
+import { Countdown } from "@/components/Countdown";
 import { HomeMotion } from "@/components/HomeMotion";
 import { hueStyle } from "@/components/MemeAvatar";
+import { RingueDuelo } from "@/components/RingueDuelo";
+import { VideoLinks, linksDoMatch } from "@/components/VideoLinks";
 import { agruparRodadas } from "@/lib/bracket";
 import { estatisticas, listarMemes, listarTorneios, obterTorneio } from "@/lib/estado";
-import { hueForId, iniciais } from "@/lib/format";
-import type { Match, Meme } from "@/lib/types";
+import { iniciais } from "@/lib/format";
+import { eliminados, epiteto, faseAoVivo, placar, votosTexto } from "@/lib/home";
+import type { Meme } from "@/lib/types";
 
-/** Nome ou vaga a exibir num slot do chaveamento (rodadas futuras não têm vencedores). */
-function nomeDoSlot(meme: Meme | null, match: Match, ehSegundo: boolean): string {
-  if (meme) return meme.nome;
-  const k = match.posicao + 1; // posicao é 0-based; a vaga herda o confronto da rodada anterior
-  return `venc. do confronto ${ehSegundo ? k * 2 : k * 2 - 1}`;
-}
+const CORES_CONFETE = ["#ffd93d", "#ff4757", "#2f7bff", "#7c3aed", "#ffffff"];
 
-/** Um dos lados de um duelo do "ringue". */
-function Lado({ meme, direita = false }: { meme: Meme | null; direita?: boolean }) {
-  if (!meme) {
-    return (
-      <div className={`r-lado r-vaga ${direita ? "is-right" : ""}`}>
-        <span className="mono">vaga em aberto</span>
-      </div>
-    );
-  }
-  return (
-    <div className={`r-lado ${direita ? "is-right" : ""}`} style={hueStyle(meme.id)}>
-      <span className="avatar avatar--xl" aria-hidden>
-        {iniciais(meme.nome)}
-      </span>
-      <b className="r-nome">{meme.nome}</b>
-      <Link className="r-sel mono" href={`/meme/${meme.id}`}>
-        abrir card ↗
-      </Link>
-      <span className="r-bar">
-        <span className="track">
-          <span
-            className="fill"
-            style={{ background: `hsl(${hueForId(meme.id)} 52% 58%)` }}
-          />
-        </span>
-        <span className="r-alt mono">votação em aberto</span>
-      </span>
-    </div>
-  );
-}
+/** Confete determinístico do hero (sem aleatoriedade: HTML estável no build). */
+const CONFETE = Array.from({ length: 34 }, (_, i) => ({
+  x: (i * 41 + 7) % 100,
+  dx: ((i % 5) - 2) * 22,
+  atraso: -((i % 11) * 0.75),
+  dur: 6.5 + ((i * 13) % 7) * 0.7,
+  cor: CORES_CONFETE[i % CORES_CONFETE.length],
+  tam: 6 + (i % 3) * 3,
+}));
 
 export default function Home() {
   const torneios = listarTorneios();
@@ -56,23 +35,56 @@ export default function Home() {
 
   const principal = torneios.find((t) => t.status !== "aguardando") ?? torneios[0];
   const t2 = torneios.find((t) => t.status === "aguardando");
-  const t1Detail = principal ? obterTorneio(principal.id) : null;
   const t2Detail = t2 ? obterTorneio(t2.id) : null;
 
-  const rodadas = t1Detail ? agruparRodadas(t1Detail.matches) : [];
-  const faseAtual = rodadas[0] ?? null;
-  const duelos = (faseAtual?.matches ?? []).filter((m) => m.meme_a_id && m.meme_b_id);
-  const emAmostra = duelos.slice(0, 3);
+  const rodadas = principal ? agruparRodadas(obterTorneio(principal.id)?.matches ?? []) : [];
+  const fase = faseAoVivo(rodadas);
+  const noRingue = fase?.duelos ?? [];
+  const destaque = noRingue[0] ?? null;
+  const laterais = noRingue.slice(1, 5);
+
+  const destaquesA = destaque ? meme(destaque.meme_a_id) : null;
+  const destaquesB = destaque ? meme(destaque.meme_b_id) : null;
+
+  const mortos = eliminados(rodadas, porId);
+  const vitrine = mortos.slice(0, 12);
+  const vivos = rodadas.length ? stats.totalMemes : 0;
 
   const t2memes = (t2Detail?.participantes ?? [])
     .map((id) => meme(id))
     .filter((m): m is Meme => Boolean(m));
   const t2vagas = t2?.tamanho ?? 64;
 
+  const faseNome = fase?.rodada.titulo ?? "A disputa";
+
   return (
     <HomeMotion>
-      {/* ── Attention: hero cinematográfico central ─────────────────────── */}
+      {/* ── Hero: a festa de abertura ───────────────────────────────────── */}
       <section className="home-hero">
+        <div className="confete" aria-hidden>
+          {CONFETE.map((c, i) => (
+            <i
+              key={i}
+              style={
+                {
+                  "--x": `${c.x}%`,
+                  "--dx": `${c.dx}px`,
+                  "--atraso": `${c.atraso}s`,
+                  "--dur": `${c.dur}s`,
+                  "--cor": c.cor,
+                  "--tam": `${c.tam}px`,
+                } as CSSProperties
+              }
+            />
+          ))}
+        </div>
+
+        <div className="hero-arena" aria-hidden>
+          <span />
+          <span />
+          <span />
+        </div>
+
         <div className="hero-emblem" aria-hidden>
           <svg viewBox="0 0 64 76" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
             <path d="M16 8h32v8a16 16 0 0 1-32 0z" />
@@ -90,50 +102,41 @@ export default function Home() {
             <span className="hero-kicker">
               <span className="live">
                 <span className="dot" aria-hidden />
-                rodada em disputa
+                ao vivo agora
               </span>
-              <span className="mono">temporada 1 · fase de 64</span>
+              <span className="mono">
+                temporada {principal?.temporada ?? "1"} · {faseNome}
+              </span>
             </span>
+
             <h1 className="hero-h1">
-              A Copa do Mundo da internet — <em>quem leva a taça?</em>
+              A COPA DO MUNDO DA INTERNET: <em>QUEM LEVA A TAÇA?</em>
             </h1>
-            <p className="hero-sub">
-              Os {duelos.length} confrontos da fase de 64 já estão armados. Conheça a
-              história de cada competidor, veja quem espera na fila e acompanhe o
-              caminho até a final.
+
+            <p className="hero-fase">
+              {faseNome} — <b>vote agora!</b> O perdedor vai direto pro cemitério dos caídos.
             </p>
+
+            <div className="hero-crono">
+              <span className="hero-crono-rot mono">a votação encerra em</span>
+              <Countdown />
+            </div>
+
             <div className="hero-actions">
               <a className="btn btn--primary btn--pulse" href="#ringue">
-                Ir para o ringue
+                ir para o ringue
               </a>
               {principal ? (
                 <Link className="btn btn--glass" href={`/torneio/${principal.id}`}>
-                  Ver o chaveamento completo
+                  ver o chaveamento completo
                 </Link>
               ) : null}
             </div>
 
-            <div className="stats placar">
-              <div className="stat glass stat--lead">
-                <div className="n">{duelos.length}</div>
-                <div className="l">confrontos da fase de 64</div>
-              </div>
-              <div className="stat glass">
-                <div className="n">{stats.decididos}</div>
-                <div className="l">duelos decididos</div>
-              </div>
-              <div className="stat glass">
-                <div className="n">
-                  {t2memes.length}
-                  <span className="stat-slash">/{t2vagas}</span>
-                </div>
-                <div className="l">aguardando na temporada 2</div>
-              </div>
-              <div className="stat glass">
-                <div className="n">{stats.totalMemes}</div>
-                <div className="l">competidores na liga</div>
-              </div>
-            </div>
+            <p className="hero-numeros mono">
+              {vivos} memes na disputa · {stats.totalConfrontos} confrontos · {mortos.length} já
+              caíram · 1 taça
+            </p>
           </div>
         </div>
       </section>
@@ -150,129 +153,183 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── Interest: o ringue ──────────────────────────────────────────── */}
+      {/* ── O RINGUE ────────────────────────────────────────────────────── */}
       <section className="home-section" id="ringue">
         <div className="wrap">
           <header className="section-head home-rise">
             <div>
-              <span className="kicker">O ringue</span>
-              <h2 className="section-title">Batalhas da fase de 64</h2>
+              <span className="kicker">o ringue</span>
+              <h2 className="section-title">{faseNome}: dois entram, um avança</h2>
             </div>
-            {emAmostra.length > 0 ? (
-              <p className="section-note">
-                Três confrontos em destaque — todos os {duelos.length} duelos estão na
-                chave. Votação abre quando o público entrar na arena.
-              </p>
-            ) : (
-              <p className="section-note">Os confrontos da fase de 64 ainda estão sendo montados.</p>
-            )}
+            <p className="section-note">
+              Vote na arquibancada e veja a torcida comentando ao vivo. Cada voto mexe no placar
+              em tempo real — e quem perde sai carimbado.
+            </p>
           </header>
 
-          {emAmostra.length > 0 ? (
-            <div className="ringue-grid home-rise">
-              {(() => {
-                const m = emAmostra[0];
-                const a = meme(m.meme_a_id);
-                const b = meme(m.meme_b_id);
-                return (
-                  <article className="ringue-card vs-featured home-scale">
-                    <header className="ringue-head">
-                      <span className="badge badge--live">
-                        <span className="dot" aria-hidden /> fase de 64
-                      </span>
-                      <span className="mono ringue-n">confronto #{m.posicao + 1}</span>
-                    </header>
-                    <div className="ringue-field">
-                      <Lado meme={a} />
-                      <span className="r-vs" aria-hidden>
-                        <span className="vs-badge">VS</span>
-                      </span>
-                      <Lado meme={b} direita />
-                    </div>
-                    <footer className="ringue-foot">
-                      <span className="mono">a votação acontece na arena</span>
-                      {principal ? (
-                        <Link className="btn btn--sm" href={`/torneio/${principal.id}`}>
-                          acompanhar no chaveamento →
-                        </Link>
-                      ) : null}
-                    </footer>
-                  </article>
-                );
-              })()}
-
-              {emAmostra.slice(1).map((m) => {
-                const a = meme(m.meme_a_id);
-                const b = meme(m.meme_b_id);
-                return (
-                  <article className="ringue-card vs-side home-scale" key={m.id}>
-                    <div className="vs-mini">
-                      <div className="mini-lane">
-                        <span className="avatar avatar--md" style={hueStyle(a?.id ?? 0)} aria-hidden>
-                          {iniciais(a?.nome ?? "?")}
-                        </span>
-                        <b>{a?.nome ?? "—"}</b>
-                      </div>
-                      <span className="mini-vs" aria-hidden>
-                        VS
-                      </span>
-                      <div className="mini-lane is-right">
-                        <b>{b?.nome ?? "—"}</b>
-                        <span className="avatar avatar--md" style={hueStyle(b?.id ?? 0)} aria-hidden>
-                          {iniciais(b?.nome ?? "?")}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="mini-foot mono">fase de 64 · confronto #{m.posicao + 1}</div>
-                  </article>
-                );
-              })}
-
-              <article className="ringue-card room-card home-scale">
-                <div className="room-num" aria-hidden>
-                  {t2memes.length}
-                  <span className="room-total">/{t2vagas}</span>
-                </div>
-                <div className="room-body">
-                  <h3>{t2 ? t2.nome : "Temporada 2"}</h3>
-                  <p>
-                    Na fila de espera, novos oponentes aguardam para completar a chave da
-                    próxima edição. A votação da temporada atual corre primeiro.
-                  </p>
-                  <div className="room-chips">
-                    {t2memes.slice(0, 8).map((m) => (
-                      <Link key={m.id} className="chip" href={`/meme/${m.id}`}>
-                        {m.nome}
-                      </Link>
-                    ))}
-                    {t2memes.length > 8 ? (
-                      <span className="chip chip--more mono">+{t2memes.length - 8}</span>
-                    ) : null}
-                  </div>
-                </div>
-                {t2 ? (
-                  <Link className="btn btn--sm" href={`/torneio/${t2.id}`}>
-                    ver fila de espera →
-                  </Link>
-                ) : null}
-              </article>
+          {destaque && destaquesA && destaquesB ? (
+            <div className="home-rise">
+              <RingueDuelo
+                matchId={destaque.id}
+                fase={faseNome}
+                confronto={destaque.posicao + 1}
+                a={{ id: destaquesA.id, nome: destaquesA.nome, epiteto: epiteto(destaquesA), votos: destaque.votos_a }}
+                b={{ id: destaquesB.id, nome: destaquesB.nome, epiteto: epiteto(destaquesB), votos: destaque.votos_b }}
+                tiktok={destaque.tiktok_url}
+                instagram={destaque.instagram_url}
+                youtube={destaque.youtube_url}
+              />
             </div>
           ) : (
             <div className="empty-box">
-              Nenhum confronto gerado ainda. Rode <code>python -m app.cli reset_estado</code> e
-              refaça o build.
+              Nenhum confronto ao vivo. Rode <code>python -m app.cli reset_estado</code> e refaça o
+              build.
             </div>
           )}
+
+          {laterais.length > 0 ? (
+            <div className="ringue-lista home-rise">
+              <h3 className="ringue-lista-titulo mono">
+                <span className="dot" aria-hidden /> também na {faseNome.toLowerCase()}
+              </h3>
+              <div className="ringue-lista-grid">
+                {laterais.map((m) => {
+                  const a = meme(m.meme_a_id);
+                  const b = meme(m.meme_b_id);
+                  const p = placar(m);
+                  return (
+                    <article className="mini-duelo home-scale" key={m.id}>
+                      <header className="mini-duelo-topo mono">
+                        ao vivo · confronto #{m.posicao + 1}
+                      </header>
+                      <div className="mini-duelo-corpo">
+                        <div className="mini-lado">
+                          <span className="avatar avatar--sm" style={hueStyle(a?.id ?? 0)} aria-hidden>
+                            {iniciais(a?.nome ?? "?")}
+                          </span>
+                          <b>{a?.nome ?? "—"}</b>
+                          <span className="mono mini-pct">{p.pctA}%</span>
+                        </div>
+                        <span className="mini-vs2" aria-hidden>
+                          VS
+                        </span>
+                        <div className="mini-lado is-right">
+                          <span className="mono mini-pct">{p.pctB}%</span>
+                          <b>{b?.nome ?? "—"}</b>
+                          <span className="avatar avatar--sm" style={hueStyle(b?.id ?? 0)} aria-hidden>
+                            {iniciais(b?.nome ?? "?")}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="mini-barras">
+                        <span className="mini-barra mini-barra--a">
+                          <i style={{ width: `${p.pctA}%` }} />
+                        </span>
+                        <span className="mini-barra mini-barra--b">
+                          <i style={{ width: `${p.pctB}%` }} />
+                        </span>
+                      </div>
+                      <div className="mini-duelo-rodape mono">
+                        <span>{votosTexto(p.total)} votos na urna</span>
+                        <VideoLinks {...linksDoMatch(m)} variante="icons" />
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
+
+          {t2 ? (
+            <article className="room-card ringue-card home-scale">
+              <div className="room-num" aria-hidden>
+                {t2memes.length}
+                <span className="room-total">/{t2vagas}</span>
+              </div>
+              <div className="room-body">
+                <h3>{t2.nome} · sala de espera</h3>
+                <p>
+                  Enquanto a taça não sai, novos oponentes já reservam lugar na próxima edição. A
+                  votação da temporada atual corre primeiro.
+                </p>
+                <div className="room-chips">
+                  {t2memes.slice(0, 8).map((m) => (
+                    <Link key={m.id} className="chip" href={`/meme/${m.id}`}>
+                      {m.nome}
+                    </Link>
+                  ))}
+                  {t2memes.length > 8 ? (
+                    <span className="chip chip--more mono">+{t2memes.length - 8}</span>
+                  ) : null}
+                </div>
+              </div>
+              <Link className="btn btn--sm" href={`/torneio/${t2.id}`}>
+                ver a fila de espera →
+              </Link>
+            </article>
+          ) : null}
         </div>
       </section>
 
-      {/* ── Desire: a chave em faixa horizontal ─────────────────────────── */}
+      {/* ── CEMITÉRIO DOS CAÍDOS ────────────────────────────────────────── */}
+      <section className="home-section cemiterio" id="cemiterio">
+        <div className="wrap">
+          <header className="section-head home-rise">
+            <div>
+              <span className="kicker">cemitério dos caídos</span>
+              <h2 className="section-title">Quem já foi pra lápide</h2>
+            </div>
+            <p className="section-note">
+              {mortos.length} memes já caíram nesta temporada — todos em preto e branco, carimbados
+              e pra sempre lembrados.
+            </p>
+          </header>
+
+          {vitrine.length > 0 ? (
+            <div className="cem-grid">
+              {vitrine.map((e) => (
+                <Link
+                  className="cem-card home-scale"
+                  href={`/meme/${e.meme.id}`}
+                  style={hueStyle(e.meme.id)}
+                  key={e.meme.id}
+                  title={`Abrir o card de ${e.meme.nome}`}
+                >
+                  <span className="avatar avatar--lg" aria-hidden>
+                    {iniciais(e.meme.nome)}
+                  </span>
+                  <b className="cem-nome">{e.meme.nome}</b>
+                  <span className="cem-fase mono">caiu na {e.fase}</span>
+                  <span className="cem-stamp" aria-hidden>
+                    eliminado
+                  </span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="empty-box">Ninguém caiu ainda. A temporada está só começando.</div>
+          )}
+
+          <p className="cem-rodape mono">
+            🪦 {mortos.length} caídos · {Math.max(vivos - mortos.length, 0)} seguem na briga pela
+            taça
+            {principal ? (
+              <>
+                {" · "}
+                <Link href={`/torneio/${principal.id}`}>ver a chave completa →</Link>
+              </>
+            ) : null}
+          </p>
+        </div>
+      </section>
+
+      {/* ── A CHAVE ─────────────────────────────────────────────────────── */}
       {rodadas.length > 0 ? (
-        <section className="home-section">
+        <section className="home-section" id="chave">
           <div className="wrap">
             <header className="section-head home-rise">
               <div>
-                <span className="kicker">A chave</span>
+                <span className="kicker">chaveamento</span>
                 <h2 className="section-title">A trilha até a taça</h2>
               </div>
               {principal ? (
@@ -282,40 +339,8 @@ export default function Home() {
               ) : null}
             </header>
 
-            <div className="chave-wrap home-rise">
-              <div className="chave-overflow">
-                <div className="chave-track">
-                  {rodadas.map((r) => (
-                    <div className="chave-col" key={r.round}>
-                      <div className="chave-col-head">
-                        <b>{r.titulo}</b>
-                        <span className="mono chave-count">{r.matches.length}</span>
-                      </div>
-                      {r.matches.map((m) => {
-                        const a = meme(m.meme_a_id);
-                        const b = meme(m.meme_b_id);
-                        return (
-                          <div
-                            className="chave-row"
-                            key={m.id}
-                            style={{ "--hue": hueForId((a ?? b)?.id ?? 0) } as CSSProperties}
-                          >
-                            <span className="nm">
-                              {a ? a.nome : nomeDoSlot(null, m, false)}
-                            </span>
-                            <span className="nm nm--b">
-                              {b ? b.nome : nomeDoSlot(null, m, true)}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="chave-hint mono">
-                role para o lado · os vencedores da fase de 64 avançam para a fase de 32
-              </div>
+            <div className="home-rise">
+              <ChaveGlimpse rodadas={rodadas} memes={porId} />
             </div>
           </div>
         </section>

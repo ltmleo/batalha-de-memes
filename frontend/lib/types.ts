@@ -26,7 +26,15 @@ export type Match = {
   meme_b_id: number | null;
   winner_id: number | null;
   video_path: string | null;
-  tiktok_url: string | null;
+  tiktok_url?: string | null;
+  /** Reels no Instagram (opcional; preenchido via `app.cli video`). */
+  instagram_url?: string | null;
+  /** YouTube Shorts (opcional; preenchido via `app.cli video`). */
+  youtube_url?: string | null;
+  /** Quando o confronto foi publicado nas redes (ISO), usado para exibir "publicado". */
+  publicado_em?: string | null;
+  /** Prazo de votação do confronto (ISO). */
+  deadline?: string | null;
   status: string;
   votos_a: number;
   votos_b: number;

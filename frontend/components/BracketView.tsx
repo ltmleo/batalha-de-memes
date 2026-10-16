@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { hueStyle } from "@/components/MemeAvatar";
+import { VideoLinks, linksDoMatch } from "@/components/VideoLinks";
 import { GEOM, caminhoDoMeme, layoutBracket } from "@/lib/bracket";
 import type { Match, Meme, TournamentDetail } from "@/lib/types";
 
@@ -76,33 +77,42 @@ function MatchCard({
   const bye = match.status === "finalizado" && (match.meme_a_id === null || match.meme_b_id === null);
   const onPath = caminho ? caminho.has(match.id) : false;
   const dimmed = caminho !== null && !onPath;
+  const videos = linksDoMatch(match);
+  const temVideo = Boolean(videos.tiktok || videos.instagram || videos.youtube);
 
   return (
-    <div
-      className={`bmatch${onPath ? " on-path" : ""}${dimmed ? " dimmed" : ""}`}
-      style={{ left: x, top: y + TOPO, "--delay": `${delay}ms` } as React.CSSProperties}
-      onMouseEnter={() => onHover(match.id)}
-      onMouseLeave={() => onHover(null)}
-    >
-      <Slot
-        memeId={match.meme_a_id}
-        votos={match.votos_a}
-        vencedor={match.winner_id !== null && match.winner_id === match.meme_a_id}
-        bye={bye}
-        memes={memes}
-        focusedId={focusedId}
-        onFocus={onFocus}
-      />
-      <Slot
-        memeId={match.meme_b_id}
-        votos={match.votos_b}
-        vencedor={match.winner_id !== null && match.winner_id === match.meme_b_id}
-        bye={bye}
-        memes={memes}
-        focusedId={focusedId}
-        onFocus={onFocus}
-      />
-    </div>
+    <>
+      <div
+        className={`bmatch${onPath ? " on-path" : ""}${dimmed ? " dimmed" : ""}`}
+        style={{ left: x, top: y + TOPO, "--delay": `${delay}ms` } as React.CSSProperties}
+        onMouseEnter={() => onHover(match.id)}
+        onMouseLeave={() => onHover(null)}
+      >
+        <Slot
+          memeId={match.meme_a_id}
+          votos={match.votos_a}
+          vencedor={match.winner_id !== null && match.winner_id === match.meme_a_id}
+          bye={bye}
+          memes={memes}
+          focusedId={focusedId}
+          onFocus={onFocus}
+        />
+        <Slot
+          memeId={match.meme_b_id}
+          votos={match.votos_b}
+          vencedor={match.winner_id !== null && match.winner_id === match.meme_b_id}
+          bye={bye}
+          memes={memes}
+          focusedId={focusedId}
+          onFocus={onFocus}
+        />
+      </div>
+      {temVideo ? (
+        <div className="bmatch-video" style={{ left: x, top: y + TOPO + GEOM.cardH + 2 }}>
+          <VideoLinks {...videos} variante="icons" />
+        </div>
+      ) : null}
+    </>
   );
 }
 
