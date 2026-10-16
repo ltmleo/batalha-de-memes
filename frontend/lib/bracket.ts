@@ -109,3 +109,163 @@ export function caminhoDoMeme(matches: Match[], memeId: number): Set<number> {
   }
   return ids;
 }
+
+// --- chaveamento simétrico (estilo "Copa do Mundo", final ao centro) -------
+// As últimas K rodadas (oitavas → final) são espelhadas: as extremidades
+// esquerda e direita exibem as oitavas e o caminho afunila para a grande
+// final no centro, sobre um pedestal glorioso. Cada rodada é dividida ao
+// meio: a primeira metade alimenta o lado esquerdo, a segunda o direito.
+
+export type SimLado = "esq" | "dir" | "centro";
+
+export type SimNode = {
+  match: Match;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  centerY: number;
+  col: number;
+  lado: SimLado;
+};
+
+export type SimColuna = {
+  round: number;
+  titulo: string;
+  x: number;
+  lado: SimLado;
+  vagas: number;
+};
+
+export type SimLink = {
+  key: string;
+  d: string;
+  lado: SimLado;
+  fromId: number;
+  toId: number;
+};
+
+export type SimLayout = {
+  colunas: SimColuna[];
+  nodes: SimNode[];
+  links: SimLink[];
+  largura: number;
+  altura: number;
+  topo: number;
+  centroX: number;
+  centroY: number;
+  final: SimNode | null;
+};
+
+/** Altura da faixa central (pedestal da final). */
+const FINAL_H = GEOM.cardH + 32;
+
+export function layoutSimetrico(matches: Match[]): SimLayout {
+  const topo = 62; // faixa dos títulos das rodadas
+  const rodadas = agruparRodadas(matches).slice(-4);
+  if (rodadas.length === 0) {
+    return { colunas: [], nodes: [], links: [], largura: 0, altura: topo, topo, centroX: 0, centroY: topo, final: null };
+  }
+
+  const K = rodadas.length;
+  const S = GEOM.cardH + GEOM.rowGap;
+  const nCol = 2 * K - 1; // K-1 colunas por lado + 1 central
+  const colFinal = K - 1;
+  const colX = (c: number) => c * (GEOM.cardW + GEOM.colGap);
+
+  // confrontos por lado na rodada mais larga (a primeira exibida)
+  const totalPrim = rodadas[0].matches.length;
+  const porLado = Math.max(Math.floor(totalPrim / 2), 1);
+
+  const altura = (porLado - 1) * S + GEOM.cardH;
+  const centroY = topo + altura / 2;
+  const centroX = colX(colFinal) + GEOM.cardW / 2;
+
+  // y dos níveis por lado (índice 0..porLado-1); níveis seguintes = ponto médio
+  const niveisY: number[][] = [
+    Array.from({ length: porLado }, (_, i) => centroY + (i - (porLado - 1) / 2) * S),
+  ];
+  for (let k = 1; k <= K - 2; k++) {
+    const ant = niveisY[k - 1];
+    const n = Math.floor(ant.length / 2);
+    niveisY.push(Array.from({ length: n }, (_, j) => (ant[2 * j] + ant[2 * j + 1]) / 2));
+  }
+
+  // nós dos lados + final
+  const nodes: SimNode[] = [];
+  const porChave = new Map<string, SimNode>();
+  for (let k = 0; k <= K - 2; k++) {
+    const rodada = rodadas[k];
+    const metade = Math.floor(rodada.matches.length / 2);
+    for (const m of rodada.matches) {
+      const esq = m.posicao < metade;
+      const lado: SimLado = esq ? "esq" : "dir";
+      const idx = esq ? m.posicao : m.posicao - metade;
+      const centerY = niveisY[k][idx] ?? centroY;
+      const col = esq ? k : nCol - 1 - k;
+      const node: SimNode = {
+        match: m,
+        x: colX(col),
+        y: centerY - GEOM.cardH / 2,
+        w: GEOM.cardW,
+        h: GEOM.cardH,
+        centerY,
+        col,
+        lado,
+      };
+      nodes.push(node);
+      porChave.set(`${m.round}:${m.posicao}`, node);
+    }
+  }
+  let final: SimNode | null = null;
+  const fm = rodadas[K - 1].matches[0];
+  if (fm) {
+    final = {
+      match: fm,
+      x: colX(colFinal),
+      y: centroY - FINAL_H / 2,
+      w: GEOM.cardW,
+      h: FINAL_H,
+      centerY: centroY,
+      col: colFinal,
+      lado: "centro",
+    };
+    nodes.push(final);
+    porChave.set(`${fm.round}:${fm.posicao}`, final);
+  }
+
+  // conectores: cada confronto de lado liga-se ao confronto-pai (próxima
+  // rodada, mesma metade). A semi liga-se à final ao centro.
+  const links: SimLink[] = [];
+  for (const node of nodes) {
+    if (node.lado === "centro") continue;
+    const pai = porChave.get(`${node.match.round + 1}:${Math.floor(node.match.posicao / 2)}`);
+    if (!pai) continue;
+    const esq = node.lado === "esq";
+    const x1 = esq ? node.x + GEOM.cardW : node.x;
+    const y1 = node.centerY;
+    const x2 = esq ? pai.x : pai.x + pai.w;
+    const y2 = pai.centerY;
+    const meio = esq ? (node.x + GEOM.cardW + pai.x) / 2 : (node.x + pai.x + pai.w) / 2;
+    links.push({
+      key: `${node.match.id}-${pai.match.id}`,
+      d: `M ${x1} ${y1} H ${meio} V ${y2} H ${x2}`,
+      lado: node.lado,
+      fromId: node.match.id,
+      toId: pai.match.id,
+    });
+  }
+
+  // títulos das colunas (espelhados; a central vira "Grande final")
+  const colunas: SimColuna[] = [];
+  for (let k = 0; k <= K - 2; k++) {
+    const rodada = rodadas[k];
+    colunas.push({ round: rodada.round, titulo: rodada.titulo, x: colX(k), lado: "esq", vagas: rodada.vagas });
+    colunas.push({ round: rodada.round, titulo: rodada.titulo, x: colX(nCol - 1 - k), lado: "dir", vagas: rodada.vagas });
+  }
+  const finalRod = rodadas[K - 1];
+  colunas.push({ round: finalRod.round, titulo: "Grande final", x: colX(colFinal), lado: "centro", vagas: finalRod.vagas });
+
+  const largura = nCol * GEOM.cardW + Math.max(nCol - 1, 0) * GEOM.colGap;
+  return { colunas, nodes, links, largura, altura: altura + topo, topo, centroX, centroY, final };
+}

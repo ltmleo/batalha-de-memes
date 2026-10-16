@@ -29,14 +29,18 @@ Catálogo → Sorteio das chaves → Download+recorte → Montagem → Publicaç
 batalha-de-memes/
   backend/
     app/
-      cli.py             # pipeline: seed, torneio, vencedor, montar...
+      cli.py             # pipeline: seed, torneio, vencedor, montar, editor...
       store.py           # lê/grava data/estado.json (fonte única da verdade)
-      config.py          # caminhos (estado, mídia, moldura, fontes, tmp)
+      config.py          # caminhos (estado, mídia, moldura, fontes, layout, tmp)
+      layout.py          # geometria da montagem (data/layout.json)
+      editor/
+        app.py           # editor visual desktop (Tkinter): preview, arraste, gerar vídeo
+        preview.py       # preview PIL + frame exato via ffmpeg
       services/
         catalog.py       # lê data/memes.json -> estado
         bracket.py       # sorteio das chaves + propagação
         downloader.py    # yt-dlp + crop 9:16
-        assembler.py     # ffmpeg (montagem)
+        assembler.py     # ffmpeg (montagem; cover/contain; montar_match)
         scraper.py       # comentários TikTok        (a implementar)
         vote_parser.py   # apuração A vs B            (a implementar)
         publisher.py     # upload/publicação          (a implementar)
@@ -44,6 +48,7 @@ batalha-de-memes/
     data/
       memes.json         # catálogo editável (entrada do seed)
       estado.json        # estado da aplicação (fonte única da verdade)
+      layout.json        # layout da montagem (criado ao salvar no editor)
     media/               # cache de clipes (git-ignored)
     requirements.txt
   frontend/              # Next.js (export estático)
@@ -55,8 +60,8 @@ Persistidos como listas de objetos em `backend/data/estado.json`:
 Memes[]      Meme{id, nome, youtube_url, inicio, fim, autor_fonte, tags[], status}
 Tournaments[] Tournament{id, nome, temporada, seed, tamanho, status, criado_em}
 Matches[]    Match{id, tournament_id, round, posicao, meme_a_id, meme_b_id,
-                   video_path, tiktok_url, publicado_em, deadline, status,
-                   votos_a, votos_b, winner_id}
+                   titulo_a, titulo_b, video_path, tiktok_url, publicado_em,
+                   deadline, status, votos_a, votos_b, winner_id}
 Votes[]      Vote{id, match_id, user_hash, raw_comment, escolha(A|B), valido, criado_em}
 ```
 `user_hash` = hash do autor do comentário (dedupe sem guardar dado pessoal).
@@ -78,15 +83,30 @@ desfocado — em `media/clips/`. Trechos já baixados são cacheados.
 - Quem não tem adversário recebe *bye* e avança automaticamente.
 
 ## 3. Montagem (`assembler.py`, ffmpeg)
-Template vertical **A em cima / B embaixo** (cada um 1080x960):
-```
-[0:v]scale=1080:960:force_original_aspect_ratio=increase,crop=1080:960,setsar=1[top];
-[1:v]scale=1080:960:force_original_aspect_ratio=increase,crop=1080:960,setsar=1[bot];
-[top][bot]vstack=inputs=2[base];
-[base]drawtext=text='A':...[v]
-```
-Sobreposições: labels **A/B**, contagem, placar, CTA "Comente A ou B". Export
-`1080x1920 @30fps`. Intro/outro com vencedor do confronto anterior.
+Sequência **abertura → meme A → meme B** (+ encerramento opcional), com a moldura
+`assets/modulra.png` sobreposta e o clipe no "telão":
+
+- a área do vídeo e o **preenchimento** (`cover` = recorte central / `contain` =
+  barras pretas) vêm de `data/layout.json` (editável no editor desktop);
+- título centralizado no topo com a fonte **Dream MMA** (empacotada em
+  `assets/fonts/`, caixa-alta, gradiente dourado + contorno preto), renderizado
+  em PNG (ver `app/titulo.py`) e sobreposto; o tamanho é automático — medido na
+  fonte real e **quebrado em até duas linhas** quando uma ficaria pequena demais,
+  ou px fixo pelo editor. Texto = `titulo_a`/`titulo_b` do confronto ou o nome do
+  meme; posição/faixa/tamanho vêm do bloco `titulo` de `data/layout.json`;
+- export `1080x1920 @30fps`, áudio original de cada clipe, `flags=lanczos`.
+
+`montar_match(estado, match)` centraliza download + montagem + gravação de
+`video_path`/`status`, usado pela CLI (`montar`) e pelo editor (`Gerar vídeo`).
+
+### Editor visual (`app.cli editor`)
+Janela Tkinter + Pillow com preview 9:16: arrasta/redimensiona a área do clipe,
+edita os títulos, ajusta o enquadramento do título (posição Y, largura da faixa,
+tamanho automático — com quebra em até duas linhas — ou manual; arraste vertical
+da faixa) e escolhe cover/contain. O título usa a fonte empacotada Dream MMA
+(`app/titulo.py`: gradiente + contorno, renderizado em PNG). **Salvar** grava
+`data/layout.json` (global) e os títulos no confronto; **Frame exato** renderiza
+um quadro via ffmpeg para conferência; **Gerar vídeo** monta o mp4.
 
 ## 4. Coleta e apuração de votos
 - `scraper.py`: Playwright abre o vídeo público (cookies de sessão), rola e salva os
@@ -124,5 +144,6 @@ tráfego para o site (ranking/votação) e "inscrição de memes" patrocinada.
 ## Roadmap
 1. `catalog.py` + `bracket.py` + CLI com chaveamento. **(feito neste scaffold)**
 2. `downloader.py` + `assembler.py`: gerar um match manualmente. **(scaffold pronto)**
-3. `scraper.py` + `vote_parser.py` com coleta simulada.
-4. `pipeline.py` automatiza o ciclo; `publisher.py` fecha.
+3. Editor visual desktop (área do vídeo na moldura, título, cover/contain, gerar vídeo). **(feito)**
+4. `scraper.py` + `vote_parser.py` com coleta simulada.
+5. `pipeline.py` automatiza o ciclo; `publisher.py` fecha.

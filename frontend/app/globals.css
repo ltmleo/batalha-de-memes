@@ -1,9 +1,9 @@
-/* ==========================================================================
-   Batalha de Memes — design system premium
-   Direção: editorial dark-tech. Base neutra (zinc), UM accent rosé dessaturado,
-   tipografia Space Grotesk + JetBrains Mono, sombras de difusão (nada de neon),
-   refração "liquid glass" e movimento só de transform/opacity (60fps).
-   Referência: .agents/skills/design-taste-frontend-v1 + 60fps-animation.
+﻿/* ==========================================================================
+   Batalha de Memes ÔÇö design system premium
+   Dire├º├úo: editorial dark-tech. Base neutra (zinc), UM accent ros├® dessaturado,
+   tipografia Space Grotesk + JetBrains Mono, sombras de difus├úo (nada de neon),
+   refra├º├úo "liquid glass" e movimento s├│ de transform/opacity (60fps).
+   Refer├¬ncia: .agents/skills/design-taste-frontend-v1 + 60fps-animation.
    ========================================================================== */
 
 :root {
@@ -22,7 +22,7 @@
   --muted: #b3a8d6;
   --muted-2: #837aa9;
 
-  /* festa neon: o amarelo da taça é o accent; azul e vermelho marcam os lados */
+  /* festa neon: o amarelo da ta├ºa ├® o accent; azul e vermelho marcam os lados */
   --accent: #ffd93d;
   --accent-strong: #ffe45c;
   --accent-deep: #e09a00;
@@ -33,7 +33,7 @@
   --win: #33d6a6;
   --warn: #ffb020;
 
-  /* sombras de difusão + brilho interno de refração */
+  /* sombras de difus├úo + brilho interno de refra├º├úo */
   --shadow-1: 0 10px 30px rgba(6, 2, 16, 0.42);
   --shadow-2: 0 26px 64px rgba(6, 2, 16, 0.55);
   --ring-inset: inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -70,7 +70,7 @@ body {
   font-feature-settings: "ss01", "cv01";
 }
 
-/* números e rótulos técnicos: mono */
+/* n├║meros e r├│tulos t├®cnicos: mono */
 .num,
 .mono {
   font-family: var(--font-mono, ui-monospace, monospace);
@@ -337,7 +337,7 @@ h3 {
   color: var(--muted);
 }
 
-/* ---------- botões ---------- */
+/* ---------- bot├Áes ---------- */
 .btn {
   --btn-bg: var(--panel);
   display: inline-flex;
@@ -432,7 +432,7 @@ h3 {
   }
 }
 
-/* ---------- glass (refração líquida) ---------- */
+/* ---------- glass (refra├º├úo l├¡quida) ---------- */
 .glass {
   background: linear-gradient(180deg, rgba(244, 244, 245, 0.06), rgba(244, 244, 245, 0.015)),
     var(--panel-2);
@@ -542,7 +542,7 @@ h3 {
   padding: 16px;
   text-decoration: none;
   overflow: hidden;
-  /* Sem backdrop-filter: há dezenas de cards — look "vidro" só com gradiente
+  /* Sem backdrop-filter: h├í dezenas de cards ÔÇö look "vidro" s├│ com gradiente
      + borda + brilho interno evita repaint pesado no scroll (60fps). */
   background: linear-gradient(180deg, rgba(244, 244, 245, 0.07), rgba(244, 244, 245, 0.02)),
     rgba(15, 16, 21, 0.88);
@@ -654,7 +654,7 @@ h3 {
   height: 14px;
 }
 
-/* camada de link que cobre o card; ações ficam acima */
+/* camada de link que cobre o card; a├º├Áes ficam acima */
 .mcard-overlay {
   position: absolute;
   inset: 0;
@@ -1152,7 +1152,7 @@ h3 {
   color: var(--win);
 }
 .bslot.win::after {
-  content: "▸";
+  content: "Ôû©";
   color: var(--win);
   font-size: 11px;
 }
@@ -1302,7 +1302,7 @@ h3 {
   font-weight: 600;
 }
 
-/* ---------- navegação inferior ---------- */
+/* ---------- navega├º├úo inferior ---------- */
 .pager {
   display: flex;
   justify-content: space-between;
@@ -1310,7 +1310,7 @@ h3 {
   margin-top: 34px;
 }
 
-/* ---------- utilitários ---------- */
+/* ---------- utilit├írios ---------- */
 .breadcrumb {
   display: inline-flex;
   align-items: center;
@@ -1379,7 +1379,7 @@ h3 {
   opacity: 1;
 }
 
-/* ---------- view transitions (paginação) ---------- */
+/* ---------- view transitions (pagina├º├úo) ---------- */
 @view-transition {
   navigation: auto;
 }
@@ -1422,14 +1422,14 @@ h3 {
   background-clip: content-box;
 }
 
-/* ---------- foco visível ---------- */
+/* ---------- foco vis├¡vel ---------- */
 :where(a, button, input, [tabindex]):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 8px;
 }
 
-/* ---------- acessibilidade: transparência reduzida ---------- */
+/* ---------- acessibilidade: transpar├¬ncia reduzida ---------- */
 @media (prefers-reduced-transparency: reduce) {
   .glass,
   .site-header,
@@ -1477,8 +1477,8 @@ h3 {
 }
 
 /* ==========================================================================
-   HOME — "A Copa do Mundo da Internet" (hero, ringue, chave, footer)
-   Tipografia de exibição: Outfit (--font-display). Movimento via GSAP
+   HOME ÔÇö "A Copa do Mundo da Internet" (hero, ringue, chave, footer)
+   Tipografia de exibi├º├úo: Outfit (--font-display). Movimento via GSAP
    (.home-rise / .home-scale / chave-track) + CSS keyframes com fallback
    de prefers-reduced-motion.
    ========================================================================== */
@@ -1497,7 +1497,7 @@ h3,
   font-family: var(--font-display, var(--font-sans, sans-serif));
 }
 
-/* ---------- hero cinemático central ---------- */
+/* ---------- hero cinem├ítico central ---------- */
 .home-hero {
   position: relative;
   overflow: hidden;
@@ -1651,7 +1651,7 @@ h3,
   }
 }
 
-/* ---------- seções da home ---------- */
+/* ---------- se├º├Áes da home ---------- */
 .home-section {
   padding: clamp(84px, 12vh, 150px) 0;
   border-top: 1px solid rgba(244, 244, 245, 0.06);
@@ -2219,11 +2219,11 @@ h3,
 }
 
 /* ==========================================================================
-   COPA DO MEME — camada nova da home (festa neon)
+   COPA DO MEME ÔÇö camada nova da home (festa neon)
    Sobrescreve as regras "home" antigas acima por cascata (mesma especificidade,
    declarada depois). Dials do briefing: dark mode roxo, amarelo/azul/vermelho
-   neon, confete, luzes de arena, torcida ao vivo e cemitério dos caídos.
-   Movimento só de transform/opacity (60fps) e tudo desligado em
+   neon, confete, luzes de arena, torcida ao vivo e cemit├®rio dos ca├¡dos.
+   Movimento s├│ de transform/opacity (60fps) e tudo desligado em
    prefers-reduced-motion.
    ========================================================================== */
 
@@ -2424,7 +2424,7 @@ h3,
   letter-spacing: 0.15em;
 }
 
-/* ---------- âncoras ---------- */
+/* ---------- ├óncoras ---------- */
 #ringue,
 #cemiterio,
 #chave,
@@ -2947,7 +2947,7 @@ h3,
   color: var(--muted-2);
 }
 
-/* ---------- CEMITÉRIO DOS CAÍDOS ---------- */
+/* ---------- CEMIT├ëRIO DOS CA├ìDOS ---------- */
 .cemiterio {
   position: relative;
   background: linear-gradient(180deg, rgba(8, 3, 16, 0.6), transparent 42%);
@@ -3165,7 +3165,7 @@ h3,
   }
 }
 
-/* ---------- acessibilidade: movimento/transparência ---------- */
+/* ---------- acessibilidade: movimento/transpar├¬ncia ---------- */
 @media (prefers-reduced-motion: reduce) {
   .confete,
   .emoji-campo,
@@ -3186,8 +3186,8 @@ h3,
 }
 
 /* ==========================================================================
-   MVP: links de vídeo do confronto (TikTok / Instagram / YouTube Shorts)
-   Os votos são contados manualmente; os links levam a torcida ao vídeo.
+   MVP: links de v├¡deo do confronto (TikTok / Instagram / YouTube Shorts)
+   Os votos s├úo contados manualmente; os links levam a torcida ao v├¡deo.
    ========================================================================== */
 .video-links {
   display: inline-flex;
@@ -3237,7 +3237,7 @@ h3,
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.32);
 }
 
-/* variante compacta: só ícones (mini-duelos e chaveamento) */
+/* variante compacta: s├│ ├¡cones (mini-duelos e chaveamento) */
 .video-links--icons {
   gap: 5px;
 }
@@ -3254,7 +3254,7 @@ h3,
   height: 14px;
 }
 
-/* barra de vídeos do duelo em destaque (logo abaixo do palco) */
+/* barra de v├¡deos do duelo em destaque (logo abaixo do palco) */
 .duelo-videos {
   display: flex;
   flex-wrap: wrap;
@@ -3294,7 +3294,7 @@ h3,
   height: 12px;
 }
 
-/* mini-duelo: rodapé com contagem + links compactos */
+/* mini-duelo: rodap├® com contagem + links compactos */
 .mini-duelo-rodape {
   display: flex;
   align-items: center;

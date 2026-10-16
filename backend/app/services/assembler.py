@@ -2,100 +2,71 @@ from __future__ import annotations
 
 import subprocess
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
 from ..config import (
     ABERTURA_PATH,
     CLIPS_DIR,
     ENCERRAMENTO_PATH,
-    FONTE_PATH,
-    FONTE_TITULO_PATH,
     MOLDURA_PATH,
 )
-from .downloader import resolver_ffmpeg
+from ..layout import Layout, carregar_layout
+from .. import titulo
+from .downloader import preparar_clip, resolver_ffmpeg
+
+if TYPE_CHECKING:  # só para tips; evita import cíclico
+    from ..store import Estado
 
 LARGURA = 1080
 ALTURA = 1920
 FPS = 30
 
-# Áreas da moldura (assets/modulra.png), em fração de 1080x1920
-MEME_X = round(0.11 * LARGURA)
-MEME_Y = round(0.25 * ALTURA)
-MEME_L = round(0.89 * LARGURA) - MEME_X
-MEME_A = round(0.81 * ALTURA) - MEME_Y
-TITULO_CENTRO_Y = round(0.18 * ALTURA)
-TITULO_LARGURA = round((0.86 - 0.14) * LARGURA)
-TITULO_ALTURA = round((0.23 - 0.13) * ALTURA)
-TITULO_FONTE_MIN = 56
-TITULO_FONTE_MAX = 150
-
-# Avanço médio dos glifos da Arial Bold (em milésimos de em)
-_AVANCO_ARIAL_BOLD = {
-    **{c: 556 for c in "0123456789"},
-    **dict.fromkeys("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 722),
-    " ": 278, "A": 722, "B": 722, "C": 722, "D": 722, "E": 667, "F": 611, "G": 778,
-    "H": 722, "I": 278, "J": 556, "K": 722, "L": 611, "M": 833, "N": 722, "O": 778,
-    "P": 667, "Q": 778, "R": 722, "S": 667, "T": 611, "U": 722, "V": 667, "W": 944,
-    "X": 667, "Y": 667, "Z": 611,
-    "a": 556, "b": 611, "c": 556, "d": 611, "e": 556, "f": 333, "g": 611, "h": 611,
-    "i": 278, "j": 278, "k": 556, "l": 278, "m": 889, "n": 611, "o": 611, "p": 611,
-    "q": 611, "r": 389, "s": 556, "t": 333, "u": 611, "v": 556, "w": 778, "x": 556,
-    "y": 556, "z": 500, "!": 333, "?": 611, ",": 278, ".": 278, "'": 238, "-": 333,
-    ":": 333, ";": 333, "&": 722, "+": 584, "=": 584, "@": 975, "#": 556, "%": 889,
-}
+# Área da moldura e preenchimento vêm de data/layout.json (editável no editor);
+# os valores abaixo são o padrão histórico, mantidos por referência/compatibilidade.
+_LAYOUT_PADRAO = Layout()
+MEME_X = _LAYOUT_PADRAO.px_x()
+MEME_Y = _LAYOUT_PADRAO.px_y()
+MEME_L = _LAYOUT_PADRAO.px_l()
+MEME_A = _LAYOUT_PADRAO.px_a()
 
 
 class AssembleError(RuntimeError):
     """Erro ao montar o vídeo do confronto."""
 
 
-def _escalar(indice: int, label: str, largura: int, altura: int) -> str:
-    """Preenche o quadro inteiro recortando o centro (cover/crop).
+def _escalar(indice: int, label: str, largura: int, altura: int, modo: str = "cover") -> str:
+    """Preenche o quadro reservado pelo clipe, conforme o modo.
 
-    `force_original_aspect_ratio=increase` aumenta o vídeo até cobrir toda a
-    área reservada e `crop` remove o excesso no centro — sem fundo desfocado
-    nem barras. `flags=lanczos` evita o aspecto desfocado/borrado do reescalão.
+    ``cover``: ``force_original_aspect_ratio=increase`` aumenta o vídeo até
+    cobrir toda a área e ``crop`` remove o excesso no centro — ocupa 100% do
+    espaço, mesmo cortando as bordas, sem fundo desfocado nem barras.
+    ``contain``: ``decrease`` reduz até caber e ``pad`` completa com barras
+    pretas centralizadas (nenhuma parte do vídeo é cortada).
+    ``flags=lanczos`` evita o aspecto desfocado/borrado do reescalão.
     """
+    if modo == "contain":
+        preenchimento = (
+            f"scale={largura}:{altura}:force_original_aspect_ratio=decrease:flags=lanczos,"
+            f"pad={largura}:{altura}:(ow-iw)/2:(oh-ih)/2:color=black"
+        )
+    else:
+        preenchimento = (
+            f"scale={largura}:{altura}:force_original_aspect_ratio=increase:flags=lanczos,"
+            f"crop={largura}:{altura}"
+        )
     return (
-        f"[{indice}:v]scale={largura}:{altura}:force_original_aspect_ratio=increase:"
-        f"flags=lanczos,crop={largura}:{altura},fps={FPS},format=yuv420p,setsar=1[{label}]"
+        f"[{indice}:v]{preenchimento},fps={FPS},format=yuv420p,setsar=1[{label}]"
     )
 
 
-def _escalar_meme(indice: int, label: str) -> str:
-    return _escalar(indice, label, MEME_L, MEME_A)
+def _escalar_meme(indice: int, label: str, layout: Layout) -> str:
+    return _escalar(indice, label, layout.px_l(), layout.px_a(), layout.preenchimento)
 
 
 def _audio(indice: int, label: str) -> str:
     return (
         f"[{indice}:a]aformat=sample_fmts=fltp:sample_rates=48000:"
         f"channel_layouts=stereo[{label}]"
-    )
-
-
-def _escapar(texto: str) -> str:
-    return (
-        str(texto)
-        .replace("\\", "\\\\")
-        .replace("'", r"\'")
-        .replace(":", r"\:")
-        .replace("%", r"\%")
-    )
-
-
-def _tamanho_titulo(texto: str) -> int:
-    """Maior fonte (Arial Bold) que cabe na área do título, limitada pela altura."""
-    em = sum(_AVANCO_ARIAL_BOLD.get(c, 556) for c in texto) / 1000 or 1.0
-    por_largura = 0.98 * TITULO_LARGURA / em
-    limite = min(TITULO_FONTE_MAX, 0.95 * TITULO_ALTURA / 1.05)
-    return int(max(TITULO_FONTE_MIN, min(por_largura, limite)))
-
-
-def _titulo(texto: str, fonte: str) -> str:
-    return (
-        f"drawtext=fontfile='{fonte}':text='{_escapar(texto)}':"
-        f"x=(w-text_w)/2:y={TITULO_CENTRO_Y}-text_h/2:"
-        f"fontcolor=white:fontsize={_tamanho_titulo(texto)}:"
-        "shadowcolor=black@0.8:shadowx=3:shadowy=3"
     )
 
 
@@ -108,18 +79,18 @@ def montar_video(
     encerramento: Path | None = None,
     moldura: Path | None = None,
     destino: Path | None = None,
-    fonte: Path | None = None,
-    fonte_titulo: Path | None = None,
+    layout: Layout | None = None,
 ) -> Path:
-    """Mostra o clipe A e depois o clipe B dentro da moldura, com o título no topo."""
+    """Mostra o clipe A e depois o clipe B dentro da moldura, com o título no topo.
+
+    ``layout`` (padrão: ``data/layout.json``) define a área do clipe na moldura
+    e o preenchimento (``cover``/``contain``).
+    """
     ffmpeg = resolver_ffmpeg()
     if ffmpeg is None:
         raise AssembleError("ffmpeg não encontrado")
 
-    fonte_titulo = fonte_titulo or FONTE_TITULO_PATH
-    if not Path(fonte_titulo).exists():
-        fonte_titulo = fonte or FONTE_PATH
-    fonte_titulo_ff = str(fonte_titulo).replace("\\", "/").replace(":", r"\:")
+    layout = (layout or carregar_layout()).normalizar()
     destino = destino or (CLIPS_DIR / "batalha.mp4")
     destino.parent.mkdir(parents=True, exist_ok=True)
 
@@ -164,16 +135,21 @@ def montar_video(
     trechos = ((idx_a, "va", "aa", texto_a), (idx_b, "vb", "ab", texto_b))
     for indice, vtag, atag, texto in trechos:
         if usar_moldura:
-            filtros.append(_escalar_meme(indice, f"{vtag}m"))
+            filtros.append(_escalar_meme(indice, f"{vtag}m", layout))
             filtros.append(
-                f"[{base_moldura[vtag]}][{vtag}m]overlay={MEME_X}:{MEME_Y}:shortest=1[{vtag}b]"
+                f"[{base_moldura[vtag]}][{vtag}m]overlay={layout.px_x()}:{layout.px_y()}:"
+                f"shortest=1[{vtag}b]"
             )
         else:
             filtros.append(_escalar(indice, f"{vtag}b", LARGURA, ALTURA))
         vbase = f"{vtag}b"
 
         if texto:
-            filtros.append(f"[{vbase}]{_titulo(texto, fonte_titulo_ff)}[{vtag}]")
+            caminho_titulo = titulo.caminho_png(texto, layout)
+            idx_titulo = len(entradas)
+            entradas.append(caminho_titulo)
+            filtros.append(f"[{idx_titulo}:v]format=rgba[tit_{vtag}]")
+            filtros.append(f"[{vbase}][tit_{vtag}]overlay=0:0:eof_action=repeat[{vtag}]")
             vbase = vtag
 
         filtros.append(_audio(indice, atag))
@@ -204,13 +180,49 @@ def montar_video(
     return destino
 
 
+def montar_match(
+    estado: "Estado",
+    match: dict[str, Any],
+    layout: Layout | None = None,
+    forcar: bool = False,
+    destino: Path | None = None,
+) -> Path:
+    """Baixa os clipes do confronto e monta o vídeo com o layout atual.
+
+    O título de cada lado é ``titulo_a``/``titulo_b`` do confronto (override
+    feito no editor) ou, na ausência, o nome do meme. Grava ``video_path`` e
+    marca o confronto como ``pronto`` (persistir o estado é com o chamador).
+    """
+    meme_a = estado.buscar_meme(match["meme_a_id"])
+    meme_b = estado.buscar_meme(match["meme_b_id"])
+    if meme_a is None or meme_b is None:
+        raise AssembleError(f"confronto {match.get('id')}: meme A ou B não encontrado")
+
+    clip_a = preparar_clip(meme_a, forcar=forcar)
+    clip_b = preparar_clip(meme_b, forcar=forcar)
+
+    destino = destino or CLIPS_DIR / f"match_{match['id']}.mp4"
+    saida = montar_video(
+        clip_a,
+        clip_b,
+        texto_a=match.get("titulo_a") or meme_a["nome"],
+        texto_b=match.get("titulo_b") or meme_b["nome"],
+        abertura=ABERTURA_PATH,
+        encerramento=ENCERRAMENTO_PATH,
+        layout=layout,
+        destino=destino,
+    )
+    match["video_path"] = str(saida)
+    match["status"] = "pronto"
+    return saida
+
+
 def _cli() -> None:
     import argparse
     import logging
 
     from ..config import TMP_DIR
     from ..store import Estado
-    from .downloader import preparar_clip
 
     parser = argparse.ArgumentParser(description="Monta a batalha de dois memes com abertura")
     parser.add_argument("--a", type=int, required=True, help="id do meme A")

@@ -8,6 +8,7 @@ Manipula ``data/estado.json`` (fonte única da verdade) sem API nem banco::
     python -m app.cli vencedor --match 1 --winner 2
     python -m app.cli video --match 1 --tiktok URL --instagram URL --youtube URL
     python -m app.cli montar --match 1
+    python -m app.cli editor          # editor visual desktop
 """
 
 from __future__ import annotations
@@ -17,8 +18,7 @@ import json
 import random
 from pathlib import Path
 
-from .config import ABERTURA_PATH, CLIPS_DIR, ENCERRAMENTO_PATH
-from .services import assembler, downloader
+from .services import assembler
 from .services.bracket import criar_torneio_aguardando, definir_vencedor, gerar_torneio
 from .services.catalog import carregar_catalogo
 from .store import Estado
@@ -103,26 +103,16 @@ def _cmd_montar(args: argparse.Namespace) -> None:
     if not match["meme_a_id"] or not match["meme_b_id"]:
         raise SystemExit("confronto incompleto")
 
-    meme_a = estado.buscar_meme(match["meme_a_id"])
-    meme_b = estado.buscar_meme(match["meme_b_id"])
-    clip_a = downloader.preparar_clip(meme_a)
-    clip_b = downloader.preparar_clip(meme_b)
-
-    destino = Path(args.saida) if args.saida else CLIPS_DIR / f'match_{match["id"]}.mp4'
-    saida = assembler.montar_video(
-        clip_a,
-        clip_b,
-        texto_a=meme_a["nome"],
-        texto_b=meme_b["nome"],
-        abertura=ABERTURA_PATH,
-        encerramento=ENCERRAMENTO_PATH,
-        destino=destino,
-    )
-
-    match["video_path"] = str(saida)
-    match["status"] = "pronto"
+    destino = Path(args.saida) if args.saida else None
+    saida = assembler.montar_match(estado, match, destino=destino)
     estado.salvar()
     print(saida)
+
+
+def _cmd_editor(args: argparse.Namespace) -> None:
+    from .editor.app import executar
+
+    executar()
 
 
 def _cmd_video(args: argparse.Namespace) -> None:
@@ -202,6 +192,12 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--match", type=int, required=True)
     p.add_argument("--saida", type=str, default=None)
     p.set_defaults(func=_cmd_montar)
+
+    p = sub.add_parser(
+        "editor",
+        help="abre o editor visual desktop (área do vídeo, título, preenchimento)",
+    )
+    p.set_defaults(func=_cmd_editor)
 
     p = sub.add_parser("video", help="define os links de vídeo (TikTok/Instagram/YouTube) de um confronto")
     p.add_argument("--match", type=int, required=True)
