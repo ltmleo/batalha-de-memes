@@ -2,15 +2,14 @@ import { Fragment } from "react";
 
 import { MemeSticker } from "@/components/MemeSticker";
 import { VideoLinks, linksDoMatch } from "@/components/VideoLinks";
-import { GEOM_COMPACT, layoutBracket } from "@/lib/bracket";
+import { GEOM_COMPACT, layoutSimetrico } from "@/lib/bracket";
 import type { Meme, Rodada } from "@/lib/types";
 
-const TOPO = 46; // faixa dos títulos das rodadas (igual ao BracketView)
-
 /**
- * Vista compacta do chaveamento para a home: as três rodadas finais
- * (quartas → final), que cabem inteiras na moldura, com conectores em SVG,
- * cards quadrados dos memes, vencedores coroados e perdedores carimbados.
+ * Vista compacta do chaveamento para a home: a mesma árvore simétrica de
+ * `/torneio/[id]` (1ª rodada — o sorteio real — nas duas extremidades e a
+ * grande final ao centro, sobre o pedestal da taça), só que em tamanho
+ * reduzido. A moldura rola nos dois eixos quando a árvore não cabe inteira.
  */
 export function ChaveGlimpse({
   rodadas,
@@ -19,107 +18,125 @@ export function ChaveGlimpse({
   rodadas: Rodada[];
   memes: Map<number, Meme>;
 }) {
-  const ultimas = rodadas.slice(-3);
-  const matches = ultimas.flatMap((r) => r.matches);
-  const layout = layoutBracket(matches, GEOM_COMPACT);
-  const { cardW, cardH, colGap } = GEOM_COMPACT;
+  const layout = layoutSimetrico(
+    rodadas.flatMap((r) => r.matches),
+    GEOM_COMPACT,
+  );
+  const { cardW } = GEOM_COMPACT;
 
-  const conectores: { key: string; d: string }[] = [];
-  for (let r = 0; r < layout.rodadas.length - 1; r++) {
-    const atual = layout.rodadas[r];
-    const proxima = layout.rodadas[r + 1];
-    atual.matches.forEach((node, i) => {
-      const pai = proxima.matches[Math.floor(i / 2)];
-      if (!pai) return;
-      const x1 = node.x + cardW;
-      const y1 = TOPO + node.centerY;
-      const meio = node.x + cardW + colGap / 2;
-      const x2 = pai.x;
-      const y2 = TOPO + pai.centerY;
-      conectores.push({ key: `${node.match.id}-${pai.match.id}`, d: `M ${x1} ${y1} H ${meio} V ${y2} H ${x2}` });
-    });
-  }
+  if (layout.nodes.length === 0) return null;
+
+  // folga embaixo pros links de vídeo que ficam sob o último confronto
+  const alturaCanvas = layout.altura + 24;
 
   return (
     <div className="chave-wrap">
       <div className="chave-overflow">
         <div
           className="bracket-canvas chave-canvas"
-          style={{ width: layout.width, height: layout.height + TOPO }}
+          style={{ width: layout.largura, height: alturaCanvas }}
         >
-          <svg className="bracket-svg" width={layout.width} height={layout.height + TOPO} aria-hidden>
-            {conectores.map((c) => (
-              <path key={c.key} className="bconn" d={c.d} />
+          <div className="chave-centro" aria-hidden style={{ left: layout.centroX, top: layout.centroY }} />
+          <div className="chave-luz" aria-hidden />
+
+          <svg className="bracket-svg" width={layout.largura} height={alturaCanvas} aria-hidden>
+            {layout.links.map((c) => (
+              <path key={c.key} className={`bconn bconn--${c.lado}`} d={c.d} />
             ))}
           </svg>
 
-          {layout.rodadas.map((r) => (
-            <div key={r.round} className="round-head" style={{ left: r.x, width: cardW }}>
-              {r.titulo}
-              <span className="round-count">{r.vagas}</span>
+          {layout.colunas.map((c) => (
+            <div
+              key={`${c.lado}-${c.round}`}
+              className={`round-head${c.lado === "centro" ? " round-head--final" : ""}${
+                c.lado === "dir" ? " round-head--dir" : ""
+              }`}
+              style={{ left: c.x, width: cardW }}
+            >
+              {c.titulo}
             </div>
           ))}
 
-          {layout.rodadas.map((r) =>
-            r.matches.map((node, i) => {
-              const m = node.match;
-              const decidido = m.winner_id !== null;
-              const bye = decidido && (m.meme_a_id === null || m.meme_b_id === null);
-              const a = m.meme_a_id ? memes.get(m.meme_a_id) ?? null : null;
-              const b = m.meme_b_id ? memes.get(m.meme_b_id) ?? null : null;
-              const venceuA = decidido && m.winner_id === m.meme_a_id;
-              const venceuB = decidido && m.winner_id === m.meme_b_id;
-              const videos = linksDoMatch(m);
-              const temVideo = Boolean(videos.tiktok || videos.instagram || videos.youtube);
-              return (
-                <Fragment key={m.id}>
-                  <div
-                    className={`bmatch bmatch--sm bmatch--${decidido ? "decidido" : a && b ? "ativo" : "vazio"}`}
-                    style={{
+          {layout.nodes.map((node, i) => {
+            const m = node.match;
+            const decidido = m.winner_id !== null;
+            const bye = decidido && (m.meme_a_id === null || m.meme_b_id === null);
+            const a = m.meme_a_id ? memes.get(m.meme_a_id) ?? null : null;
+            const b = m.meme_b_id ? memes.get(m.meme_b_id) ?? null : null;
+            const venceuA = decidido && m.winner_id === m.meme_a_id;
+            const venceuB = decidido && m.winner_id === m.meme_b_id;
+            const videos = linksDoMatch(m);
+            const temVideo = Boolean(videos.tiktok || videos.instagram || videos.youtube);
+            const ehFinal = node.lado === "centro";
+            const estado = decidido ? "decidido" : a && b ? "ativo" : "vazio";
+
+            return (
+              <Fragment key={m.id}>
+                <div
+                  className={`bmatch bmatch--sm bmatch--${node.lado}${
+                    ehFinal ? " is-final" : ""
+                  } bmatch--${estado}`}
+                  style={
+                    {
                       left: node.x,
-                      top: node.y + TOPO,
+                      top: node.y,
                       width: node.w,
                       height: node.h,
-                      "--delay": `${Math.min(r.index * 90 + i * 5, 640)}ms`,
-                    } as React.CSSProperties}
-                  >
-                    <MemeSticker
-                      size="sm"
-                      meme={a}
-                      votos={m.votos_a}
-                      vencedor={venceuA}
-                      eliminado={decidido && !venceuA && !bye}
-                      vazio={bye ? "avança (bye)" : "a definir"}
-                      href={a ? `/meme/${a.id}` : undefined}
-                      title={a ? `Abrir o card de ${a.nome}` : undefined}
-                    />
-                    <span className="bmatch-vs" aria-hidden>
-                      VS
+                      "--delay": `${Math.min(node.col * 70 + (i % 6) * 35, 620)}ms`,
+                    } as React.CSSProperties
+                  }
+                >
+                  <MemeSticker
+                    size="sm"
+                    meme={a}
+                    votos={m.votos_a}
+                    vencedor={venceuA}
+                    eliminado={decidido && !venceuA && !bye}
+                    vazio={bye ? "avança (bye)" : "a definir"}
+                    href={a ? `/meme/${a.id}` : undefined}
+                    title={a ? `Abrir o card de ${a.nome}` : undefined}
+                  />
+                  <span className="bmatch-vs" aria-hidden>
+                    VS
+                  </span>
+                  <MemeSticker
+                    size="sm"
+                    meme={b}
+                    votos={m.votos_b}
+                    vencedor={venceuB}
+                    eliminado={decidido && !venceuB && !bye}
+                    vazio={bye ? "avança (bye)" : "a definir"}
+                    href={b ? `/meme/${b.id}` : undefined}
+                    title={b ? `Abrir o card de ${b.nome}` : undefined}
+                  />
+
+                  {ehFinal ? (
+                    <span className="final-trophy" aria-hidden>
+                      <svg viewBox="0 0 64 76" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M16 8h32v8a16 16 0 0 1-32 0z" />
+                        <path d="M16 12H7a5 5 0 0 0 5 9" />
+                        <path d="M48 12h9a5 5 0 0 1 5 9" />
+                        <path d="M32 30v18" />
+                        <path d="M21 48h22" />
+                        <path d="M24 56h16" />
+                        <path d="M28 56v6M36 56v6" />
+                      </svg>
                     </span>
-                    <MemeSticker
-                      size="sm"
-                      meme={b}
-                      votos={m.votos_b}
-                      vencedor={venceuB}
-                      eliminado={decidido && !venceuB && !bye}
-                      vazio={bye ? "avança (bye)" : "a definir"}
-                      href={b ? `/meme/${b.id}` : undefined}
-                      title={b ? `Abrir o card de ${b.nome}` : undefined}
-                    />
-                  </div>
-                  {temVideo ? (
-                    <div className="bmatch-video" style={{ left: node.x, top: node.y + TOPO + cardH + 2 }}>
-                      <VideoLinks {...videos} variante="icons" />
-                    </div>
                   ) : null}
-                </Fragment>
-              );
-            }),
-          )}
+                </div>
+
+                {temVideo ? (
+                  <div className="bmatch-video" style={{ left: node.x, top: node.y + node.h + 2 }}>
+                    <VideoLinks {...videos} variante="icons" />
+                  </div>
+                ) : null}
+              </Fragment>
+            );
+          })}
         </div>
       </div>
       <div className="chave-hint mono">
-        deslize para o lado · o vencedor de cada duelo sobe uma rodada rumo à taça
+        deslize para percorrer a chave · o vencedor de cada duelo sobe uma rodada rumo à taça
       </div>
     </div>
   );

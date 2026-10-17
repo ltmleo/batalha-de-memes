@@ -3511,7 +3511,9 @@ h3,
 }
 .chave-overflow {
   overflow: auto;
-  max-height: min(88vh, 760px);
+  /* a home agora mostra a árvore simétrica inteira (igual ao /torneio): a
+     moldura cresce junto, sempre presa a uma fração da viewport. */
+  max-height: min(88vh, 1120px);
   padding: 8px 0 12px;
   overscroll-behavior: contain;
   scrollbar-width: thin;
@@ -3541,6 +3543,15 @@ h3,
 }
 .chave-canvas .bsticker {
   text-decoration: none;
+}
+/* a final do glimpse mantém o pedestal dourado (o override acima vence por
+   ordem, então precisa de uma regra mais específica) */
+.chave-canvas .bmatch.is-final {
+  border-color: rgba(255, 217, 61, 0.42);
+  background:
+    radial-gradient(120% 130% at 50% 0%, rgba(255, 217, 61, 0.16), transparent 58%),
+    linear-gradient(180deg, rgba(40, 29, 21, 0.96), rgba(16, 12, 22, 0.97));
+  box-shadow: 0 14px 44px rgba(255, 217, 61, 0.16), var(--ring-inset);
 }
 .chave-hint {
   background: rgba(9, 4, 20, 0.4);
