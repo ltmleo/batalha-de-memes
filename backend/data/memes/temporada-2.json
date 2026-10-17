@@ -1,0 +1,518 @@
+{
+  "_instrucoes": "Memes da temporada 2 do catálogo (entrada do `seed`). Campos: nome, youtube_url (link do vídeo original; quando é 'results?search_query=' o card mostra 'buscar vídeo'), inicio/fim em segundos, autor_fonte, ano, origem, historia (contexto do meme), tags e confirmado (revisão manual, ignorado pelo backend). A temporada vem do campo 'temporada' deste arquivo e é gravada em cada meme pelo seed. Ajuste inicio/fim conforme o trecho escolhido.",
+  "temporada": 2,
+  "memes": [
+    {
+      "nome": "Para nossa alegria",
+      "youtube_url": "https://www.youtube.com/watch?v=K02Cxo3fAC8",
+      "inicio": 0,
+      "fim": 30,
+      "autor_fonte": "YouTube",
+      "ano": 2012,
+      "origem": "YouTube",
+      "historia": "Vídeo caseiro de 2012 em que uma família canta o hino \"Galhos Secos\" e um menino dispara o bordão \"para nossa alegria\". Virou um dos virais mais famosos do Brasil. A cena foi parodiada e remixada à exaustão.",
+      "tags": [
+        "viral",
+        "nacional",
+        "classico"
+      ],
+      "confirmado": true
+    },
+    {
+      "nome": "André Marques DJ",
+      "youtube_url": "https://www.youtube.com/watch?v=-qmq6RLx-ws",
+      "inicio": 0,
+      "fim": 15,
+      "autor_fonte": "YouTube (Jurerê Internacional)",
+      "ano": 2010,
+      "origem": "YouTube",
+      "historia": "Vídeo de 2010 do apresentador André Marques atuando como DJ no Jurerê Internacional (SC), fazendo caras e poses. O clipe ressurgiu anos depois e virou meme pelo áudio \"manda aquele sample de guitarra\". É referência recorrente na internet brasileira.",
+      "tags": [
+        "classico",
+        "musica",
+        "viral"
+      ],
+      "confirmado": true
+    },
+    {
+      "nome": "Matou a formiguinha",
+      "youtube_url": "https://www.youtube.com/watch?v=pnfrb3--kSc",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube",
+      "ano": 2011,
+      "origem": "YouTube",
+      "historia": "O vídeo mostra dois irmãos gêmeos pequenos discutindo depois que um deles mata uma formiga; o outro chora e pergunta \"matou a formiguinha dele?\". Com legendas em inglês e espanhol, passou de 15 milhões de visualizações e virou um dos memes brasileiros mais antigos e icônicos. Os gêmeos depois reapareceram em programas de TV.",
+      "tags": [
+        "classico",
+        "nacional",
+        "familia"
+      ],
+      "confirmado": true
+    },
+    {
+      "nome": "Me de papai",
+      "youtube_url": "https://www.youtube.com/watch?v=FZeHPKWOR8k",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "Zé Iaiá (YouTube)",
+      "ano": 2015,
+      "origem": "YouTube",
+      "historia": "O cearense Iatami Alves Bezerra, o \"Zé Iaiá\", viralizou em 2015 com o bordão \"me dê, papai\". No vídeo ele recusa bolacha, café e leite com cara de choro, mas aceita cachaça sorrindo. O bordão virou meme e áudio clássico, e Zé morreu em 2022.",
+      "tags": [
+        "ceara",
+        "bordao",
+        "viral"
+      ],
+      "confirmado": true
+    },
+    {
+      "nome": "Papaco",
+      "youtube_url": "https://www.youtube.com/watch?v=bG1w8JkcPUo",
+      "inicio": 0,
+      "fim": 15,
+      "autor_fonte": "Cinema nacional (1986)",
+      "ano": 1986,
+      "origem": "TV",
+      "historia": "Vem do filme nacional \"Um Pistoleiro Chamado Papaco\" (1986), de humor pastelão, cheio de diálogos absurdos e sem sentido. A cena do caixão (\"O que levas nesse caixão?\") ficou famosa por seu deboche e virou referência constante em edits e imitações.",
+      "tags": [
+        "cinema",
+        "classico",
+        "humor"
+      ],
+      "confirmado": true
+    },
+    {
+      "nome": "Ricardo Milos",
+      "youtube_url": "https://www.youtube.com/watch?v=IxWo7yG-W-E",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube / Halogen - U Got That",
+      "ano": 2007,
+      "origem": "YouTube",
+      "historia": "Meme de bait-and-switch surgido de um vídeo antigo de dança do modelo brasileiro-americano Ricardo Milos, com bandana e short da bandeira dos EUA, ao som de \"U Got That\". A partir de 2018 virou piada global: você assiste a algo aparentemente inofensivo e, de repente, é \"Ricardizado\".",
+      "tags": [
+        "internacional",
+        "musica",
+        "classico"
+      ],
+      "confirmado": true
+    },
+    {
+      "nome": "Sonia Youtube",
+      "youtube_url": "https://www.youtube.com/results?search_query=S%C3%B4nia+YouTube+ponto+com",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube",
+      "ano": 2006,
+      "origem": "YouTube",
+      "historia": "\"Sônia YouTube\" é um clássico vídeo caseiro da internet brasileira em que alguém pede para Sônia repetir um endereço e ela soletra \"W, W, W, ponto YouTube, ponto com\". A dificuldade e o tom da resposta fizeram o clipe circular por anos como um dos memes mais antigos do YouTube no Brasil.",
+      "tags": [
+        "classico",
+        "internet",
+        "nacional"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "As arvores somos nozes",
+      "youtube_url": "https://www.youtube.com/results?search_query=as+%C3%A1rvores+somos+nozes+jardineiro+%C3%A9+jesus",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube",
+      "ano": 2010,
+      "origem": "YouTube",
+      "historia": "\"As árvores somos nozes\" (ou \"o jardineiro é Jesus\") é um vídeo em que o narrador faz uma pregação confusa misturando uma canção com a ideia de que Deus é o jardineiro e as árvores somos nós. A fala embaralhada viralizou e virou bordão da internet brasileira por volta de 2010.",
+      "tags": [
+        "classico",
+        "religioso",
+        "nacional"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Ronaldo",
+      "youtube_url": "https://www.youtube.com/results?search_query=Ronaldo+Fen%C3%B4meno+meme",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube",
+      "ano": null,
+      "origem": "Internet",
+      "historia": "Na cultura de memes brasileira, \"Ronaldo\" está ligado à idolatria e às piadas sobre o atacante Ronaldo Nazário, o \"Fenômeno\", ícone da Seleção. Trechos de entrevistas, comemorações e aparições dele circulam como áudio e reação em vídeos de humor.",
+      "tags": [
+        "futebol",
+        "esporte",
+        "nacional"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Jamelão",
+      "youtube_url": "https://www.youtube.com/results?search_query=Jamel%C3%A3o+samba+meme",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube",
+      "ano": null,
+      "origem": "Internet",
+      "historia": "\"Jamelão\" é o apelido de José Bispo Clementino dos Santos, lendário intérprete do samba e voz marcante da Mangueira. Trechos de suas apresentações e entrevistas circulam na internet como meme, associados ao canto cheio de personalidade e a momentos de TV.",
+      "tags": [
+        "musica",
+        "classico",
+        "samba"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Eu vou caiiiir",
+      "youtube_url": "https://www.youtube.com/results?search_query=eu+vou+cair+meme",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube",
+      "ano": 2013,
+      "origem": "YouTube",
+      "historia": "\"Eu vou caiiiir\" vem de um vídeo caseiro em que um rapaz, em situação de desequilíbrio, repete desesperado \"eu vou cair!\". O trecho foi editado em montagens e virou meme clássico do YouTube brasileiro, usado para reações de medo e desespero.",
+      "tags": [
+        "classico",
+        "nacional",
+        "humor"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Cafunga a carequinha",
+      "youtube_url": "https://www.youtube.com/results?search_query=cafunga+carequinha",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "MC Renan da Providência",
+      "ano": 2016,
+      "origem": "YouTube",
+      "historia": "\"Cafunga carequinha\" surgiu por volta de 2016, ligada ao MC Renan da Providência e a uma gravação em estúdio que virou treta. O áudio, repetindo a expressão, foi reaproveitado como meme e vem sendo redescoberto em vídeos de reação e zoeira.",
+      "tags": [
+        "funk",
+        "meme",
+        "musica"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Aiiii aiiii aiii (cara fazendo tatuagem)",
+      "youtube_url": "https://www.youtube.com/results?search_query=ai+ai+ai+tatuagem+meme",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "TikTok",
+      "ano": 2023,
+      "origem": "TikTok",
+      "historia": "\"Ai ai ai\" (cara fazendo tatuagem) é um clipe viral em que um homem grita \"ai, ai, ai\" enquanto é tatuado. O áudio virou som recorrente no TikTok e no Instagram para representar dor exagerada e situações de sofrimento cômico.",
+      "tags": [
+        "meme",
+        "tatuagem",
+        "viral"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "So queria um pai reponsa",
+      "youtube_url": "https://www.youtube.com/results?search_query=s%C3%B3+queria+um+pai+responsa",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube",
+      "ano": null,
+      "origem": "YouTube",
+      "historia": "Bordão viral em que alguém diz, em tom dramático, \"só queria um pai responsa\", usado em piadas sobre pais ausentes ou imaturos. O contraste entre o drama e a ironia virou legenda recorrente em memes de deboche. É um clássico das zoeiras familiares na internet brasileira.",
+      "tags": [
+        "nacional",
+        "internet",
+        "classico"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Aqui é palmeiras",
+      "youtube_url": "https://www.youtube.com/results?search_query=aqui+%C3%A9+palmeiras+meme",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "Torcida do Palmeiras",
+      "ano": null,
+      "origem": "Futebol",
+      "historia": "Grito de guerra da torcida do Palmeiras, entoado em estádios e replicado em vídeos de provocação entre torcidas. A repetição exagerada em brigas virtuais e comentários de futebol transformou a frase em meme. É um clássico do humor esportivo nacional.",
+      "tags": [
+        "futebol",
+        "torcida",
+        "nacional"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Seu pai tem gonorréia",
+      "youtube_url": "https://www.youtube.com/results?search_query=seu+pai+tem+gonorreia",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube",
+      "ano": null,
+      "origem": "YouTube",
+      "historia": "Áudio viral em que alguém responde a uma discussão com a frase \"seu pai tem gonorréia\". O absurdo da ofensa transformou o trecho em botão de som e clipe de zoeira. É usado até hoje como efeito cômico em vídeos de deboche.",
+      "tags": [
+        "audio",
+        "zoeira",
+        "nacional"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Fotografía com o raça negra",
+      "youtube_url": "https://www.youtube.com/results?search_query=fotografia+com+o+Ra%C3%A7a+Negra+menino",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "SBT / Programa Silvio Santos",
+      "ano": 2000,
+      "origem": "TV",
+      "historia": "Cena do Programa Silvio Santos com o menino Luis Sales, fã do grupo Raça Negra, que viralizou pela frase sobre tirar uma fotografia com a banda. A espontaneidade da criança rendeu risadas e o trecho virou meme carinhoso. Foi revisitado anos depois, quando o caso voltou à mídia.",
+      "tags": [
+        "tv",
+        "sbt",
+        "musica"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Freddie Mercury prateado",
+      "youtube_url": "https://www.youtube.com/results?search_query=Freddie+Mercury+prateado",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube",
+      "ano": null,
+      "origem": "YouTube",
+      "historia": "Meme que associa uma pessoa pintada de prata, imitando estátua viva, ao vocalista do Queen, Freddie Mercury, pelo visual \"prateado\". A piada brinca com a pose e a semelhança inesperada. Circula sobretudo em vídeos curtos de humor.",
+      "tags": [
+        "humor",
+        "variedades",
+        "internet"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Grávida de Taubaté",
+      "youtube_url": "https://www.youtube.com/results?search_query=Gr%C3%A1vida+de+Taubat%C3%A9+qu%C3%ADntuplos",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "TV (SBT)",
+      "ano": 2012,
+      "origem": "TV",
+      "historia": "Caso de Verônica, moradora de Taubaté (SP), que em 2012 alegou estar grávida de quíntuplos e apareceu na TV. A farsa foi desmascarada e o episódio virou um dos maiores memes do país. Até hoje o termo \"de Taubaté\" é usado como piada.",
+      "tags": [
+        "tv",
+        "nacional",
+        "classico"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Chupa cu",
+      "youtube_url": "https://www.youtube.com/results?search_query=chupa+cu+de+Goianinha",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "TV Maresol",
+      "ano": null,
+      "origem": "TV",
+      "historia": "Vídeo gravado em Goianinha (RN) onde moradores dizem ter visto um animal misterioso, apelidado de \"chupa-cu\". As imagens correram o Brasil e o nome virou piada nacional. É um clássico das lendas virais regionais.",
+      "tags": [
+        "regional",
+        "viral",
+        "nacional"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Rei do camarote",
+      "youtube_url": "https://www.youtube.com/results?search_query=rei+do+camarote+VJ+de+Viana",
+      "inicio": 0,
+      "fim": 15,
+      "autor_fonte": "Veja São Paulo",
+      "ano": 2013,
+      "origem": "YouTube",
+      "historia": "Reportagem da Veja São Paulo de 2013 com o empresário Alexander de Almeida listando os \"10 mandamentos\" para ser o rei do camarote. O tom de ostentação virou meme quase instantaneamente. Foi um dos vídeos mais virais do ano no YouTube.",
+      "tags": [
+        "classico",
+        "viral",
+        "humor"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Magrelinho",
+      "youtube_url": "https://www.youtube.com/results?search_query=Magrelinho+m%C3%BAsica+cachorro",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube",
+      "ano": null,
+      "origem": "YouTube",
+      "historia": "Vídeo de um rapaz cantando emocionado um rap de despedida para seu cachorro, Magrelinho, que morreu. A entrega exagerada e o tom dramático viraram meme. Ficou famoso pelo mix de emoção e humor involuntário.",
+      "tags": [
+        "viral",
+        "nacional",
+        "classico"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Mostarde ketchup maionese maionese ketchup mostarda",
+      "youtube_url": "https://www.youtube.com/results?search_query=mostarda+ketchup+maionese+maionese+ketchup+mostarda",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube",
+      "ano": null,
+      "origem": "YouTube",
+      "historia": "Áudio viral em que alguém repete de forma ritmada \"mostarda, ketchup, maionese, maionese, ketchup, mostarda\". A cadência hipnótica transformou a fala em meme. É usado em vídeos de humor e edições engraçadas.",
+      "tags": [
+        "audio",
+        "humor",
+        "nacional"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Shake it bolo",
+      "youtube_url": "https://www.youtube.com/results?search_query=shake+it+bolo+meme",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube",
+      "ano": null,
+      "origem": "YouTube",
+      "historia": "Clipe curto com o bordão \"shake it\" associado a um bolo, usado como reação engraçada em vídeos. A edição acelerada e o trocadilho renderam piadas na internet. Circula principalmente em formatos curtos de humor.",
+      "tags": [
+        "humor",
+        "internet",
+        "viral"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Mc poze nos anos 80",
+      "youtube_url": "https://www.youtube.com/results?search_query=MC+Poze+nos+anos+80+September",
+      "inicio": 0,
+      "fim": 20,
+      "autor_fonte": "YouTube (canal PMM)",
+      "ano": 2021,
+      "origem": "YouTube",
+      "historia": "Mashup do canal PMM que mistura o funk \"Trajadão Pro Baile\", do MC Poze do Rodo, com o clássico \"September\", do Earth, Wind & Fire. O resultado soa como se o MC fosse dos anos 80. Viralizou em 2021 e acumulou dezenas de milhões de views.",
+      "tags": [
+        "musica",
+        "viral",
+        "funk"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Peida leite",
+      "youtube_url": "https://www.youtube.com/results?search_query=peida+leite+meme",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "A Gazeta (ES)",
+      "ano": 2024,
+      "origem": "Redes Sociais",
+      "historia": "\"Peida Leite\" virou meme em 2024 ao ser revelado como o apelido inusitado de um personagem do crime no Espírito Santo. O nome peculiar gerou uma onda de piadas e áudios nas redes. Também é associado a personagens de pegadinhas, como \"Alírio Peida Leite\".",
+      "tags": [
+        "nacional",
+        "apelido",
+        "viral"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Voar voar subir subir",
+      "youtube_url": "https://www.youtube.com/results?search_query=Biafra+parapente+sonho+de+%C3%ADcaro",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "TV / Biafra",
+      "ano": 2009,
+      "origem": "TV",
+      "historia": "Em 2009, durante a gravação de um documentário sobre o Chacrinha, o cantor Biafra foi atingido por um parapente em pleno voo. O momento inesperado, ironicamente ligado ao seu hit \"Sonho de Ícaro\" (\"voar, voar, subir, subir\"), virou um clássico meme da internet. A cena é lembrada pela imprevisibilidade e pela trilha sonora.",
+      "tags": [
+        "tv",
+        "musica",
+        "classico"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Caneta azul",
+      "youtube_url": "https://www.youtube.com/results?search_query=Manoel+Gomes+caneta+azul",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "Manoel Gomes (YouTube)",
+      "ano": 2019,
+      "origem": "YouTube",
+      "historia": "Em 2019, o vigilante maranhense Manoel Gomes viralizou cantando \"Caneta azul, azul caneta\", música criada depois que perdeu uma caneta na escola. Divulgada por famosos nas redes, a canção virou um dos maiores fenômenos virais do ano e lançou sua carreira musical.",
+      "tags": [
+        "musica",
+        "nacional",
+        "viral"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Ai pai para",
+      "youtube_url": "https://www.youtube.com/results?search_query=ai+pai+para+meme",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "Facebook/YouTube",
+      "ano": 2015,
+      "origem": "Facebook",
+      "historia": "O vídeo \"Ai pai para\" surgiu em 2015 com Mário Célio, que aparecia pedindo doações e repetia o bordão \"ai pai, para\". O contraste entre o pedido e a fala virou um meme muito compartilhado, com milhões de visualizações. A história ficou marcada também pelo tom triste da situação real.",
+      "tags": [
+        "facebook",
+        "brasil",
+        "classico"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Ayynnn (panico)",
+      "youtube_url": "https://www.youtube.com/results?search_query=ayynnn+som+p%C3%A2nico",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "Pânico na TV",
+      "ano": null,
+      "origem": "TV",
+      "historia": "É um áudio de um grito arrastado (\"ayynnn\") usado como efeito sonoro em vídeos de humor, frequentemente associado ao estilo exagerado do Pânico na TV. O som virou bordão em edits para marcar desespero ou susto cômico. Sua origem exata é difícil de confirmar.",
+      "tags": [
+        "som",
+        "humor",
+        "tv"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Ow sua monica do caralho",
+      "youtube_url": "https://www.youtube.com/watch?v=-eU5zy50NMY",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "Canal Away",
+      "ano": 2014,
+      "origem": "YouTube",
+      "historia": "O bordão \"Ô sua Mônica do caralho, vou te deitar na porrada\" vem de uma chamada do canal Away, no YouTube, gravada no fim de 2014. O tom agressivo e exagerado virou um dos memes brasileiros mais citados da década. O vídeo é apontado como a origem da frase.",
+      "tags": [
+        "youtube",
+        "bordao",
+        "classico"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Away",
+      "youtube_url": "https://www.youtube.com/results?search_query=Away+South+America+Memes",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "Canal Away (SAM)",
+      "ano": null,
+      "origem": "YouTube",
+      "historia": "Away foi um dos nomes por trás do canal South America Memes, criador de bordões virais. Sua figura e seu jeito marcaram os memes brasileiros dos anos 2010. Sua morte, em 2023, gerou uma onda de homenagens nas redes.",
+      "tags": [
+        "youtube",
+        "homenagem",
+        "brasil"
+      ],
+      "confirmado": false
+    }
+  ]
+}

@@ -1,0 +1,310 @@
+{
+  "_instrucoes": "Memes da temporada 3 do catálogo (entrada do `seed`). Campos: nome, youtube_url (link do vídeo original; quando é 'results?search_query=' o card mostra 'buscar vídeo'), inicio/fim em segundos, autor_fonte, ano, origem, historia (contexto do meme), tags e confirmado (revisão manual, ignorado pelo backend). A temporada vem do campo 'temporada' deste arquivo e é gravada em cada meme pelo seed. Ajuste inicio/fim conforme o trecho escolhido.",
+  "temporada": 3,
+  "memes": [
+    {
+      "nome": "Nao eu sou o jo soares sua piranha",
+      "youtube_url": "https://www.youtube.com/results?search_query=n%C3%A3o+eu+sou+o+j%C3%B4+soares+sua+piranha+pel%C3%A9",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "Os Trombadinhas (1979)",
+      "ano": 1979,
+      "origem": "Cinema",
+      "historia": "A frase \"Não, eu sou o Jô Soares, sua piranha\" é de uma cena do filme \"Os Trombadinhas\" (1979), em que Pelé responde à pergunta se era o jogador. O diálogo bizarro viralizou décadas depois como meme. A cena ganhou novas homenagens após a morte de Pelé, em 2022.",
+      "tags": [
+        "cinema",
+        "pele",
+        "classico"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Esse programa esta uma porra",
+      "youtube_url": "https://www.youtube.com/results?search_query=esse+programa+t%C3%A1+uma+porra",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "TV",
+      "ano": null,
+      "origem": "TV",
+      "historia": "É um áudio viral de alguém dizendo que \"esse programa tá uma porra\". A fala direta e revoltada virou efeito sonoro em vídeos de humor. É usada para expressar que algo está ruim ou caótico.",
+      "tags": [
+        "tv",
+        "bordao",
+        "humor"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Mike do mosqueiro",
+      "youtube_url": "https://www.youtube.com/results?search_query=Mike+do+Mosqueiro",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube (Pará)",
+      "ano": null,
+      "origem": "Regional",
+      "historia": "Meme regional ligado a Mosqueiro, distrito de Belém do Pará. \"Mike\" ficou conhecido por vídeos virais em que aparece com o jeito descontraído paraense, virando referência local em grupos e redes. É um fenômeno de nicho, pouco documentado fora do Pará.",
+      "tags": [
+        "regional",
+        "para",
+        "youtube"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Miauuuuuu (bebado)",
+      "youtube_url": "https://www.youtube.com/results?search_query=miau+b%C3%AAbado+som",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube",
+      "ano": null,
+      "origem": "Soundboard",
+      "historia": "Áudio de uma pessoa imitando um gato com um miado longo e exagerado, usado como efeito sonoro em vídeos de humor. O som virou clipe de soundboard e aparece em edits para dar um toque cômico e inusitado. Sua origem exata não é bem documentada.",
+      "tags": [
+        "som",
+        "humor",
+        "animal"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Vai filhao",
+      "youtube_url": "https://www.youtube.com/results?search_query=vai+filh%C3%A3o+meme+1+2+3",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube",
+      "ano": null,
+      "origem": "YouTube",
+      "historia": "\"Vai filhão!\" é um bordão brasileiro que se espalhou como meme e efeito sonoro, associado à contagem animada \"1, 2, 3, vai filhão!\". A frase é usada em vídeos e edits para incentivar alguém a agir ou como punchline cômica. Sua origem é atribuída a um vídeo caseiro dos anos 2000.",
+      "tags": [
+        "youtube",
+        "bordao",
+        "classico"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "PaysanduUuU",
+      "youtube_url": "https://www.youtube.com/results?search_query=Paysandu+uuu+grito",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube",
+      "ano": 2021,
+      "origem": "YouTube",
+      "historia": "Meme nascido do grito exagerado e arrastado \"Paysanduuuuuuuu\", associado à torcida e a narrações empolgadas dos jogos do Paysandu, time do Pará. O áudio virou efeito sonoro para vídeos curtos de zoeira no TikTok, Instagram e YouTube, usado para marcar momentos de euforia exagerada ou derrota.",
+      "tags": [
+        "futebol",
+        "audio",
+        "nacional"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Som da última trombeta",
+      "youtube_url": "https://www.youtube.com/results?search_query=som+da+%C3%BAltima+trombeta+meme",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube",
+      "ano": 2019,
+      "origem": "YouTube",
+      "historia": "Piada evangélica baseada no versículo de 1 Coríntios 15:52, sobre o som da última trombeta do Apocalipse. Virou meme de humor, em frases como \"quem rir desses memes não vai ouvir o som da última trombeta\", zombando de quem estaria condenado por rir de conteúdo bobo.",
+      "tags": [
+        "religiao",
+        "humor",
+        "nacional"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Sorriso Ronaldo",
+      "youtube_url": "https://www.youtube.com/results?search_query=Sorriso+Ronaldo+edits",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube / TikTok",
+      "ano": 2023,
+      "origem": "YouTube",
+      "historia": "Meme musical viralizado em edits e cortes, feito a partir de um áudio acelerado com montagem de várias fotos de um MC sorrindo. O exagero das imagens e a batida grudenta transformaram o bordão \"Sorriso Ronaldo\" em piada recorrente na comunidade brasileira de internet.",
+      "tags": [
+        "musica",
+        "edit",
+        "nacional"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Dado vs João gordo",
+      "youtube_url": "https://www.youtube.com/results?search_query=Dado+Jo%C3%A3o+Gordo+quebrou+minha+mesa",
+      "inicio": 0,
+      "fim": 12,
+      "autor_fonte": "YouTube / MTV",
+      "ano": 2015,
+      "origem": "TV",
+      "historia": "Meme construído em torno do áudio de uma discussão caótica entre Dado e o apresentador João Gordo, com a frase \"cê quebrou minha mesa, mano\" e gritaria exagerada. Os fãs remixaram o trecho em versões de ASMR e edits, explorando o clima de briga absurda para humor.",
+      "tags": [
+        "tv",
+        "humor",
+        "audio"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Mike Baguncinha",
+      "youtube_url": "https://www.youtube.com/results?search_query=Mike+Baguncinha+subtenente+falcone",
+      "inicio": 0,
+      "fim": 15,
+      "autor_fonte": "Subtenente Falcone / YouTube",
+      "ano": 2019,
+      "origem": "YouTube",
+      "historia": "Personagem criado pelo usuário \"Subtenente Falcone\" (Mike Baguncinha), que se apresenta como policial/SWAT e agente do FBI, contando histórias cada vez mais improváveis e exageradas. O tom sério somado às narrativas absurdas virou meme nacional e rendeu entrevistas e remixes.",
+      "tags": [
+        "meme",
+        "policia",
+        "nacional"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Sorve galera",
+      "youtube_url": "https://www.youtube.com/results?search_query=sorve+galera",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube",
+      "ano": null,
+      "origem": "YouTube",
+      "historia": "Bordão de internet brasileira usado como chamada exagerada para uma bebida, provavelmente em vídeo viral de baixa qualidade ou propaganda improvisada. O fraseado \"sorve, galera\" ficou associado a vídeos de zoeira e edits curtos, mas o material original é obscuro e de circulação regional.",
+      "tags": [
+        "bordao",
+        "audio",
+        "regional"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Árvore de 28 anos",
+      "youtube_url": "https://www.youtube.com/results?search_query=%C3%A1rvore+de+28+anos+reportagem",
+      "inicio": 0,
+      "fim": 12,
+      "autor_fonte": "Reportagem de TV",
+      "ano": 2024,
+      "origem": "TV",
+      "historia": "Meme originado de uma reportagem de TV em que um morador reclama de uma árvore de 28 anos cortada, insistindo em exagerar a idade e dramatizar o caso. A fala inflamada e o número específico (\"28 anos\") viraram piada sobre reclamações desproporcionais e exagero de morador indignado.",
+      "tags": [
+        "tv",
+        "reportagem",
+        "nacional"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Felipe Smith",
+      "youtube_url": "https://www.youtube.com/results?search_query=Felipe+Smith+Romero+Britto+seu+cu",
+      "inicio": 0,
+      "fim": 12,
+      "autor_fonte": "YouTube",
+      "ano": 2014,
+      "origem": "YouTube",
+      "historia": "Meme surgido de pequenos vídeos de Felipe Smith, conhecido pelo bordão \"Romero Britto? Seu cu!\", misturando reclamações e humor escrachado. A repetição da frase e o jeito irreverente tornaram o vídeo clássico da internet brasileira da década de 2010, gerando remixes e imitações.",
+      "tags": [
+        "classico",
+        "humor",
+        "nacional"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Pedro de formiga",
+      "youtube_url": "https://www.youtube.com/results?search_query=Pedro+de+formiga+se+eu+fodo",
+      "inicio": 0,
+      "fim": 12,
+      "autor_fonte": "YouTube",
+      "ano": 2017,
+      "origem": "YouTube",
+      "historia": "Vem de uma gravação caseira de formatura em que um rapaz se apresenta de forma atrapalhada e desconexa, imortalizando uma fala sem noção. O clima de vergonha alheia fez o vídeo virar meme de zoeira e parte do vocabulário da internet brasileira.",
+      "tags": [
+        "vergonhaalheia",
+        "classico",
+        "nacional"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Pedro cade meu chip",
+      "youtube_url": "https://www.youtube.com/results?search_query=Pedro+cad%C3%AA+meu+chip",
+      "inicio": 0,
+      "fim": 8,
+      "autor_fonte": "YouTube / redes sociais",
+      "ano": 2021,
+      "origem": "YouTube",
+      "historia": "Áudio curto em que alguém grita desesperado \"Pedro, cadê meu chip?\". O tom de pânico exagerado por perder o chip do celular virou efeito sonoro para edits e vídeos de zoeira, funcionando como reação cômica a qualquer situação de item perdido ou drama exagerado.",
+      "tags": [
+        "audio",
+        "reacao",
+        "nacional"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Esse debate tá uma porra",
+      "youtube_url": "https://www.youtube.com/results?search_query=esse+debate+t%C3%A1+uma+porra",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "TV / YouTube",
+      "ano": 2022,
+      "origem": "TV",
+      "historia": "Bordão extraído de um momento de improviso e irritação em transmissão de debate, em que alguém resume o caos do evento com a frase direta \"esse debate tá uma porra\". A sinceridade abrupta virou reação popular em vídeos políticos e de zoeira sobre programas confusos.",
+      "tags": [
+        "politica",
+        "tv",
+        "bordao"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Luiza Marilac",
+      "youtube_url": "https://www.youtube.com/results?search_query=Luiza+Marilac+se+isso+%C3%A9+estar+na+pior",
+      "inicio": 0,
+      "fim": 12,
+      "autor_fonte": "YouTube",
+      "ano": 2010,
+      "origem": "YouTube",
+      "historia": "Em 2010, a youtuber e ativista Luísa Marilac publicou vídeos mostrando uma vida de ostentação na Espanha, tomando \"meus bons drinks\" ao lado de uma piscina, e soltando a frase \"se isso é estar na pior, porra, o que é estar bem?\". Os bordões viralizaram e hoje Marilac é também reconhecida por seu ativismo LGBT e pela biografia \"Eu, travesti\".",
+      "tags": [
+        "youtube",
+        "bordao",
+        "nacional"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Corre berg",
+      "youtube_url": "https://www.youtube.com/watch?v=NipO0DOKitY",
+      "inicio": 0,
+      "fim": 28,
+      "autor_fonte": "TV Correio (Record/PB)",
+      "ano": 2018,
+      "origem": "TV",
+      "historia": "Em um trecho de telejornal da TV Correio, uma pessoa em pânico grita repetidamente \"Meu Deus do céu, corre, Berg!\", gerando uma cena de desespero involuntariamente engraçada. O desespero virou bordão e áudio viral nas redes, usado em montagens sempre que alguém precisa \"correr\" de uma situação.",
+      "tags": [
+        "tv",
+        "humor",
+        "bordao"
+      ],
+      "confirmado": false
+    },
+    {
+      "nome": "Seu buceta",
+      "youtube_url": "https://www.youtube.com/results?search_query=seu+buceta+rev%C3%B3lver",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube",
+      "ano": 2015,
+      "origem": "YouTube",
+      "historia": "\"Seu Buceta\" viralizou no YouTube e no Facebook a partir de dezembro de 2015, com um homem falando em tom cômico sobre um revólver e uma proposta de compra. A expressão repetida virou áudio de zoeira e rendeu boatos posteriores sobre o paradeiro do personagem.",
+      "tags": [
+        "viral",
+        "classico",
+        "humor"
+      ],
+      "confirmado": false
+    }
+  ]
+}

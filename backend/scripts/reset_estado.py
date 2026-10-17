@@ -3,10 +3,11 @@
 Roda sem depender de yt-dlp/ffmpeg: só store + catalog + bracket.
 
 Estrutura gerada:
-- Torneio 1 (Temporada 1): os 64 primeiros memes do catálogo numa chave cheia
-  de 64 vagas (32 confrontos reais, sem byes).
-- Torneio 2 (Temporada 2): os memes restantes aguardando o resto dos oponentes
-  para completar a chave de 64 vagas.
+- Temporada 1: os 32 primeiros memes do catálogo numa chave cheia de 32 vagas
+  (16, 8, 4, 2).
+- Temporada 2: os 32 memes seguintes, **aguardando** — aparecem no site com os
+  participantes, mas ainda sem chave definida.
+- Temporada 3: os memes restantes, também aguardando completar a chave de 32.
 
 Uso (na raiz do repositório):
 
@@ -23,7 +24,8 @@ from app.services.bracket import criar_torneio_aguardando, gerar_torneio  # noqa
 from app.services.catalog import carregar_catalogo  # noqa: E402
 from app.store import Estado  # noqa: E402
 
-TAMANHO_CHAVE = 64
+TAMANHO_CHAVE = 32
+SEED = 42
 
 
 def main() -> None:
@@ -32,11 +34,15 @@ def main() -> None:
     ids = [m["id"] for m in estado.memes if m.get("status", "ativo") == "ativo"]
 
     ids_t1 = ids[:TAMANHO_CHAVE]
-    ids_t2 = ids[TAMANHO_CHAVE:]
+    ids_t2 = ids[TAMANHO_CHAVE : TAMANHO_CHAVE * 2]
+    ids_t3 = ids[TAMANHO_CHAVE * 2 :]
 
-    t1 = gerar_torneio(estado, "Temporada 1", ids_t1, seed=42, temporada="1")
+    t1 = gerar_torneio(estado, "Temporada 1", ids_t1, seed=SEED, temporada="1")
     t2 = criar_torneio_aguardando(
         estado, "Temporada 2", ids_t2, tamanho=TAMANHO_CHAVE, temporada="2"
+    )
+    t3 = criar_torneio_aguardando(
+        estado, "Temporada 3", ids_t3, tamanho=TAMANHO_CHAVE, temporada="3"
     )
 
     caminho = estado.salvar()
@@ -45,10 +51,12 @@ def main() -> None:
         f"torneio {t1['id']} '{t1['nome']}': {len(ids_t1)} memes | "
         f"tamanho={t1['tamanho']} | confrontos={len(estado.matches_do_torneio(t1['id']))}"
     )
-    print(
-        f"torneio {t2['id']} '{t2['nome']}': {len(ids_t2)} memes aguardando | "
-        f"tamanho={t2['tamanho']} | faltam {t2['tamanho'] - len(ids_t2)} oponentes"
-    )
+    for t in (t2, t3):
+        n = len(t.get("participantes", []))
+        print(
+            f"torneio {t['id']} '{t['nome']}': {n} memes aguardando | "
+            f"tamanho={t['tamanho']} | faltam {t['tamanho'] - n} oponentes"
+        )
     print(f"salvo em {caminho}")
 
 

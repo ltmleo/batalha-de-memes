@@ -31,8 +31,8 @@ Tudo o que o app precisa vive em `backend/data/estado.json`:
 }
 ```
 
-O catálogo editável em `backend/data/memes.json` alimenta o estado via `seed` (insere
-novos memes e atualiza os existentes por nome).
+O catálogo editável é dividido por temporada em `backend/data/memes/temporada-N.json`
+e alimenta o estado via `seed` (insere novos memes e atualiza os existentes por nome).
 
 ---
 
@@ -83,7 +83,7 @@ pip install -r requirements.txt
 ### 2. Popular o catálogo e criar um torneio
 
 ```powershell
-# lê backend/data/memes.json e grava no estado (ignora memes já existentes)
+# lê backend/data/memes/*.json e grava no estado (ignora memes já existentes)
 .\.venv\Scripts\python.exe -m app.cli seed
 
 # cria a temporada com todos os memes ativos
@@ -139,7 +139,7 @@ Arquivos gerados (git-ignored):
 
 | Comando | Descrição |
 | --- | --- |
-| `seed` | Carrega `data/memes.json` no estado |
+| `seed` | Carrega `data/memes/*.json` no estado |
 | `memes` | Lista os memes |
 | `torneio --nome ...` | Cria torneio (sorteia as chaves) |
 | `torneios` | Lista temporadas |
@@ -177,14 +177,14 @@ A janela (Tkinter + Pillow) tem:
   `media/clips/match_N.mp4`), **Salvar só o layout** (grava sem gerar), **Restaurar
   padrão**, **Baixar clipes p/ preview** e **Frame exato (ffmpeg)** (renderiza um
   quadro 1080x1920 idêntico ao vídeo);
-- quadro **Dados (json)**: **Sincronizar catálogo (seed)** copia `memes.json` →
-  `estado.json` (mesmo efeito do `seed` da CLI, sem sair do editor) e
-  **Recarregar do disco** relê `estado.json`/`layout.json` descartando edições não
-  salvas.
+- quadro **Dados (json)**: **Sincronizar catálogo (seed)** copia
+  `data/memes/*.json` → `estado.json` (mesmo efeito do `seed` da CLI, sem sair do
+  editor) e **Recarregar do disco** relê `estado.json`/`layout.json` descartando
+  edições não salvas.
 
-⚠️ O editor lê o **`estado.json`**, não o `memes.json`. Se você editar o
-`memes.json` (catálogo), clique em **Sincronizar catálogo (seed)** para ver a
-mudança no editor.
+⚠️ O editor lê o **`estado.json`**, não os arquivos de temporada. Se você editar
+o catálogo (`data/memes/*.json`), clique em **Sincronizar catálogo (seed)** para
+ver a mudança no editor.
 
 Os botões que geram vídeo (**Salvar e gerar vídeo**) e que baixam para o preview
 (**Baixar clipes p/ preview**) pedem **confirmação antes de baixar**: uma janela
@@ -270,12 +270,15 @@ batalha-de-memes/
         app.py              # editor visual desktop (Tkinter)
         preview.py          # preview PIL + frame exato (ffmpeg)
       services/
-        catalog.py          # lê data/memes.json  -> estado
+        catalog.py          # lê data/memes/*.json -> estado
         bracket.py          # sorteio das chaves + propagação do vencedor
         downloader.py       # yt-dlp + normalização 9:16   (CLI: --id)
         assembler.py        # ffmpeg: abertura + moldura + título (CLI: --a --b)
     data/
-      memes.json            # catálogo editável (entrada do seed)
+      memes/                # catálogo editável por temporada (entrada do seed)
+        temporada-1.json
+        temporada-2.json
+        temporada-3.json
       estado.json           # estado da aplicação (fonte única da verdade)
       layout.json           # layout da montagem (criado ao salvar no editor)
     media/                  # cache de clipes (git-ignored)
@@ -340,4 +343,4 @@ contorno, quebra de linha) fica em `backend/app/titulo.py` e os caminhos em
 - **Site vazio / temporada antiga:** o site lê o JSON no **build**. Rode `seed` e
   `torneio` na CLI e refaça `npm run build` em `frontend/`.
 - **Download falha / vídeo indisponível:** verifique `youtube_url`, `inicio`/`fim`
-  (em segundos) em `backend/data/estado.json` (ou no catálogo `memes.json`).
+  (em segundos) em `backend/data/estado.json` (ou no catálogo `data/memes/*.json`).

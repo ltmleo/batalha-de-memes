@@ -37,7 +37,7 @@ batalha-de-memes/
         app.py           # editor visual desktop (Tkinter): preview, arraste, gerar vídeo
         preview.py       # preview PIL + frame exato via ffmpeg
       services/
-        catalog.py       # lê data/memes.json -> estado
+        catalog.py       # lê data/memes/*.json -> estado
         bracket.py       # sorteio das chaves + propagação
         downloader.py    # yt-dlp + crop 9:16 (+ progresso p/ barra)
         assembler.py     # ffmpeg (montagem; cover/contain; montar_match)
@@ -46,7 +46,7 @@ batalha-de-memes/
         publisher.py     # upload/publicação          (a implementar)
       workers/pipeline.py
     data/
-      memes.json         # catálogo editável (entrada do seed)
+      memes/             # catálogo editável por temporada (entrada do seed)
       estado.json        # estado da aplicação (fonte única da verdade)
       layout.json        # layout da montagem (criado ao salvar no editor)
     media/               # cache de clipes (git-ignored)
@@ -131,9 +131,9 @@ normalização por clipe) e sobe até 50%; na renderização ela segue **determi
 minutos.
 
 O quadro **Dados (json)** expõe o fluxo de dados sem CLI: **Sincronizar catálogo
-(seed)** roda `carregar_catalogo` (`memes.json` → `estado.json`) e **Recarregar do
-disco** relê `estado.json`/`layout.json`. O editor lê o `estado.json`, não o
-`memes.json` — daí a necessidade do seed.
+(seed)** roda `carregar_catalogo` (`data/memes/*.json` → `estado.json`) e **Recarregar do
+disco** relê `estado.json`/`layout.json`. O editor lê o `estado.json`, não os
+arquivos de temporada — daí a necessidade do seed.
 
 O cache de clipes (`media/raw`, `media/clips`) é invalidado automaticamente:
 `baixar_trecho` grava uma **assinatura** do trecho (`youtube_url`+`inicio`+`fim`)

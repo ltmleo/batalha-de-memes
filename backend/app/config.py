@@ -24,7 +24,8 @@ FONTE_TITULO_PATH = ASSETS_DIR / "fonts" / "Dream MMA.ttf"
 
 # Estado da aplicação (fonte única da verdade) e catálogo de entrada
 CAMINHO_ESTADO = DATA_DIR / "estado.json"
-CAMINHO_CATALOGO = DATA_DIR / "memes.json"
+# Catálogo de entrada dividido por temporada (data/memes/temporada-N.json)
+CATALOGO_DIR = DATA_DIR / "memes"
 
 # Layout da montagem (área do vídeo na moldura, preenchimento) — editável no editor
 CAMINHO_LAYOUT = DATA_DIR / "layout.json"

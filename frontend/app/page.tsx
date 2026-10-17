@@ -8,7 +8,13 @@ import { hueStyle } from "@/components/MemeAvatar";
 import { RingueDuelo } from "@/components/RingueDuelo";
 import { VideoLinks, linksDoMatch } from "@/components/VideoLinks";
 import { agruparRodadas } from "@/lib/bracket";
-import { estatisticas, listarMemes, listarTorneios, obterTorneio } from "@/lib/estado";
+import {
+  estatisticas,
+  listarMemes,
+  listarTorneios,
+  memesDoTorneio,
+  obterTorneio,
+} from "@/lib/estado";
 import { iniciais } from "@/lib/format";
 import { eliminados, epiteto, faseAoVivo, placar, votosTexto } from "@/lib/home";
 import type { Meme } from "@/lib/types";
@@ -28,16 +34,34 @@ const CONFETE = Array.from({ length: 34 }, (_, i) => ({
 export default function Home() {
   const torneios = listarTorneios();
   const memes = listarMemes();
-  const stats = estatisticas();
 
   const porId = new Map(memes.map((m) => [m.id, m]));
   const meme = (id: number | null | undefined): Meme | null => (id ? porId.get(id) ?? null : null);
 
   const principal = torneios.find((t) => t.status !== "aguardando") ?? torneios[0];
-  const t2 = torneios.find((t) => t.status === "aguardando");
-  const t2Detail = t2 ? obterTorneio(t2.id) : null;
+  const principalDetail = principal ? obterTorneio(principal.id) : null;
 
-  const rodadas = principal ? agruparRodadas(obterTorneio(principal.id)?.matches ?? []) : [];
+  const rodadas = principalDetail ? agruparRodadas(principalDetail.matches) : [];
+
+  // Números da home escopados na temporada em disputa (o que foi sorteado) —
+  // nunca nos totais globais, que também contam as temporadas aguardando.
+  const stats = estatisticas(principalDetail ?? undefined);
+
+  // Elenco da faixa de nomes: só quem foi sorteado, não o catálogo inteiro.
+  const elenco = principalDetail ? memesDoTorneio(principalDetail) : memes;
+
+  // Salas de espera em ordem de temporada (não em ordem de id decrescente).
+  const salasEspera = torneios
+    .filter((t) => t.status === "aguardando")
+    .sort((a, b) => Number(a.temporada) - Number(b.temporada))
+    .map((t) => ({
+      torneio: t,
+      vagas: t.tamanho,
+      reservados: (obterTorneio(t.id)?.participantes ?? [])
+        .map((id) => meme(id))
+        .filter((m): m is Meme => Boolean(m)),
+    }));
+
   const fase = faseAoVivo(rodadas);
   const noRingue = fase?.duelos ?? [];
   const destaque = noRingue[0] ?? null;
@@ -49,11 +73,6 @@ export default function Home() {
   const mortos = eliminados(rodadas, porId);
   const vitrine = mortos.slice(0, 12);
   const vivos = rodadas.length ? stats.totalMemes : 0;
-
-  const t2memes = (t2Detail?.participantes ?? [])
-    .map((id) => meme(id))
-    .filter((m): m is Meme => Boolean(m));
-  const t2vagas = t2?.tamanho ?? 64;
 
   const faseNome = fase?.rodada.titulo ?? "A disputa";
 
@@ -144,7 +163,7 @@ export default function Home() {
       {/* ── marquee do elenco ───────────────────────────────────────────── */}
       <div className="marquee-band" aria-hidden>
         <div className="marquee-track">
-          {[...memes, ...memes].map((m, i) => (
+          {[...elenco, ...elenco].map((m, i) => (
             <span key={`${m.id}-${i}`}>
               {m.nome}
               <span className="marquee-sep">·</span>
@@ -240,34 +259,34 @@ export default function Home() {
             </div>
           ) : null}
 
-          {t2 ? (
-            <article className="room-card ringue-card home-scale">
+          {salasEspera.map(({ torneio, vagas, reservados }) => (
+            <article className="room-card ringue-card home-scale" key={torneio.id}>
               <div className="room-num" aria-hidden>
-                {t2memes.length}
-                <span className="room-total">/{t2vagas}</span>
+                {reservados.length}
+                <span className="room-total">/{vagas}</span>
               </div>
               <div className="room-body">
-                <h3>{t2.nome} · sala de espera</h3>
+                <h3>{torneio.nome} · sala de espera</h3>
                 <p>
                   Enquanto a taça não sai, novos oponentes já reservam lugar na próxima edição. A
                   votação da temporada atual corre primeiro.
                 </p>
                 <div className="room-chips">
-                  {t2memes.slice(0, 8).map((m) => (
+                  {reservados.slice(0, 8).map((m) => (
                     <Link key={m.id} className="chip" href={`/meme/${m.id}`}>
                       {m.nome}
                     </Link>
                   ))}
-                  {t2memes.length > 8 ? (
-                    <span className="chip chip--more mono">+{t2memes.length - 8}</span>
+                  {reservados.length > 8 ? (
+                    <span className="chip chip--more mono">+{reservados.length - 8}</span>
                   ) : null}
                 </div>
               </div>
-              <Link className="btn btn--sm" href={`/torneio/${t2.id}`}>
+              <Link className="btn btn--sm" href={`/torneio/${torneio.id}`}>
                 ver a fila de espera →
               </Link>
             </article>
-          ) : null}
+          ))}
         </div>
       </section>
 

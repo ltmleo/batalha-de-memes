@@ -117,7 +117,7 @@ class Editor(tk.Tk):
                    command=self._sincronizar_catalogo).grid(sticky="ew")
         ttk.Button(f_dados, text="Recarregar do disco",
                    command=self._recarregar).grid(sticky="ew", pady=(4, 0))
-        ttk.Label(f_dados, text="memes.json → estado.json → editor",
+        ttk.Label(f_dados, text="data/memes/*.json → estado.json → editor",
                   foreground="#666").grid(sticky="w", pady=(4, 0))
 
         # -- ver lado ---------------------------------------------------
@@ -491,13 +491,13 @@ class Editor(tk.Tk):
         self._status("padrão restaurado (área, título e preenchimento) — clique em Salvar para aplicar")
 
     def _sincronizar_catalogo(self) -> None:
-        """Copia memes.json -> estado.json (mesmo que o `seed` da CLI)."""
+        """Copia data/memes/*.json -> estado.json (mesmo que o `seed` da CLI)."""
         if not messagebox.askyesno(
             "Sincronizar catálogo",
-            "Copiar memes.json para o estado.json?\n\n"
+            "Copiar data/memes/*.json para o estado.json?\n\n"
             "Atualiza link/trecho/metadados dos memes existentes (casados por nome) e "
             "insere os novos. O chaveamento e os votos não mudam.\n\n"
-            "Útil quando você edita o memes.json e quer ver no editor.",
+            "Útil quando você edita os arquivos de temporada e quer ver no editor.",
         ):
             self._status("sincronização cancelada")
             return

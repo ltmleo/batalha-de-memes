@@ -32,12 +32,6 @@ function tituloDaFase(match: Match): string {
   return rodada?.titulo ?? `Rodada ${match.round}`;
 }
 
-const LABEL_CONFIANCA: Record<string, string> = {
-  alta: "alta",
-  media: "média",
-  baixa: "baixa",
-};
-
 export default async function MemePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const meme = obterMeme(Number(id));
@@ -93,12 +87,6 @@ export default async function MemePage({ params }: { params: Promise<{ id: strin
               <div className="k">Vídeo</div>
               <div className="v">{busca ? "busca" : "original"}</div>
             </div>
-            {meme.confianca ? (
-              <div className="meta-item">
-                <div className="k">Confiança do link</div>
-                <div className="v">{LABEL_CONFIANCA[meme.confianca] ?? meme.confianca}</div>
-              </div>
-            ) : null}
           </div>
         </section>
       </Reveal>

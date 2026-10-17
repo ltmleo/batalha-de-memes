@@ -152,7 +152,7 @@ def main(argv: list[str] | None = None) -> None:
     )
     sub = parser.add_subparsers(dest="comando", required=True)
 
-    p = sub.add_parser("seed", help="carrega data/memes.json no estado")
+    p = sub.add_parser("seed", help="carrega data/memes/*.json no estado")
     p.set_defaults(func=_cmd_seed)
 
     p = sub.add_parser("memes", help="lista os memes")

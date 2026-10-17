@@ -182,7 +182,9 @@ const FINAL_EXTRA = 34;
 
 export function layoutSimetrico(matches: Match[], geom: Geom = GEOM): SimLayout {
   const topo = 62; // faixa dos títulos das rodadas
-  const rodadas = agruparRodadas(matches).slice(-4);
+  // Todas as rodadas, sem cortar: o chaveamento tem que refletir o que foi
+  // sorteado — a 1ª rodada carrega os confrontos reais, antes de qualquer voto.
+  const rodadas = agruparRodadas(matches);
   if (rodadas.length === 0) {
     return { colunas: [], nodes: [], links: [], largura: 0, altura: topo, topo, centroX: 0, centroY: topo, final: null };
   }
