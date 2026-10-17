@@ -10,6 +10,7 @@ from ..config import (
     CLIPS_DIR,
     ENCERRAMENTO_PATH,
     MOLDURA_PATH,
+    VERSUS_PATH,
 )
 from ..layout import Layout, carregar_layout
 from .. import titulo
@@ -69,6 +70,19 @@ def _audio(indice: int, label: str) -> str:
         f"[{indice}:a]aformat=sample_fmts=fltp:sample_rates=48000:"
         f"channel_layouts=stereo[{label}]"
     )
+
+
+def _tem_audio(caminho: Path, ffmpeg: str) -> bool:
+    """True se o arquivo tem trilha de áudio (lido do log do ``ffmpeg -i``)."""
+    try:
+        proc = subprocess.run(
+            [ffmpeg, "-hide_banner", "-i", str(caminho)],
+            capture_output=True,
+            text=True,
+        )
+        return "Audio:" in (proc.stderr or "")
+    except Exception:  # noqa: BLE001 — sem log não dá pra afirmar: trata como "sem áudio"
+        return False
 
 
 def _moldura_tem_alpha(caminho: Path) -> bool:
@@ -147,6 +161,7 @@ def montar_video(
     texto_b: str = "B",
     abertura: Path | None = None,
     encerramento: Path | None = None,
+    versus: Path | None = None,
     moldura: Path | None = None,
     destino: Path | None = None,
     layout: Layout | None = None,
@@ -172,6 +187,9 @@ def montar_video(
     moldura_transparente = usar_moldura and _moldura_tem_alpha(Path(moldura))
     usar_abertura = abertura is not None and Path(abertura).exists()
     usar_encerramento = encerramento is not None and Path(encerramento).exists()
+    usar_versus = versus is not None and Path(versus).exists()
+    # o clip versus precisa de áudio pra entrar no concat (senão geramos silêncio)
+    versus_sem_audio = usar_versus and not _tem_audio(Path(versus), ffmpeg)
 
     entradas: list[Path] = []
     idx_frame = idx_abertura = None
@@ -183,6 +201,10 @@ def montar_video(
         entradas.append(abertura)
     idx_a = len(entradas)
     entradas.append(clip_a)
+    idx_vs = None
+    if usar_versus:
+        idx_vs = len(entradas)
+        entradas.append(versus)
     idx_b = len(entradas)
     entradas.append(clip_b)
     idx_enc = None
@@ -212,12 +234,37 @@ def montar_video(
         filtros.append(_audio(idx_abertura, "ia"))
         segmentos.append(("iv", "ia"))
 
-    trechos = ((idx_a, "va", "aa", texto_a), (idx_b, "vb", "ab", texto_b))
+    trechos = []
+    if usar_versus and idx_vs is not None:
+        trechos = ((idx_a, "va", "aa", texto_a), (idx_vs, "vsv", "avs", None), (idx_b, "vb", "ab", texto_b))
+    else:
+        trechos = ((idx_a, "va", "aa", texto_a), (idx_b, "vb", "ab", texto_b))
     for indice, vtag, atag, texto in trechos:
         vbase = f"{vtag}b"
+        if vtag == "vsv":
+            filtros.append(_escalar(indice, f"{vtag}b", LARGURA, ALTURA))
+            if texto:
+                caminho_titulo = titulo.caminho_png(texto, layout)
+                idx_titulo = len(entradas)
+                entradas.append(caminho_titulo)
+                filtros.append(f"[{idx_titulo}:v]format=rgba[tit_{vtag}]")
+                filtros.append(f"[{vbase}][tit_{vtag}]overlay=0:0:eof_action=repeat[{vtag}]")
+                vbase = vtag
+            filtros.append(f"[{vbase}]format=yuv420p[{vtag}out]")
+            if versus_sem_audio:
+                dur = _duracao(Path(versus), ffmpeg)
+                filtros.append(
+                    f"anullsrc=channel_layout=stereo:sample_rate=48000,"
+                    f"atrim=0:{max(dur, 0.1):.3f},asetpts=PTS-STARTPTS,"
+                    f"aformat=sample_fmts=fltp:sample_rates=48000:"
+                    f"channel_layouts=stereo[{atag}]"
+                )
+            else:
+                filtros.append(_audio(indice, atag))
+            segmentos.append((f"{vtag}out", atag))
+            continue
+
         if usar_moldura and moldura_transparente:
-            # vídeo ATRÁS: clipe posicionado na janela (canvas preto via pad, finito)
-            # e a moldura (com alfa) por cima — o vídeo aparece pela janela.
             filtros.append(_escalar_meme(indice, f"{vtag}m", layout))
             x_m, y_m = layout.px_x(), layout.px_y()
             x_m = max(0, min(x_m, LARGURA - layout.px_l()))
@@ -231,7 +278,6 @@ def montar_video(
                 f"eof_action=repeat[{vtag}b]"
             )
         elif usar_moldura:
-            # moldura opaca ao fundo: clipe por cima (comportamento anterior)
             filtros.append(_escalar_meme(indice, f"{vtag}m", layout))
             filtros.append(
                 f"[{base_moldura[vtag]}][{vtag}m]overlay={layout.px_x()}:{layout.px_y()}:"
@@ -248,7 +294,6 @@ def montar_video(
             filtros.append(f"[{vbase}][tit_{vtag}]overlay=0:0:eof_action=repeat[{vtag}]")
             vbase = vtag
 
-        # concat exige o mesmo pix_fmt em todos os segmentos (yuv420p)
         filtros.append(f"[{vbase}]format=yuv420p[{vtag}out]")
         filtros.append(_audio(indice, atag))
         segmentos.append((f"{vtag}out", atag))
@@ -265,7 +310,10 @@ def montar_video(
     trechos_duracao: list[Path] = []
     if usar_abertura:
         trechos_duracao.append(Path(abertura))
-    trechos_duracao += [Path(clip_a), Path(clip_b)]
+    trechos_duracao += [Path(clip_a)]
+    if usar_versus:
+        trechos_duracao.append(Path(versus))
+    trechos_duracao += [Path(clip_b)]
     if usar_encerramento:
         trechos_duracao.append(Path(encerramento))
 
@@ -342,6 +390,7 @@ def montar_match(
         texto_b=match.get("titulo_b") or meme_b["nome"],
         abertura=ABERTURA_PATH,
         encerramento=ENCERRAMENTO_PATH,
+        versus=VERSUS_PATH,
         layout=layout,
         destino=destino,
         progresso=progresso_montagem,
@@ -364,6 +413,7 @@ def _cli() -> None:
     parser.add_argument("--sem-abertura", action="store_true")
     parser.add_argument("--sem-moldura", action="store_true")
     parser.add_argument("--sem-encerramento", action="store_true")
+    parser.add_argument("--sem-versus", action="store_true", help="não insere videos/versus.mp4 entre os clipes")
     parser.add_argument("--forcar", action="store_true", help="ignora o cache de download")
     parser.add_argument("--saida", type=str, default=None)
     args = parser.parse_args()
@@ -382,6 +432,7 @@ def _cli() -> None:
     abertura = None if args.sem_abertura else ABERTURA_PATH
     encerramento = None if args.sem_encerramento else ENCERRAMENTO_PATH
     moldura = None if args.sem_moldura else MOLDURA_PATH
+    versus = None if args.sem_versus else VERSUS_PATH
     destino = Path(args.saida) if args.saida else TMP_DIR / f"batalha_{meme_a['id']}_{meme_b['id']}.mp4"
     saida = montar_video(
         clip_a,
@@ -390,6 +441,7 @@ def _cli() -> None:
         texto_b=meme_b["nome"],
         abertura=abertura,
         encerramento=encerramento,
+        versus=versus,
         moldura=moldura,
         destino=destino,
     )

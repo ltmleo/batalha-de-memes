@@ -48,6 +48,8 @@ novos memes e atualiza os existentes por nome).
 | Caminho | Para quê |
 | --- | --- |
 | `videos/abertura.mp4` | Intro (vertical 1080x1920) concatenada no início do vídeo |
+| `videos/versus.mp4` | Transição "VS" (vertical 1080x1920) em tela cheia, **entre** o clipe A e o clipe B (sem moldura, sem título) |
+| `videos/encerramento.mp4` | Encerramento (vertical 1080x1920) concatenado no fim, se existir |
 | `assets/moldura2.png` | Moldura 9:16 com **janela transparente** — o clipe aparece por trás dela |
 | `assets/fonts/Dream MMA.ttf` | Fonte de display do título (empacotada; ver `assets/fonts/LEIA-ME.txt`) |
 | `C:\Windows\Fonts\arial.ttf` | Fonte usada fora do título |
@@ -121,9 +123,9 @@ cd backend
 .\.venv\Scripts\python.exe -m app.services.downloader --id 1
 .\.venv\Scripts\python.exe -m app.services.downloader --id 2 --forcar   # ignora cache
 
-# monta a batalha (abertura + moldura) e imprime o caminho do vídeo
+# monta a batalha (abertura + moldura + VS) e imprime o caminho do vídeo
 .\.venv\Scripts\python.exe -m app.services.assembler --a 1 --b 2
-# flags: --sem-abertura  --sem-moldura  --sem-encerramento  --saida "caminho\saida.mp4"
+# flags: --sem-abertura  --sem-moldura  --sem-encerramento  --sem-versus  --saida "caminho\saida.mp4"
 ```
 
 Arquivos gerados (git-ignored):
@@ -256,6 +258,7 @@ $env:ESTADO_JSON = "C:\caminho\para\estado.json"; npm run build
 batalha-de-memes/
   assets/moldura2.png       # moldura usada na montagem (janela transparente)
   videos/abertura.mp4       # intro
+  videos/versus.mp4         # transição "VS" entre os dois memes
   backend/
     app/
       cli.py                # CLI do pipeline (seed, torneio, vencedor, montar, editor...)
@@ -288,7 +291,9 @@ batalha-de-memes/
 
 ## Como o vídeo final é montado
 
-Cada clipe é exibido em tela cheia, em sequência: **abertura → meme A → meme B**.
+Cada clipe é exibido, em sequência: **abertura → meme A → versus → meme B** (o
+`videos/versus.mp4` é a transição "VS" entre os dois memes; sem ele, a sequência é
+**A → B**).
 Sobre cada clipe aplica-se a moldura (`assets/moldura2.png`). Como a moldura tem
 **fundo transparente (janela)**, o clipe é composto **por trás dela** — o vídeo
 aparece pela janela e as bordas opacas fazem o acabamento. (Se a moldura for opaca

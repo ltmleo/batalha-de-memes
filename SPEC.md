@@ -83,11 +83,15 @@ desfocado — em `media/clips/`. Trechos já baixados são cacheados.
 - Quem não tem adversário recebe *bye* e avança automaticamente.
 
 ## 3. Montagem (`assembler.py`, ffmpeg)
-Sequência **abertura → meme A → meme B** (+ encerramento opcional), com a moldura
-`assets/moldura2.png` e o clipe no "telão". A moldura tem **janela transparente**,
-então o clipe é composto **atrás** dela (o vídeo aparece pela janela; detecção de
-alpha via PIL em `_moldura_tem_alpha` — moldura opaca volta ao comportamento
-antigo, com a moldura ao fundo):
+Sequência **abertura → meme A → versus → meme B** (+ encerramento opcional), com a
+moldura `assets/moldura2.png` e os clipes dos memes no "telão". O clipe `videos/versus.mp4`
+(transição "VS") entra **entre os dois memes**, exibido em **tela cheia** (sem passar
+pela moldura e sem título sobreposto), seguindo o mesmo tratamento de escala que
+abertura/encerramento (`_escalar`) — ver `montar_video(..., versus=)`; sem o arquivo
+(ou com `--sem-versus`), a sequência volta a **A → B**. A moldura tem **janela
+transparente**, então os memes são compostos **atrás** dela (aparecem pela janela;
+detecção de alpha via PIL em `_moldura_tem_alpha` — moldura opaca volta ao
+comportamento antigo, com a moldura ao fundo):
 
 - a área do vídeo e o **preenchimento** (`cover` = recorte central / `contain` =
   barras pretas) vêm de `data/layout.json` (editável no editor desktop);
