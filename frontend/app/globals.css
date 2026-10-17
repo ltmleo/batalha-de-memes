@@ -1061,6 +1061,131 @@ h3 {
   }
 }
 
+/* ---------- hero do chaveamento ---------- */
+.chave-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 30px 20px 26px;
+  border-bottom: 1px solid var(--border);
+  background:
+    radial-gradient(120% 150% at 50% -30%, rgba(124, 58, 237, 0.42), transparent 62%),
+    linear-gradient(180deg, rgba(43, 20, 80, 0.6), rgba(13, 6, 26, 0.72));
+}
+.chave-hero-emojis {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+.chave-emoji {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  font-size: clamp(18px, 2.4vw, 30px);
+  opacity: 0.26;
+  animation: emoji-flutua var(--dur, 8s) var(--ease-in-out) infinite alternate;
+}
+@keyframes emoji-flutua {
+  from {
+    transform: translate3d(0, 0, 0) rotate(-8deg);
+  }
+  to {
+    transform: translate3d(12px, -22px, 0) rotate(10deg);
+  }
+}
+.chave-hero-body {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  text-align: center;
+}
+.chave-hero-title {
+  margin: 0;
+  max-width: 22ch;
+  font-size: clamp(1.5rem, 3.6vw, 2.5rem);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+.chave-hero-title em {
+  font-style: normal;
+  background: linear-gradient(180deg, var(--accent-strong), var(--accent-deep));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: var(--accent);
+}
+.chave-hero-sub {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.chave-hero .confete,
+.chave-hero .hero-arena {
+  z-index: 0;
+}
+/* o hero do chaveamento é baixo: o confete cai na altura dele (e não em 112vh) */
+.chave-hero .confete i {
+  animation-name: confete-cai-curto;
+}
+@keyframes confete-cai-curto {
+  0% {
+    transform: translate3d(0, -40px, 0) rotate(0deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(var(--dx), 320px, 0) rotate(560deg);
+    opacity: 0.65;
+  }
+}
+
+/* ---------- títulos das rodadas + centro ---------- */
+.round-head--dir {
+  justify-content: flex-end;
+}
+.round-head--final {
+  justify-content: center;
+  color: var(--accent);
+  letter-spacing: 0.16em;
+}
+.round-head--final::before,
+.round-head--final::after {
+  content: "";
+  flex: 1 1 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 217, 61, 0.45));
+}
+.round-head--final::after {
+  background: linear-gradient(90deg, rgba(255, 217, 61, 0.45), transparent);
+}
+
+.chave-centro {
+  position: absolute;
+  z-index: 0;
+  width: 440px;
+  height: 440px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 217, 61, 0.16), transparent 62%);
+  pointer-events: none;
+}
+.chave-luz {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 217, 61, 0.1), transparent 40%),
+    radial-gradient(58% 40% at 50% 50%, rgba(124, 58, 237, 0.18), transparent 72%);
+}
+
 .bconn {
   fill: none;
   stroke: rgba(178, 160, 255, 0.24);
@@ -1077,14 +1202,20 @@ h3 {
   opacity: 0.22;
 }
 
+/* ---------- o confronto: duelo de figurinhas ---------- */
 .bmatch {
   position: absolute;
-  width: 240px;
-  height: 62px;
-  border-radius: 12px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-rows: 1fr auto;
+  align-items: center;
+  justify-items: center;
+  column-gap: 6px;
+  row-gap: 4px;
+  padding: 8px 8px 6px;
+  border-radius: 18px;
   border: 1px solid rgba(244, 244, 245, 0.09);
-  background: linear-gradient(180deg, rgba(30, 31, 39, 0.97), rgba(17, 18, 24, 0.97));
-  overflow: hidden;
+  background: linear-gradient(180deg, rgba(30, 31, 39, 0.94), rgba(17, 18, 24, 0.96));
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), var(--ring-inset);
   transition: transform 0.24s var(--ease-out), border-color 0.24s ease,
     box-shadow 0.24s ease, opacity 0.3s ease, filter 0.3s ease;
@@ -1116,55 +1247,396 @@ h3 {
   filter: grayscale(0.55);
 }
 
-.bslot {
+/* confronto ao vivo: aro neon pulsante */
+.bmatch--ativo::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  border: 1.5px solid rgba(255, 217, 61, 0.55);
+  animation: neon-pulse 1.9s var(--ease-in-out) infinite;
+  pointer-events: none;
+}
+@keyframes neon-pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+    box-shadow: 0 0 0 rgba(255, 217, 61, 0);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 18px rgba(255, 217, 61, 0.35);
+  }
+}
+
+/* rodapé do card: CTA de voto, quem avança ou espera */
+.bmatch-pe {
+  grid-column: 1 / -1;
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 50%;
-  padding: 0 11px;
-  font-size: 13px;
-  color: #d4d5dd;
-  border-left: 3px solid transparent;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  justify-content: center;
+  width: 100%;
+  height: 22px;
+  overflow: hidden;
 }
-.bslot + .bslot {
-  border-top: 1px solid rgba(244, 244, 245, 0.07);
-}
-.bslot .name {
-  flex: 1;
+.bmatch-espera,
+.bmatch-avanca {
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.bslot .score {
   font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.bmatch-espera {
+  color: var(--muted-2);
+}
+.bmatch-avanca {
+  color: var(--win);
+}
+.bmatch-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 13px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--accent-strong), var(--accent));
+  color: var(--accent-ink);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow: 0 5px 14px rgba(255, 217, 61, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition: transform 0.18s var(--ease-overshoot), box-shadow 0.18s ease;
+}
+.bmatch-cta:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(255, 217, 61, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* final: pedestal dourado + taça flutuando */
+.bmatch.is-final {
+  padding-top: 40px;
+  border-color: rgba(255, 217, 61, 0.42);
+  background:
+    radial-gradient(120% 130% at 50% 0%, rgba(255, 217, 61, 0.16), transparent 58%),
+    linear-gradient(180deg, rgba(40, 29, 21, 0.96), rgba(16, 12, 22, 0.97));
+  box-shadow: 0 14px 44px rgba(255, 217, 61, 0.16), var(--ring-inset);
+}
+.final-trophy {
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  width: 30px;
+  height: 34px;
+  color: var(--accent);
+  filter: drop-shadow(0 4px 10px rgba(255, 217, 61, 0.5));
+  animation: trofeu-flutua 3.2s var(--ease-in-out) infinite;
+}
+.final-trophy svg {
+  width: 100%;
+  height: 100%;
+}
+@keyframes trofeu-flutua {
+  0%,
+  100% {
+    transform: translate(-50%, 0);
+  }
+  50% {
+    transform: translate(-50%, -5px);
+  }
+}
+
+/* selo VS entre as duas figurinhas */
+.bmatch-vs {
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 9.5px;
+  font-weight: 800;
+  color: var(--accent);
+  background: radial-gradient(circle at 50% 28%, rgba(255, 217, 61, 0.24), rgba(18, 10, 32, 0.94));
+  border: 1px solid rgba(255, 217, 61, 0.42);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  transform: rotate(-8deg);
+}
+
+/* ---------- a figurinha: foto quadrada + nome embaixo ---------- */
+.bsticker {
+  --foto: 84px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  min-width: 0;
+  padding: 7px;
+  border: 1px solid hsl(var(--hue, 300) 62% 68% / 0.24);
+  border-radius: 14px;
+  background: linear-gradient(180deg, hsl(var(--hue, 300) 62% 62% / 0.16), rgba(10, 7, 20, 0.42));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease-out), border-color 0.2s ease, box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+.bsticker--sm {
+  --foto: 56px;
+  gap: 3px;
+  padding: 5px;
+  border-radius: 11px;
+}
+button.bsticker:hover,
+a.bsticker:hover {
+  transform: translateY(-2px) rotate(-1deg);
+  border-color: hsl(var(--hue, 300) 70% 72% / 0.5);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.bsticker-foto {
+  position: relative;
+  width: var(--foto);
+  height: var(--foto);
+  border-radius: 11px;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 110% at 28% 10%, rgba(255, 255, 255, 0.34), transparent 56%),
+    linear-gradient(160deg, hsl(var(--hue, 300) 64% 58%), hsl(calc(var(--hue, 300) + 42) 60% 32%));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14), 0 4px 12px rgba(0, 0, 0, 0.34);
+}
+.bsticker--sm .bsticker-foto {
+  border-radius: 8px;
+}
+.bsticker-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s var(--ease-out);
+}
+/* brilho de figurinha: só nas fotos de verdade */
+.bsticker-foto--img::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(192deg, rgba(255, 255, 255, 0.24), transparent 42%, rgba(0, 0, 0, 0.16));
+  pointer-events: none;
+}
+button.bsticker:hover .bsticker-img,
+a.bsticker:hover .bsticker-img {
+  transform: scale(1.07);
+}
+/* adesivo gerado quando o meme só tem link de busca (sem foto) */
+.bsticker-adesivo {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+.bsticker-adesivo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.28) 1.4px, transparent 1.5px);
+  background-size: 11px 11px;
+  opacity: 0.5;
+}
+.bsticker-adesivo b {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-display, var(--font-sans, sans-serif));
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.22);
+}
+.bsticker--sm .bsticker-adesivo b {
+  font-size: 20px;
+}
+.bsticker-emoji {
+  position: absolute;
+  right: 4px;
+  bottom: 3px;
+  z-index: 1;
+  font-size: 22px;
+  font-style: normal;
+  transform: rotate(-8deg);
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45));
+}
+.bsticker--sm .bsticker-emoji {
+  right: 2px;
+  bottom: 2px;
+  font-size: 15px;
+}
+
+.bsticker-nome {
+  width: 100%;
+  height: 2.3em;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow-wrap: anywhere;
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: #ece8ff;
+}
+.bsticker--sm .bsticker-nome {
+  font-size: 9.5px;
+}
+
+/* votos: selo no canto da foto */
+.bsticker-votos {
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px 2px 5px;
+  border-radius: 999px;
+  background: rgba(8, 4, 16, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #fff;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  font-size: 11px;
-  color: var(--muted);
-  padding-left: 6px;
 }
-.bslot.win {
-  color: var(--win);
-  font-weight: 650;
-  background: linear-gradient(90deg, rgba(58, 166, 120, 0.1), transparent 70%);
+.bsticker-votos svg {
+  width: 11px;
+  height: 11px;
+  color: var(--accent);
 }
-.bslot.win .score {
-  color: var(--win);
+.bsticker--sm .bsticker-votos {
+  padding: 1px 5px;
+  font-size: 9px;
 }
-.bslot.win::after {
-  content: "Ôû©";
-  color: var(--win);
-  font-size: 11px;
+.bsticker--sm .bsticker-votos svg {
+  width: 9px;
+  height: 9px;
 }
-.bslot.empty .name {
+
+/* coroa do vencedor (fora da foto, para poder saltar) */
+.bsticker-coroa {
+  position: absolute;
+  top: -8px;
+  right: -7px;
+  z-index: 3;
+  display: block;
+  font-size: 21px;
+  line-height: 1;
+  transform: rotate(16deg);
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.5));
+  animation: coroa-pop 0.5s var(--ease-overshoot) both;
+}
+.bsticker--sm .bsticker-coroa {
+  top: -7px;
+  right: -6px;
+  font-size: 16px;
+}
+@keyframes coroa-pop {
+  from {
+    transform: scale(0) rotate(-40deg);
+  }
+  to {
+    transform: scale(1) rotate(16deg);
+  }
+}
+
+/* carimbo de eliminado por cima da foto */
+.bsticker-carimbo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  transform: translate(-50%, -50%) rotate(-8deg);
+  padding: 1px 7px;
+  border: 1.5px solid rgba(255, 86, 96, 0.85);
+  border-radius: 4px;
+  background: rgba(22, 4, 11, 0.62);
+  color: rgba(255, 110, 120, 0.95);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.bsticker--sm .bsticker-carimbo {
+  font-size: 6.5px;
+  padding: 0 4px;
+}
+
+/* estados da figurinha */
+.bsticker.is-win {
+  border-color: rgba(51, 214, 166, 0.6);
+  background: linear-gradient(180deg, rgba(51, 214, 166, 0.16), rgba(10, 7, 20, 0.42));
+  box-shadow: 0 0 0 1px rgba(51, 214, 166, 0.3), 0 8px 20px rgba(51, 214, 166, 0.16);
+}
+.bsticker.is-win .bsticker-foto {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14), 0 0 0 2px rgba(51, 214, 166, 0.5),
+    0 6px 16px rgba(51, 214, 166, 0.24);
+}
+.bsticker.is-win .bsticker-nome {
+  color: #8df2cf;
+}
+.bsticker.is-out {
+  filter: grayscale(0.9) brightness(0.74);
+}
+.bsticker.is-out .bsticker-nome {
+  color: var(--muted-2);
+  text-decoration: line-through;
+}
+.bsticker.is-on {
+  border-color: rgba(255, 217, 61, 0.8);
+  box-shadow: 0 0 0 2px rgba(255, 217, 61, 0.35), 0 10px 26px rgba(255, 217, 61, 0.2);
+}
+.bsticker.is-empty {
+  border-style: dashed;
+  border-color: rgba(178, 160, 255, 0.22);
+  background: rgba(9, 4, 20, 0.38);
+  cursor: default;
+}
+.bsticker.is-empty .bsticker-foto {
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(178, 160, 255, 0.08) 0 8px,
+    transparent 8px 16px
+  );
+  box-shadow: inset 0 0 0 1px rgba(178, 160, 255, 0.16);
+}
+.bsticker.is-empty .bsticker-adesivo::after {
+  opacity: 0.16;
+}
+.bsticker.is-empty .bsticker-adesivo b {
+  color: rgba(216, 208, 255, 0.5);
+  font-size: 26px;
+  text-shadow: none;
+}
+.bsticker.is-empty .bsticker-nome {
   color: var(--muted-2);
   font-style: italic;
-}
-.bslot.hue {
-  border-left-color: hsl(var(--hue, 348) 50% 62%);
-}
-.bslot.on {
-  background: rgba(255, 217, 61, 0.09);
+  font-weight: 600;
 }
 
 /* ---------- estado vazio / erro ---------- */
@@ -2175,7 +2647,7 @@ h3,
 }
 @media (max-width: 1023px) {
   .chave-overflow {
-    overflow-x: auto;
+    overflow: auto;
   }
 }
 @media (max-width: 860px) {
@@ -3038,51 +3510,37 @@ h3,
   overflow: hidden;
 }
 .chave-overflow {
-  overflow-x: auto;
+  overflow: auto;
+  max-height: min(88vh, 760px);
   padding: 8px 0 12px;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
 }
 .chave-overflow::-webkit-scrollbar {
   height: 9px;
+  width: 9px;
 }
 .chave-canvas {
   position: relative;
   margin: 0 auto;
 }
-.chave-canvas .bslot {
-  text-decoration: none;
+/* variante compacta do confronto (glimpse da home) */
+.bmatch--sm {
+  padding: 6px 6px 5px;
+  column-gap: 3px;
+  border-radius: 14px;
 }
-.bslot {
-  position: relative;
-}
-.bslot.out {
-  color: var(--muted-2);
-  filter: grayscale(1);
-  opacity: 0.72;
-}
-.bslot.out .name {
-  text-decoration: line-through;
-}
-.bslot.out::after {
-  content: "eliminado";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%) rotate(-7deg);
-  padding: 1px 6px;
-  border: 1.5px solid rgba(255, 71, 87, 0.75);
-  border-radius: 4px;
-  background: rgba(22, 4, 11, 0.6);
-  color: rgba(255, 86, 96, 0.92);
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 8.5px;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  pointer-events: none;
+.bmatch--sm .bmatch-vs {
+  width: 20px;
+  height: 20px;
+  font-size: 8px;
 }
 .chave-canvas .bmatch {
-  background: linear-gradient(180deg, rgba(33, 22, 58, 0.97), rgba(15, 8, 28, 0.97));
+  background: linear-gradient(180deg, rgba(33, 22, 58, 0.95), rgba(15, 8, 28, 0.96));
   border-color: rgba(178, 160, 255, 0.14);
+}
+.chave-canvas .bsticker {
+  text-decoration: none;
 }
 .chave-hint {
   background: rgba(9, 4, 20, 0.4);

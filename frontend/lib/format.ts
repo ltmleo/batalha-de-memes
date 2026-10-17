@@ -21,15 +21,27 @@ export function ehBusca(url: string): boolean {
   return /youtube\.com\/results/.test(url);
 }
 
-/** Extrai o id do vídeo e monta uma URL de embed (ou null para buscas). */
-export function youtubeEmbed(url: string): string | null {
+/** Extrai o id do vídeo do YouTube (null quando o link é uma busca ou inválido). */
+export function youtubeId(url: string): string | null {
   if (!url || ehBusca(url)) return null;
   const m =
     url.match(/[?&]v=([\w-]{6,})/) ??
     url.match(/youtu\.be\/([\w-]{6,})/) ??
     url.match(/youtube\.com\/shorts\/([\w-]{6,})/) ??
     url.match(/youtube\.com\/embed\/([\w-]{6,})/);
-  return m ? `https://www.youtube.com/embed/${m[1]}` : null;
+  return m ? m[1] : null;
+}
+
+/** Extrai o id do vídeo e monta uma URL de embed (ou null para buscas). */
+export function youtubeEmbed(url: string): string | null {
+  const id = youtubeId(url);
+  return id ? `https://www.youtube.com/embed/${id}` : null;
+}
+
+/** "Foto" do meme: miniatura do vídeo original (null quando só há busca). */
+export function youtubeThumb(url: string): string | null {
+  const id = youtubeId(url);
+  return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : null;
 }
 
 /** Título curto para o confronto. */

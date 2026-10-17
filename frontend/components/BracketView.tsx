@@ -4,13 +4,16 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { hueStyle } from "@/components/MemeAvatar";
+import { MemeSticker } from "@/components/MemeSticker";
 import { VideoLinks, linksDoMatch } from "@/components/VideoLinks";
 import { GEOM, caminhoDoMeme, layoutSimetrico } from "@/lib/bracket";
-import { votosTexto } from "@/lib/home";
 import type { Match, Meme, TournamentDetail } from "@/lib/types";
 
 const ZOOM_MIN = 0.3;
 const ZOOM_MAX = 1.4;
+/** Faixa do zoom automático inicial: legível, mas sem exagerar no tamanho. */
+const ZOOM_AUTO_MIN = 0.62;
+const ZOOM_AUTO_MAX = 0.92;
 
 function suave(): ScrollBehavior {
   if (typeof window === "undefined" || !window.matchMedia) return "smooth";
@@ -26,47 +29,32 @@ function estadoDo(match: Match): EstadoCard {
   return match.winner_id ? "decidido" : "ativo";
 }
 
-function Slot({
-  memeId,
-  votos,
+/** Rodapé lúdico do card: CTA de voto, aviso de quem avança ou espera. */
+function Rodape({
+  estado,
   vencedor,
-  decidido,
   bye,
-  memes,
-  focusedId,
-  onFocus,
 }: {
-  memeId: number | null;
-  votos: number;
-  vencedor: boolean;
-  decidido: boolean;
+  estado: EstadoCard;
+  vencedor: string | null;
   bye: boolean;
-  memes: Map<number, Meme>;
-  focusedId: number | null;
-  onFocus: (id: number | null) => void;
 }) {
-  if (!memeId) {
+  if (estado === "ativo") {
     return (
-      <div className="bslot empty">
-        <span className="name">{bye ? "avança (bye)" : "a definir"}</span>
-      </div>
+      <Link className="bmatch-cta" href="/#ringue" onClick={(e) => e.stopPropagation()}>
+        <span aria-hidden>⚔</span> vote agora
+      </Link>
     );
   }
-  const meme = memes.get(memeId);
-  const ativo = focusedId === memeId;
-  const fora = decidido && !vencedor;
-  return (
-    <button
-      type="button"
-      className={`bslot hue${vencedor ? " win" : ""}${fora ? " out" : ""}${ativo ? " on" : ""}`}
-      style={hueStyle(memeId)}
-      onClick={() => onFocus(ativo ? null : memeId)}
-      title={ativo ? "Remover destaque" : `Destacar o caminho de ${meme?.nome ?? ""}`}
-    >
-      <span className="name">{meme?.nome ?? "?"}</span>
-      <span className="score">{votos > 0 ? votosTexto(votos) : ""}</span>
-    </button>
-  );
+  if (estado === "decidido") {
+    return (
+      <span className="bmatch-avanca">
+        <span aria-hidden>▸</span>
+        {bye ? "carimbou presença" : `${vencedor ?? "?"} avança`}
+      </span>
+    );
+  }
+  return <span className="bmatch-espera">aguardando oponentes</span>;
 }
 
 function MatchCard(props: {
@@ -90,6 +78,13 @@ function MatchCard(props: {
   const temVideo = Boolean(videos.tiktok || videos.instagram || videos.youtube);
   const ehFinal = node.lado === "centro";
 
+  const a = match.meme_a_id ? memes.get(match.meme_a_id) ?? null : null;
+  const b = match.meme_b_id ? memes.get(match.meme_b_id) ?? null : null;
+  const venceuA = decidido && match.winner_id === match.meme_a_id;
+  const venceuB = decidido && match.winner_id === match.meme_b_id;
+  const vencedorNome = venceuA ? a?.nome ?? null : venceuB ? b?.nome ?? null : null;
+  const foco = (id: number | null) => onFocus(focusedId === id ? null : id);
+
   return (
     <>
       <div
@@ -109,32 +104,33 @@ function MatchCard(props: {
         onMouseEnter={() => hoverFn(match.id)}
         onMouseLeave={() => hoverFn(null)}
       >
-        <Slot
-          memeId={match.meme_a_id}
+        <MemeSticker
+          meme={a}
           votos={match.votos_a}
-          vencedor={decidido && match.winner_id === match.meme_a_id}
-          decidido={decidido}
-          bye={bye}
-          memes={memes}
-          focusedId={focusedId}
-          onFocus={onFocus}
+          vencedor={venceuA}
+          eliminado={decidido && !venceuA && !bye}
+          focado={focusedId !== null && focusedId === match.meme_a_id}
+          vazio={bye ? "avança (bye)" : "a definir"}
+          onClick={a ? () => foco(a.id) : undefined}
+          title={a ? (focusedId === a.id ? "Remover destaque" : `Destacar o caminho de ${a.nome}`) : undefined}
         />
-        <Slot
-          memeId={match.meme_b_id}
+        <span className="bmatch-vs" aria-hidden>
+          VS
+        </span>
+        <MemeSticker
+          meme={b}
           votos={match.votos_b}
-          vencedor={decidido && match.winner_id === match.meme_b_id}
-          decidido={decidido}
-          bye={bye}
-          memes={memes}
-          focusedId={focusedId}
-          onFocus={onFocus}
+          vencedor={venceuB}
+          eliminado={decidido && !venceuB && !bye}
+          focado={focusedId !== null && focusedId === match.meme_b_id}
+          vazio={bye ? "avança (bye)" : "a definir"}
+          onClick={b ? () => foco(b.id) : undefined}
+          title={b ? (focusedId === b.id ? "Remover destaque" : `Destacar o caminho de ${b.nome}`) : undefined}
         />
 
-        {estado === "ativo" ? (
-          <Link className="bmatch-cta" href="/#ringue" onClick={(e) => e.stopPropagation()}>
-            vote agora
-          </Link>
-        ) : null}
+        <div className="bmatch-pe">
+          <Rodape estado={estado} vencedor={vencedorNome} bye={bye} />
+        </div>
 
         {ehFinal ? (
           <span className="final-trophy" aria-hidden>
@@ -192,21 +188,23 @@ export function BracketView({
   );
   const focado = focusedId ? memes.get(focusedId) : null;
 
-  const ajustar = useCallback(() => {
+  const ajustarTudo = useCallback(() => {
     const vp = viewportRef.current;
     if (!vp) return;
     const alvo = (vp.clientWidth - 24) / layout.largura;
     setZoom(Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, alvo)));
   }, [layout.largura]);
 
-  // ajusta o zoom na primeira medição para a árvore inteira caber na tela
+  // zoom inicial: a árvore inteira cabe na altura (o resto aparece no scroll
+  // lateral), mantendo as figurinhas legíveis em vez de tudo minúsculo.
   useEffect(() => {
     if (ajustado.current) return;
-    const vp = viewportRef.current;
-    if (!vp) return;
+    if (typeof window === "undefined") return;
     ajustado.current = true;
-    ajustar();
-  }, [ajustar]);
+    const alturaUtil = Math.min(window.innerHeight * 0.78, 900) - 16;
+    const alvo = alturaUtil / layout.altura;
+    setZoom(Math.min(ZOOM_MAX, Math.max(ZOOM_AUTO_MIN, Math.min(ZOOM_AUTO_MAX, alvo))));
+  }, [layout.altura]);
 
   const scrollParaColuna = useCallback(
     (x: number) => {
@@ -310,8 +308,8 @@ export function BracketView({
             +
           </button>
         </div>
-        <button type="button" className="btn btn--sm btn--ghost" onClick={ajustar}>
-          Ajustar
+        <button type="button" className="btn btn--sm btn--ghost" onClick={ajustarTudo}>
+          ver tudo
         </button>
       </div>
 
@@ -347,8 +345,8 @@ export function BracketView({
                 focusedId={focusedId}
                 delay={Math.min(node.col * 90 + (i % 6) * 30, 700)}
                 onFocus={onFocusChange}
-                  onHover={setHover}
-                />
+                onHover={setHover}
+              />
             ))}
           </div>
         </div>
@@ -358,8 +356,8 @@ export function BracketView({
         {focado
           ? `Destacando o caminho de ${focado.nome}. Clique de novo para limpar.`
           : ativo
-            ? "Confrontos ativos piscam em neon — vote no ringue. Clique num meme para ver o caminho dele até a final."
-            : "Ainda sem votos: a chave completa espera o primeiro duelo. Sorteio já definido."}
+            ? "Confrontos ao vivo piscam em neon — vote no ringue. Role para o lado e clique num meme para seguir o caminho dele até a final."
+            : "Sorteio já definido: role para o lado para percorrer a chave até a final."}
       </div>
     </div>
   );

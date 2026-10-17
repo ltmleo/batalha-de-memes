@@ -1,53 +1,16 @@
-import Link from "next/link";
 import { Fragment } from "react";
 
-import { hueStyle } from "@/components/MemeAvatar";
+import { MemeSticker } from "@/components/MemeSticker";
 import { VideoLinks, linksDoMatch } from "@/components/VideoLinks";
-import { GEOM, layoutBracket } from "@/lib/bracket";
-import { votosTexto } from "@/lib/home";
+import { GEOM_COMPACT, layoutBracket } from "@/lib/bracket";
 import type { Meme, Rodada } from "@/lib/types";
 
 const TOPO = 46; // faixa dos títulos das rodadas (igual ao BracketView)
 
-function Slot({
-  memeId,
-  votos,
-  vencedor,
-  decidido,
-  memes,
-}: {
-  memeId: number | null;
-  votos: number;
-  vencedor: boolean;
-  decidido: boolean;
-  memes: Map<number, Meme>;
-}) {
-  if (!memeId) {
-    return (
-      <div className="bslot empty">
-        <span className="name">a definir</span>
-      </div>
-    );
-  }
-  const meme = memes.get(memeId);
-  const out = decidido && !vencedor;
-  return (
-    <Link
-      href={`/meme/${memeId}`}
-      className={`bslot hue${vencedor ? " win" : ""}${out ? " out" : ""}`}
-      style={hueStyle(memeId)}
-      title={meme?.nome ?? ""}
-    >
-      <span className="name">{meme?.nome ?? "?"}</span>
-      <span className="score">{votos > 0 ? votosTexto(votos) : ""}</span>
-    </Link>
-  );
-}
-
 /**
- * Vista compacta do chaveamento para a home: as quatro últimas rodadas
- * (oitavas → final) com conectores em SVG, vencedores destacados e perdedores
- * carimbados como eliminados.
+ * Vista compacta do chaveamento para a home: as três rodadas finais
+ * (quartas → final), que cabem inteiras na moldura, com conectores em SVG,
+ * cards quadrados dos memes, vencedores coroados e perdedores carimbados.
  */
 export function ChaveGlimpse({
   rodadas,
@@ -56,9 +19,10 @@ export function ChaveGlimpse({
   rodadas: Rodada[];
   memes: Map<number, Meme>;
 }) {
-  const ultimas = rodadas.slice(-4);
+  const ultimas = rodadas.slice(-3);
   const matches = ultimas.flatMap((r) => r.matches);
-  const layout = layoutBracket(matches);
+  const layout = layoutBracket(matches, GEOM_COMPACT);
+  const { cardW, cardH, colGap } = GEOM_COMPACT;
 
   const conectores: { key: string; d: string }[] = [];
   for (let r = 0; r < layout.rodadas.length - 1; r++) {
@@ -67,9 +31,9 @@ export function ChaveGlimpse({
     atual.matches.forEach((node, i) => {
       const pai = proxima.matches[Math.floor(i / 2)];
       if (!pai) return;
-      const x1 = node.x + GEOM.cardW;
+      const x1 = node.x + cardW;
       const y1 = TOPO + node.centerY;
-      const meio = node.x + GEOM.cardW + GEOM.colGap / 2;
+      const meio = node.x + cardW + colGap / 2;
       const x2 = pai.x;
       const y2 = TOPO + pai.centerY;
       conectores.push({ key: `${node.match.id}-${pai.match.id}`, d: `M ${x1} ${y1} H ${meio} V ${y2} H ${x2}` });
@@ -90,7 +54,7 @@ export function ChaveGlimpse({
           </svg>
 
           {layout.rodadas.map((r) => (
-            <div key={r.round} className="round-head" style={{ left: r.x, width: GEOM.cardW }}>
+            <div key={r.round} className="round-head" style={{ left: r.x, width: cardW }}>
               {r.titulo}
               <span className="round-count">{r.vagas}</span>
             </div>
@@ -100,31 +64,51 @@ export function ChaveGlimpse({
             r.matches.map((node, i) => {
               const m = node.match;
               const decidido = m.winner_id !== null;
+              const bye = decidido && (m.meme_a_id === null || m.meme_b_id === null);
+              const a = m.meme_a_id ? memes.get(m.meme_a_id) ?? null : null;
+              const b = m.meme_b_id ? memes.get(m.meme_b_id) ?? null : null;
+              const venceuA = decidido && m.winner_id === m.meme_a_id;
+              const venceuB = decidido && m.winner_id === m.meme_b_id;
               const videos = linksDoMatch(m);
               const temVideo = Boolean(videos.tiktok || videos.instagram || videos.youtube);
               return (
                 <Fragment key={m.id}>
                   <div
-                    className="bmatch"
-                    style={{ left: node.x, top: node.y + TOPO, "--delay": `${Math.min(r.index * 90 + i * 5, 640)}ms` } as React.CSSProperties}
+                    className={`bmatch bmatch--sm bmatch--${decidido ? "decidido" : a && b ? "ativo" : "vazio"}`}
+                    style={{
+                      left: node.x,
+                      top: node.y + TOPO,
+                      width: node.w,
+                      height: node.h,
+                      "--delay": `${Math.min(r.index * 90 + i * 5, 640)}ms`,
+                    } as React.CSSProperties}
                   >
-                    <Slot
-                      memeId={m.meme_a_id}
+                    <MemeSticker
+                      size="sm"
+                      meme={a}
                       votos={m.votos_a}
-                      vencedor={decidido && m.winner_id === m.meme_a_id}
-                      decidido={decidido}
-                      memes={memes}
+                      vencedor={venceuA}
+                      eliminado={decidido && !venceuA && !bye}
+                      vazio={bye ? "avança (bye)" : "a definir"}
+                      href={a ? `/meme/${a.id}` : undefined}
+                      title={a ? `Abrir o card de ${a.nome}` : undefined}
                     />
-                    <Slot
-                      memeId={m.meme_b_id}
+                    <span className="bmatch-vs" aria-hidden>
+                      VS
+                    </span>
+                    <MemeSticker
+                      size="sm"
+                      meme={b}
                       votos={m.votos_b}
-                      vencedor={decidido && m.winner_id === m.meme_b_id}
-                      decidido={decidido}
-                      memes={memes}
+                      vencedor={venceuB}
+                      eliminado={decidido && !venceuB && !bye}
+                      vazio={bye ? "avança (bye)" : "a definir"}
+                      href={b ? `/meme/${b.id}` : undefined}
+                      title={b ? `Abrir o card de ${b.nome}` : undefined}
                     />
                   </div>
                   {temVideo ? (
-                    <div className="bmatch-video" style={{ left: node.x, top: node.y + TOPO + GEOM.cardH + 2 }}>
+                    <div className="bmatch-video" style={{ left: node.x, top: node.y + TOPO + cardH + 2 }}>
                       <VideoLinks {...videos} variante="icons" />
                     </div>
                   ) : null}
@@ -135,7 +119,7 @@ export function ChaveGlimpse({
         </div>
       </div>
       <div className="chave-hint mono">
-        role para o lado · o vencedor de cada duelo sobe uma rodada rumo à taça
+        deslize para o lado · o vencedor de cada duelo sobe uma rodada rumo à taça
       </div>
     </div>
   );

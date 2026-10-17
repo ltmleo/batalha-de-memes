@@ -3,7 +3,7 @@
   "memes": [
     {
       "nome": "Devagar Pai",
-      "youtube_url": "https://www.youtube.com/results?search_query=Devagar+Pai",
+      "youtube_url": "https://www.youtube.com/watch?v=_R8Qh0uLdQ4",
       "inicio": 0,
       "fim": 10,
       "autor_fonte": "YouTube",
@@ -12,11 +12,11 @@
       "historia": "Meme surgido de um áudio/vídeo curto em que um homem repete a frase \"devagar pai\" num tom de alerta exagerado. O trecho virou som recorrente em vídeos de humor e edits nas redes sociais, usado para indicar que algo está prestes a dar errado. Ficou famoso pela entonação dramática e pela facilidade de encaixar em piadas.",
       "tags": ["nacional", "humor", "audio"],
       "confianca": "media",
-      "confirmado": false
+      "confirmado": true
     },
     {
       "nome": "Tigre implacavel",
-      "youtube_url": "https://www.youtube.com/results?search_query=Tigre+implacavel",
+      "youtube_url": "https://www.youtube.com/watch?v=H_kQeqtsIdk",
       "inicio": 0,
       "fim": 10,
       "autor_fonte": "YouTube/TikTok",
@@ -25,11 +25,11 @@
       "historia": "Meme baseado num vídeo em que um homem descreve o tigre como \"o maior felino\" e \"implacável\" na caça, com narração grandiosa. O áudio virou trend, rendendo dublagens e montagens que aplicam a fala a situações do cotidiano. O bordão \"o tigre é o maior felino e na caça ele é implacável\" se espalhou em shorts e reels.",
       "tags": ["nacional", "animal", "trend"],
       "confianca": "media",
-      "confirmado": false
+      "confirmado": true
     },
     {
       "nome": "Pai de Familia",
-      "youtube_url": "https://www.youtube.com/results?search_query=Pai+de+Familia+Jailson+Mendes",
+      "youtube_url": "https://www.youtube.com/watch?v=bpM0xDaNUrk",
       "inicio": 0,
       "fim": 10,
       "autor_fonte": "Não Adivinho / YouTube",
@@ -38,24 +38,11 @@
       "historia": "Personagem-meme ligado ao ator Jailson Mendes, que se apresentava como \"pai de família\" em um vídeo adulto. A expressão e os bordões associados viraram piada recorrente na internet brasileira a partir de 2016. O contraste entre o título doméstico e o conteúdo original gerou inúmeros edits, remixes e memes (usar apenas trechos leves).",
       "tags": ["nacional", "classico", "humor"],
       "confianca": "media",
-      "confirmado": false
-    },
-    {
-      "nome": "Flor Preta",
-      "youtube_url": "https://www.youtube.com/results?search_query=Flor+Preta+piada+Bora+Bill",
-      "inicio": 0,
-      "fim": 10,
-      "autor_fonte": "Stand-up / Podcast",
-      "ano": 2022,
-      "origem": "YouTube",
-      "historia": "Piada de stand-up que virou meme ao responder por que não existe flor preta, com uma punchline envolvendo o personagem \"Bora Bill\". O trecho circulou em cortes de podcast e vídeos de comédia, gerando reações e reproduções nas redes. Ficou conhecida como a piada da \"flor preta\".",
-      "tags": ["nacional", "comedia", "piada"],
-      "confianca": "baixa",
-      "confirmado": false
+      "confirmado": true
     },
     {
       "nome": "Chico bioca",
-      "youtube_url": "https://www.youtube.com/results?search_query=Chico+Bioca",
+      "youtube_url": "https://www.youtube.com/watch?v=ERCBvxmt5mU",
       "inicio": 0,
       "fim": 10,
       "autor_fonte": "YouTube",
@@ -64,7 +51,7 @@
       "historia": "Um dos memes mais antigos do YouTube brasileiro, protagonizado por um homem de óculos e barba que fala de forma atrapalhada e direta. O vídeo ficou marcado pela frase sobre \"com quem o Chico Bioca está dormindo\". Virou clássico cult da era de ouro do YouTube no Brasil e ainda rende referências.",
       "tags": ["nacional", "classico", "youtube"],
       "confianca": "media",
-      "confirmado": false
+      "confirmado": true
     },
     {
       "nome": "Nissim",
@@ -81,107 +68,94 @@
     },
     {
       "nome": "Bambam",
-      "youtube_url": "https://www.youtube.com/results?search_query=Kleber+Bambam+BBB",
-      "inicio": 0,
-      "fim": 10,
-      "autor_fonte": "TV Globo / BBB",
-      "ano": 2002,
-      "origem": "TV",
-      "historia": "Apelido de Kleber Bambam, vencedor da primeira edição do Big Brother Brasil, em 2002. A figura desengonçada e o jeito espontâneo dele viraram referência constante na cultura pop e em memes. Ele seguiu em reality shows e na internet, alimentando o folclore em torno do nome.",
+      "youtube_url": "https://www.youtube.com/watch?v=IXKV-w2Q9vo",
+      "inicio": 1,
+      "fim": 23,
+      "autor_fonte": "YouTube",
+      "ano": 2016,
+      "origem": "YouTube",
+      "historia": "O meme nasceu de um vídeo viral de 2016 gravado durante um treino em uma academia, que reuniu o fisiculturista e influenciador Felipe Franco e Kleber Bambam (vencedor da primeira edição do Big Brother Brasil).",
       "tags": ["nacional", "tv", "reality"],
       "confianca": "media",
-      "confirmado": false
+      "confirmado": true
     },
     {
       "nome": "E Ai Gay",
-      "youtube_url": "https://www.youtube.com/results?search_query=E+ai+gay",
+      "youtube_url": "https://www.youtube.com/shorts/IQgg_LNl1B4",
       "inicio": 0,
-      "fim": 10,
+      "fim": 9,
       "autor_fonte": "YouTube",
-      "ano": null,
+      "ano": 2018,
       "origem": "YouTube",
-      "historia": "Bordão viral usado como cumprimento bem-humorado (\"e aí, gay?\") que se espalhou em vídeos e cortes de podcasts brasileiros. O termo foi reapropriado com humor e virou também nome de podcast. Ficou famoso pela repetição em resenhas e memes de internet.",
+      "historia": "Youtube shorts gravado pelo The Real Brazilian Joker - O Coringa - @therealbrazilianjoker-ocor5514",
       "tags": ["nacional", "bordao", "humor"],
       "confianca": "baixa",
-      "confirmado": false
+      "confirmado": true
     },
     {
-      "nome": "Jao",
-      "youtube_url": "https://www.youtube.com/results?search_query=Jao+meme",
+      "nome": "você é um Jão",
+      "youtube_url": "https://www.youtube.com/watch?v=Uj6kkuwQHGg",
       "inicio": 0,
-      "fim": 10,
+      "fim": 30,
       "autor_fonte": "YouTube",
-      "ano": null,
+      "ano": 2019,
       "origem": "YouTube",
-      "historia": "Meme obscuro/regional associado ao apelido \"Jão\", repetido de forma cômica em vídeos de humor e edits. Há registros principalmente em recortes de redes sociais, sem uma fonte original consolidada. Circula como piada interna da internet brasileira.",
-      "tags": ["nacional", "obscuro", "humor"],
+      "historia": "O cara chamou o outro de Jão e acabou criando um dos melhores vídeos da história. Sem tapas, sem socos, sem chutes, apenas Jão.",
+      "tags": ["nacional", "humor"],
       "confianca": "baixa",
-      "confirmado": false
+      "confirmado": true
     },
     {
-      "nome": "Lidio Fresco Boiola",
-      "youtube_url": "https://www.youtube.com/results?search_query=Lidio+Fresco",
+      "nome": "Lidio Cantando Fresno",
+      "youtube_url": "https://www.youtube.com/watch?v=Fj-Ybx9xz4w",
       "inicio": 0,
-      "fim": 10,
+      "fim": 25,
       "autor_fonte": "YouTube",
       "ano": null,
       "origem": "YouTube",
       "historia": "Meme regional e pouco documentado em torno de um personagem chamado Lídio Fresco, citado em vídeos de zoeira da internet brasileira. Não há fonte original consolidada; o nome aparece em compilações e edits de humor. Circula como piada de nicho entre grupos de memes.",
       "tags": ["nacional", "obscuro", "zoeira"],
       "confianca": "baixa",
-      "confirmado": false
+      "confirmado": true
     },
     {
-      "nome": "Pega o cassetete",
-      "youtube_url": "https://www.youtube.com/results?search_query=Pega+o+cassetete",
+      "nome": "Celso, Celso, o Celso",
+      "youtube_url": "https://www.youtube.com/watch?v=HrVTRwFzLL8",
       "inicio": 0,
-      "fim": 10,
-      "autor_fonte": "Internet / YouTube",
-      "ano": 2024,
-      "origem": "YouTube",
-      "historia": "Vídeo em que um homem tira o cassetete da mão de um policial para correr atrás de um suspeito, gerando reações de humor. A cena foi compartilhada como meme pela inversão inesperada de papéis. Viralizou em redes sociais e edits.",
-      "tags": ["nacional", "viral", "policia"],
-      "confianca": "baixa",
-      "confirmado": false
-    },
-    {
-      "nome": "Celso celso",
-      "youtube_url": "https://www.youtube.com/results?search_query=Celso+Portiolli+meme",
-      "inicio": 0,
-      "fim": 10,
+      "fim": 30,
       "autor_fonte": "SBT / Celso Portiolli",
       "ano": 2021,
       "origem": "TV",
-      "historia": "Meme em torno do apresentador Celso Portiolli, ligado pela internet a teorias conspiratórias sobre o 11 de Setembro. A piada usa o bordão \"Celso, Celso, um dia a gente te pega!\" e montagens absurdas com o apresentador. Circula desde os anos 2010 e se popularizou em páginas de humor.",
-      "tags": ["nacional", "tv", "conspiracao"],
+      "historia": "Durante um game show, o participante chama o Celso algumas vezes. celso, celso oooo celso. PS. O Celso não tem nada haver com 11/09",
+      "tags": ["nacional", "tv"],
       "confianca": "media",
-      "confirmado": false
+      "confirmado": true
     },
     {
       "nome": "Quem ao assiste dona xepa",
-      "youtube_url": "https://www.youtube.com/results?search_query=Dona+Xepa+novela+Record",
-      "inicio": 0,
-      "fim": 10,
+      "youtube_url": "https://www.youtube.com/watch?v=63GEe1PTJjs",
+      "inicio": 45,
+      "fim": 75,
       "autor_fonte": "Record TV / Internet",
       "ano": 2013,
       "origem": "TV",
       "historia": "Frase-meme derivada da novela \"Dona Xepa\", exibida pela Record em 2013, usada em piadas e perguntas do tipo \"quem assistiu?\". O bordão é lembrado por quem acompanhou a trama e virou referência nostálgica nas redes. Costuma aparecer em memes sobre novelas esquecidas.",
       "tags": ["nacional", "novela", "nostalgia"],
       "confianca": "baixa",
-      "confirmado": false
+      "confirmado": true
     },
     {
       "nome": "Amanda Klein tales",
-      "youtube_url": "https://www.youtube.com/results?search_query=Amanda+Klein+Amanda+Tales",
-      "inicio": 0,
-      "fim": 10,
+      "youtube_url": "https://www.youtube.com/watch?v=BgCf7y6_1mA",
+      "inicio": 7,
+      "fim": 32,
       "autor_fonte": "RedeTV!",
       "ano": 2015,
       "origem": "TV",
       "historia": "Gafe ao vivo no \"RedeTV! News\", em 2015, quando o entrevistado Jorge Sucupira errou repetidamente o nome da repórter Amanda Klein, chamando-a de \"Amanda Tales\", \"Clarice\" e outros. O momento virou meme pela confusão e pelos nomes aleatórios. Recortes do vídeo circulam até hoje nas redes.",
       "tags": ["nacional", "tv", "gafe"],
       "confianca": "media",
-      "confirmado": false
+      "confirmado": true
     },
     {
       "nome": "Churrasqueira de controle",
@@ -194,13 +168,13 @@
       "historia": "Em 1998, um inventor levou ao palco do Domingão do Faustão uma churrasqueira de controle remoto, que pegou fogo e arrancou o bordão \"tá pegando fogo, bicho!\" de Faustão. A cena virou um dos memes clássicos da TV brasileira. É lembrada pela reação espontânea do apresentador e pela bizarrice da invenção.",
       "tags": ["nacional", "classico", "tv"],
       "confianca": "media",
-      "confirmado": false
+      "confirmado": true
     },
     {
       "nome": "Kassinao",
       "youtube_url": "https://www.youtube.com/watch?v=LCDaw0QmQQc",
       "inicio": 0,
-      "fim": 10,
+      "fim": 30,
       "autor_fonte": "TV Bandeirantes (Sabadaço)",
       "ano": 2006,
       "origem": "TV",
@@ -211,7 +185,7 @@
     },
     {
       "nome": "Lassier",
-      "youtube_url": "https://www.youtube.com/results?search_query=Lasier+Martins+choque+festa+da+uva",
+      "youtube_url": "https://www.youtube.com/watch?v=U9CXtycJz_g",
       "inicio": 0,
       "fim": 12,
       "autor_fonte": "TV (Festa da Uva)",
@@ -220,37 +194,37 @@
       "historia": "O jornalista Lasier Martins levou um choque elétrico ao vivo durante uma reportagem na Festa da Uva, em Caxias do Sul, em 1996. A cena surreal, apelidada de \"Choque da Uva\", virou meme e foi reeditada por anos, rendendo a Martins o apelido de \"Raiden brasileiro\" e fama de resistente a descargas elétricas.",
       "tags": ["tv", "jornalismo", "classico"],
       "confianca": "media",
-      "confirmado": false
+      "confirmado": true
     },
     {
       "nome": "Cassete de agulha",
       "youtube_url": "https://www.youtube.com/results?search_query=cacete+de+agulha+doa%C3%A7%C3%A3o+de+sangue",
-      "inicio": 0,
-      "fim": 20,
+      "inicio": 12,
+      "fim": 25,
       "autor_fonte": "TV (reportagem)",
       "ano": 2007,
       "origem": "TV",
       "historia": "Em 2007, uma reportagem sobre doação de sangue entrevistou um rapaz que garantia que o procedimento \"não dói nada\", mas que gritou \"Cacete de agulha!\" assim que a enfermeira aplicou a picada. A quebra de expectativa virou um clássico dos primeiros memes brasileiros, repetido como piada até hoje.",
       "tags": ["tv", "classico", "humor"],
       "confianca": "media",
-      "confirmado": false
+      "confirmado": true
     },
     {
       "nome": "Boa noite batman",
-      "youtube_url": "https://www.youtube.com/results?search_query=boa+noite+batman+cidade+alerta",
+      "youtube_url": "https://www.youtube.com/watch?v=pNBBLKyCN_A",
       "inicio": 0,
-      "fim": 10,
+      "fim": 17,
       "autor_fonte": "TV Record (Cidade Alerta)",
-      "ano": null,
+      "ano": 2019,
       "origem": "TV",
       "historia": "Durante uma transmissão do Cidade Alerta, da Record, uma mulher entrevistada respondeu ao repórter com um inesperado \"Boa noite, Batman\", criando uma cena de humor involuntário. O trecho viralizou por seu absurdo e pelo timing, virando bordão e figurinha em grupos e redes sociais.",
       "tags": ["tv", "jornalismo", "humor"],
       "confianca": "media",
-      "confirmado": false
+      "confirmado": true
     },
     {
       "nome": "Eu nao sou cachorro nao",
-      "youtube_url": "https://www.youtube.com/results?search_query=eu+n%C3%A3o+sou+cachorro+n%C3%A3o+dinossauro+marcio+canuto",
+      "youtube_url": "https://www.youtube.com/watch?v=GI3rKNjQQig",
       "inicio": 0,
       "fim": 12,
       "autor_fonte": "TV Globo (SPTV)",
@@ -259,13 +233,13 @@
       "historia": "Em 2011, o repórter Márcio Canuto fazia uma matéria no Museu de Zoologia de São Paulo e perguntou a um menino de 3 anos, Mateus, o que ele achava dos dinossauros. Achando que ouvia \"cachorro\", o garoto rebateu: \"Cachorro? Que cachorro o quê? Eu não sou cachorro, não!\". A resposta atravessou gerações e se tornou um dos primeiros virais infantis da internet brasileira.",
       "tags": ["tv", "crianca", "classico"],
       "confianca": "media",
-      "confirmado": false
+      "confirmado": true
     },
     {
       "nome": "Cagado de fome",
-      "youtube_url": "https://www.youtube.com/results?search_query=cagado+de+fome+%C3%A9+claro",
+      "youtube_url": "https://www.youtube.com/watch?v=pNVT64PHcik",
       "inicio": 0,
-      "fim": 10,
+      "fim": 30,
       "autor_fonte": "YouTube",
       "ano": 2014,
       "origem": "YouTube",
@@ -276,7 +250,7 @@
     },
     {
       "nome": "Irineu",
-      "youtube_url": "https://www.youtube.com/results?search_query=Irineu+voc%C3%AA+n%C3%A3o+sabe+nem+eu",
+      "youtube_url": "https://www.youtube.com/watch?v=Odu55a5QtTE",
       "inicio": 0,
       "fim": 12,
       "autor_fonte": "TV Gazeta (ES) / remix AtilaKw",
@@ -285,20 +259,20 @@
       "historia": "Em 2013, numa reportagem policial da TV Gazeta do Espírito Santo, um homem interpelado sobre seu nome respondeu debochado: \"Irineu, você não sabe nem eu\". O trecho virou fenômeno no YouTube, ganhou remix de AtilaKw e se tornou uma das piadas mais conhecidas do Brasil.",
       "tags": ["tv", "humor", "musica"],
       "confianca": "media",
-      "confirmado": false
+      "confirmado": true
     },
     {
       "nome": "Jeremias",
-      "youtube_url": "https://www.youtube.com/results?search_query=Jeremias+Muito+Louco+Caruaru",
-      "inicio": 0,
-      "fim": 12,
+      "youtube_url": "https://www.youtube.com/watch?v=mmjylwI3ycY",
+      "inicio": 19,
+      "fim": 49,
       "autor_fonte": "Sem Meias Palavras / TV",
       "ano": 2005,
       "origem": "TV",
       "historia": "Jeremias, morador de Caruaru (PE), apareceu completamente embriagado numa entrevista gravada na delegacia, em cenas de \"Jeremias Muito Louco\" que circularam a partir de meados dos anos 2000. Considerado por muitos o primeiro grande meme brasileiro de verdade, virou camisetas, funk e curta-metragem no YouTube.",
       "tags": ["tv", "classico", "nacional"],
       "confianca": "media",
-      "confirmado": false
+      "confirmado": true
     },
     {
       "nome": "Galo cego",
@@ -311,76 +285,65 @@
       "historia": "Daniel Orivaldo da Silva, de Maringá, virou meme como \"Galo Cego\" depois de aparecer em entrevistas de uma TV regional, com falas e reações inusitadas. Suas frases e o jeito arretado renderam remixes (como o \"Rap do Galo\") e o mantiveram como um dos personagens mais lembrados da internet brasileira.",
       "tags": ["tv", "regional", "classico"],
       "confianca": "baixa",
-      "confirmado": false
+      "confirmado": true
     },
+
     {
-      "nome": "Corre berg",
-      "youtube_url": "https://www.youtube.com/results?search_query=corre+berg+meu+deus+do+c%C3%A9u",
+      "nome": "Reporter Vidente",
+      "youtube_url": "https://www.youtube.com/watch?v=lOKB915EEKA",
       "inicio": 0,
-      "fim": 10,
-      "autor_fonte": "TV Correio (Record/PB)",
+      "fim": 28,
+      "autor_fonte": "",
       "ano": 2018,
       "origem": "TV",
-      "historia": "Em um trecho de telejornal da TV Correio, uma pessoa em pânico grita repetidamente \"Meu Deus do céu, corre, Berg!\", gerando uma cena de desespero involuntariamente engraçada. O desespero virou bordão e áudio viral nas redes, usado em montagens sempre que alguém precisa \"correr\" de uma situação.",
-      "tags": ["tv", "humor", "bordao"],
+      "historia": "",
+      "tags": ["tv", "humor", "reportagem"],
       "confianca": "media",
-      "confirmado": false
+      "confirmado": true
     },
     {
       "nome": "Morre diabo",
-      "youtube_url": "https://www.youtube.com/results?search_query=morre+diabo+emilio+devesa",
+      "youtube_url": "https://www.youtube.com/watch?v=dAuE92NvuXU",
       "inicio": 0,
-      "fim": 8,
+      "fim": 30,
       "autor_fonte": "TV/YouTube",
       "ano": 2010,
       "origem": "TV",
-      "historia": "O bordão \"Morre, diabo!\" surgiu em gravações de novembro de 2010, em que Emílio Eduardo da Rocha Devesa aparece gritando frases bizarras diante de câmeras. O tom tenso e surreal virou um dos maiores memes do Brasil, rendendo figurinhas, remixes e até um curta-metragem premiado internacionalmente.",
+      "historia": "O meme mostra um momento de tensão em uma entrevista, na qual um homem detido se recusa a responder às perguntas de um repórter.",
       "tags": ["tv", "classico", "nacional"],
       "confianca": "media",
-      "confirmado": false
+      "confirmado": true
     },
-    {
-      "nome": "Luiza Marilac",
-      "youtube_url": "https://www.youtube.com/results?search_query=Luiza+Marilac+se+isso+%C3%A9+estar+na+pior",
-      "inicio": 0,
-      "fim": 12,
-      "autor_fonte": "YouTube",
-      "ano": 2010,
-      "origem": "YouTube",
-      "historia": "Em 2010, a youtuber e ativista Luísa Marilac publicou vídeos mostrando uma vida de ostentação na Espanha, tomando \"meus bons drinks\" ao lado de uma piscina, e soltando a frase \"se isso é estar na pior, porra, o que é estar bem?\". Os bordões viralizaram e hoje Marilac é também reconhecida por seu ativismo LGBT e pela biografia \"Eu, travesti\".",
-      "tags": ["youtube", "bordao", "nacional"],
-      "confianca": "media",
-      "confirmado": false
-    },
+
     {
       "nome": "Laila Dominique",
-      "youtube_url": "https://www.youtube.com/results?search_query=Laila+Dominique+cada+faxina",
+      "youtube_url": "https://www.youtube.com/watch?v=ERFqFEWSiRs",
       "inicio": 0,
-      "fim": 12,
+      "fim": 40,
       "autor_fonte": "YouTube",
       "ano": 2008,
       "origem": "YouTube",
-      "historia": "A travesti Laila Dominique, nascida em Diamantina (MG), ficou nacionalmente conhecida por volta de 2008 com vídeos cheios de carisma e bordões como \"Cada faxina é um flash!\" e \"sou chique de doer\". Sua autenticidade a transformou em um dos memes mais afetivos da internet brasileira, com aparições posteriores na TV.",
+      "historia": "A travesti Laila Dominique, ficou nacionalmente conhecida por volta de 2008 com vídeos cheios de carisma e bordões como \"Cada faxina é um flash!\" e \"sou chique de doer\". Sua autenticidade a transformou em um dos memes mais afetivos da internet brasileira, com aparições posteriores na TV.",
       "tags": ["youtube", "bordao", "nacional"],
       "confianca": "media",
-      "confirmado": false
+      "confirmado": true
     },
     {
-      "nome": "Carreta Furacao",
-      "youtube_url": "https://www.youtube.com/results?search_query=Carreta+Furac%C3%A3o+Fof%C3%A3o+escalando+parede",
-      "inicio": 0,
-      "fim": 12,
+      "nome": "Sobe o muro fofão!!",
+      "youtube_url": "https://www.youtube.com/watch?v=abEJGiWB0D8",
+      "inicio": 8,
+      "fim": 19,
       "autor_fonte": "YouTube (Ribeirão Preto)",
       "ano": 2007,
       "origem": "YouTube",
       "historia": "Criado em 2007 em Ribeirão Preto (SP), o grupo Carreta Furacão é um \"trenzinho da alegria\" com dançarinos fantasiados de Fofão, Mickey, Popeye e Capitão América, que fazem coreografias e acrobacias ao som de funk e pagode. Um vídeo de 2009 filmado por um segurança viralizou e o Fofão \"escalador de paredes\" virou fenômeno mundial, noticiado inclusive fora do Brasil.",
       "tags": ["youtube", "danca", "nacional"],
       "confianca": "media",
-      "confirmado": false
+      "confirmado": true
     },
     {
       "nome": "Seu fia da mae",
-      "youtube_url": "https://www.youtube.com/results?search_query=seu+fia+da+m%C3%A3e",
+      "youtube_url": "https://www.youtube.com/watch?v=V1iWsNOA02g",
       "inicio": 0,
       "fim": 10,
       "autor_fonte": "YouTube",
@@ -389,13 +352,13 @@
       "historia": "Meme obscuro de áudio/vídeo viral em que alguém solta a fala \"seu fia da mãe\" (filho da mãe) com sotaque marcado, muito compartilhado em edits e grupos. A fala virou bordão debochado usado em montagens e figurinhas, ainda que sua origem exata seja difícil de rastrear.",
       "tags": ["youtube", "bordao", "regional"],
       "confianca": "baixa",
-      "confirmado": false
+      "confirmado": true
     },
     {
       "nome": "To com fome quero leite",
       "youtube_url": "https://www.youtube.com/watch?v=rA-RgGA_ZyY",
       "inicio": 0,
-      "fim": 10,
+      "fim": 30,
       "autor_fonte": "Larica dos Mulekes",
       "ano": 2011,
       "origem": "YouTube",
@@ -405,34 +368,8 @@
       "confirmado": true
     },
     {
-      "nome": "Seu buceta",
-      "youtube_url": "https://www.youtube.com/results?search_query=seu+buceta+rev%C3%B3lver",
-      "inicio": 0,
-      "fim": 10,
-      "autor_fonte": "YouTube",
-      "ano": 2015,
-      "origem": "YouTube",
-      "historia": "\"Seu Buceta\" viralizou no YouTube e no Facebook a partir de dezembro de 2015, com um homem falando em tom cômico sobre um revólver e uma proposta de compra. A expressão repetida virou áudio de zoeira e rendeu boatos posteriores sobre o paradeiro do personagem.",
-      "tags": ["viral", "classico", "humor"],
-      "confianca": "baixa",
-      "confirmado": false
-    },
-    {
-      "nome": "Long Johnson",
-      "youtube_url": "https://www.youtube.com/watch?v=kkwiQmGWK4c",
-      "inicio": 0,
-      "fim": 10,
-      "autor_fonte": "America's Funniest Home Videos",
-      "ano": 2006,
-      "origem": "TV",
-      "historia": "\"Oh Long Johnson\" é um vídeo de um gato que parece pronunciar a frase, gravado originalmente para o programa America's Funniest Home Videos. Tornou-se um dos primeiros memes virais de gato da internet e segue usado em remixes e áudios de surpresa cômica.",
-      "tags": ["gato", "classico", "internacional"],
-      "confianca": "media",
-      "confirmado": true
-    },
-    {
       "nome": "Nada acontece feijoada",
-      "youtube_url": "https://www.youtube.com/results?search_query=crime+ocorre+nada+acontece+feijoada",
+      "youtube_url": "https://www.youtube.com/watch?v=Rf8tR4SsrO0",
       "inicio": 0,
       "fim": 10,
       "autor_fonte": "Orkut / fóruns",
@@ -445,8 +382,8 @@
     },
     {
       "nome": "Ola marilene",
-      "youtube_url": "https://www.youtube.com/results?search_query=ol%C3%A1+marilene+tainha+vinho",
-      "inicio": 0,
+      "youtube_url": "https://www.youtube.com/watch?v=z7-ZYXpJ_EU",
+      "inicio": 4,
       "fim": 10,
       "autor_fonte": "TJ UFSC",
       "ano": 2012,
@@ -458,11 +395,11 @@
     },
     {
       "nome": "Tata",
-      "youtube_url": "https://www.youtube.com/results?search_query=Tata+vou+nada+meme",
+      "youtube_url": "https://www.youtube.com/watch?v=TY8WRAehu_4",
       "inicio": 0,
-      "fim": 10,
+      "fim": 30,
       "autor_fonte": "TikTok",
-      "ano": 2023,
+      "ano": 2015,
       "origem": "TikTok",
       "historia": "O meme \"Tata\" nasceu de vídeos e áudios curtos do humorista Tata, conhecido pela voz marcante e pela frase \"vou nada\". Seus cortes viralizaram no TikTok e no YouTube e passaram a ser usados como áudio em edições de zoeira.",
       "tags": ["humor", "voz", "tiktok"],
@@ -1105,6 +1042,45 @@
       "tags": ["internacional", "musica", "classico"],
       "confianca": "media",
       "confirmado": true
+    },
+        {
+      "nome": "Luiza Marilac",
+      "youtube_url": "https://www.youtube.com/results?search_query=Luiza+Marilac+se+isso+%C3%A9+estar+na+pior",
+      "inicio": 0,
+      "fim": 12,
+      "autor_fonte": "YouTube",
+      "ano": 2010,
+      "origem": "YouTube",
+      "historia": "Em 2010, a youtuber e ativista Luísa Marilac publicou vídeos mostrando uma vida de ostentação na Espanha, tomando \"meus bons drinks\" ao lado de uma piscina, e soltando a frase \"se isso é estar na pior, porra, o que é estar bem?\". Os bordões viralizaram e hoje Marilac é também reconhecida por seu ativismo LGBT e pela biografia \"Eu, travesti\".",
+      "tags": ["youtube", "bordao", "nacional"],
+      "confianca": "media",
+      "confirmado": false
+    },
+        {
+      "nome": "Corre berg",
+      "youtube_url": "https://www.youtube.com/watch?v=NipO0DOKitY",
+      "inicio": 0,
+      "fim": 28,
+      "autor_fonte": "TV Correio (Record/PB)",
+      "ano": 2018,
+      "origem": "TV",
+      "historia": "Em um trecho de telejornal da TV Correio, uma pessoa em pânico grita repetidamente \"Meu Deus do céu, corre, Berg!\", gerando uma cena de desespero involuntariamente engraçada. O desespero virou bordão e áudio viral nas redes, usado em montagens sempre que alguém precisa \"correr\" de uma situação.",
+      "tags": ["tv", "humor", "bordao"],
+      "confianca": "media",
+      "confirmado": false
+    },
+        {
+      "nome": "Seu buceta",
+      "youtube_url": "https://www.youtube.com/results?search_query=seu+buceta+rev%C3%B3lver",
+      "inicio": 0,
+      "fim": 10,
+      "autor_fonte": "YouTube",
+      "ano": 2015,
+      "origem": "YouTube",
+      "historia": "\"Seu Buceta\" viralizou no YouTube e no Facebook a partir de dezembro de 2015, com um homem falando em tom cômico sobre um revólver e uma proposta de compra. A expressão repetida virou áudio de zoeira e rendeu boatos posteriores sobre o paradeiro do personagem.",
+      "tags": ["viral", "classico", "humor"],
+      "confianca": "baixa",
+      "confirmado": false
     }
   ]
 }
