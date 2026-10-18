@@ -1,6 +1,7 @@
 import Link from "next/link";
 
-import { MemeAvatar, hueStyle } from "@/components/MemeAvatar";
+import { FotoMeme } from "@/components/FotoMeme";
+import { hueStyle } from "@/components/MemeAvatar";
 import { ehBusca } from "@/lib/format";
 import type { Meme } from "@/lib/types";
 
@@ -29,7 +30,7 @@ export function MemeCard({
       />
 
       <div className="mcard-top">
-        <MemeAvatar id={meme.id} nome={meme.nome} />
+        <FotoMeme id={meme.id} nome={meme.nome} youtube={meme.youtube_url} decorativo />
         <div className="mcard-id">
           <h3 className="mname">{meme.nome}</h3>
           <div className="mmeta">

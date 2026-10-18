@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { MemeAvatar, hueStyle } from "@/components/MemeAvatar";
+import { FotoMeme } from "@/components/FotoMeme";
+import { hueStyle } from "@/components/MemeAvatar";
 import { Reveal } from "@/components/Reveal";
 import { agruparRodadas } from "@/lib/bracket";
 import { confrontosDoMeme, listarMemes, obterMeme, obterTorneio } from "@/lib/estado";
@@ -57,7 +58,7 @@ export default async function MemePage({ params }: { params: Promise<{ id: strin
 
         <section className="glass detail-head" style={hueStyle(meme.id)}>
           <div className="who">
-            <MemeAvatar id={meme.id} nome={meme.nome} />
+            <FotoMeme id={meme.id} nome={meme.nome} youtube={meme.youtube_url} />
             <div>
               <h1>{meme.nome}</h1>
               <div className="chips" style={{ marginTop: 10 }}>

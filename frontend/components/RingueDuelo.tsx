@@ -4,11 +4,19 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { hueStyle } from "@/components/MemeAvatar";
+import { FotoMeme } from "@/components/FotoMeme";
 import { VideoLinks } from "@/components/VideoLinks";
 import { iniciais } from "@/lib/format";
 import { votosTexto } from "@/lib/home";
 
-export type LadoDuelo = { id: number; nome: string; epiteto: string; votos: number };
+export type LadoDuelo = {
+  id: number;
+  nome: string;
+  epiteto: string;
+  votos: number;
+  /** URL do vídeo original — de onde sai a foto do meme. */
+  youtube?: string | null;
+};
 
 type Comentario = { autor: string; texto: string };
 type Lado = "a" | "b";
@@ -135,11 +143,21 @@ export function RingueDuelo({
       className={`duelo-lado duelo-lado--${lado}${voto === lado ? " is-votado" : ""}`}
       style={hueStyle(dado.id)}
     >
-      <span className="avatar avatar--xl" aria-hidden>
-        {iniciais(dado.nome)}
-      </span>
-      <h3 className="duelo-nome">{dado.nome}</h3>
-      <span className="duelo-epiteto mono">({dado.epiteto})</span>
+      <Link
+        className="duelo-id"
+        href={`/meme/${dado.id}`}
+        title={`Abrir o card de ${dado.nome}`}
+      >
+        <FotoMeme
+          id={dado.id}
+          nome={dado.nome}
+          youtube={dado.youtube}
+          className="avatar--xl"
+          decorativo
+        />
+        <h3 className="duelo-nome">{dado.nome}</h3>
+        <span className="duelo-epiteto mono">({dado.epiteto})</span>
+      </Link>
 
       <div
         className="voto-barra"

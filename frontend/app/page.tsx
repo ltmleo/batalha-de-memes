@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 
 import { ChaveGlimpse } from "@/components/ChaveGlimpse";
 import { Countdown } from "@/components/Countdown";
+import { FotoMeme } from "@/components/FotoMeme";
 import { HomeMotion } from "@/components/HomeMotion";
 import { hueStyle } from "@/components/MemeAvatar";
 import { RingueDuelo } from "@/components/RingueDuelo";
@@ -15,7 +16,6 @@ import {
   memesDoTorneio,
   obterTorneio,
 } from "@/lib/estado";
-import { iniciais } from "@/lib/format";
 import { eliminados, epiteto, faseAoVivo, placar, votosTexto } from "@/lib/home";
 import type { Meme } from "@/lib/types";
 
@@ -192,8 +192,8 @@ export default function Home() {
                 matchId={destaque.id}
                 fase={faseNome}
                 confronto={destaque.posicao + 1}
-                a={{ id: destaquesA.id, nome: destaquesA.nome, epiteto: epiteto(destaquesA), votos: destaque.votos_a }}
-                b={{ id: destaquesB.id, nome: destaquesB.nome, epiteto: epiteto(destaquesB), votos: destaque.votos_b }}
+                a={{ id: destaquesA.id, nome: destaquesA.nome, epiteto: epiteto(destaquesA), votos: destaque.votos_a, youtube: destaquesA.youtube_url }}
+                b={{ id: destaquesB.id, nome: destaquesB.nome, epiteto: epiteto(destaquesB), votos: destaque.votos_b, youtube: destaquesB.youtube_url }}
                 tiktok={destaque.tiktok_url}
                 instagram={destaque.instagram_url}
                 youtube={destaque.youtube_url}
@@ -216,29 +216,63 @@ export default function Home() {
                   const a = meme(m.meme_a_id);
                   const b = meme(m.meme_b_id);
                   const p = placar(m);
+                  const ladoA = (
+                    <>
+                      <FotoMeme
+                        id={a?.id ?? 0}
+                        nome={a?.nome ?? "?"}
+                        youtube={a?.youtube_url}
+                        className="avatar--sm"
+                        decorativo
+                      />
+                      <b>{a?.nome ?? "—"}</b>
+                      <span className="mono mini-pct">{p.pctA}%</span>
+                    </>
+                  );
+                  const ladoB = (
+                    <>
+                      <span className="mono mini-pct">{p.pctB}%</span>
+                      <b>{b?.nome ?? "—"}</b>
+                      <FotoMeme
+                        id={b?.id ?? 0}
+                        nome={b?.nome ?? "?"}
+                        youtube={b?.youtube_url}
+                        className="avatar--sm"
+                        decorativo
+                      />
+                    </>
+                  );
                   return (
                     <article className="mini-duelo home-scale" key={m.id}>
                       <header className="mini-duelo-topo mono">
                         ao vivo · confronto #{m.posicao + 1}
                       </header>
                       <div className="mini-duelo-corpo">
-                        <div className="mini-lado">
-                          <span className="avatar avatar--sm" style={hueStyle(a?.id ?? 0)} aria-hidden>
-                            {iniciais(a?.nome ?? "?")}
-                          </span>
-                          <b>{a?.nome ?? "—"}</b>
-                          <span className="mono mini-pct">{p.pctA}%</span>
-                        </div>
+                        {a ? (
+                          <Link
+                            className="mini-lado"
+                            href={`/meme/${a.id}`}
+                            title={`Abrir o card de ${a.nome}`}
+                          >
+                            {ladoA}
+                          </Link>
+                        ) : (
+                          <div className="mini-lado">{ladoA}</div>
+                        )}
                         <span className="mini-vs2" aria-hidden>
                           VS
                         </span>
-                        <div className="mini-lado is-right">
-                          <span className="mono mini-pct">{p.pctB}%</span>
-                          <b>{b?.nome ?? "—"}</b>
-                          <span className="avatar avatar--sm" style={hueStyle(b?.id ?? 0)} aria-hidden>
-                            {iniciais(b?.nome ?? "?")}
-                          </span>
-                        </div>
+                        {b ? (
+                          <Link
+                            className="mini-lado is-right"
+                            href={`/meme/${b.id}`}
+                            title={`Abrir o card de ${b.nome}`}
+                          >
+                            {ladoB}
+                          </Link>
+                        ) : (
+                          <div className="mini-lado is-right">{ladoB}</div>
+                        )}
                       </div>
                       <div className="mini-barras">
                         <span className="mini-barra mini-barra--a">
@@ -314,9 +348,13 @@ export default function Home() {
                   key={e.meme.id}
                   title={`Abrir o card de ${e.meme.nome}`}
                 >
-                  <span className="avatar avatar--lg" aria-hidden>
-                    {iniciais(e.meme.nome)}
-                  </span>
+                  <FotoMeme
+                    id={e.meme.id}
+                    nome={e.meme.nome}
+                    youtube={e.meme.youtube_url}
+                    className="avatar--lg"
+                    decorativo
+                  />
                   <b className="cem-nome">{e.meme.nome}</b>
                   <span className="cem-fase mono">caiu na {e.fase}</span>
                   <span className="cem-stamp" aria-hidden>
