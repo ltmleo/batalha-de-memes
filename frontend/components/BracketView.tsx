@@ -31,17 +31,19 @@ function estadoDo(match: Match): EstadoCard {
 
 /** Rodapé lúdico do card: CTA de voto, aviso de quem avança ou espera. */
 function Rodape({
+  matchId,
   estado,
   vencedor,
   bye,
 }: {
+  matchId: number;
   estado: EstadoCard;
   vencedor: string | null;
   bye: boolean;
 }) {
   if (estado === "ativo") {
     return (
-      <Link className="bmatch-cta" href="/#ringue" onClick={(e) => e.stopPropagation()}>
+      <Link className="bmatch-cta" href={`/match/${matchId}`} onClick={(e) => e.stopPropagation()}>
         <span aria-hidden>⚔</span> vote agora
       </Link>
     );
@@ -129,7 +131,7 @@ function MatchCard(props: {
         />
 
         <div className="bmatch-pe">
-          <Rodape estado={estado} vencedor={vencedorNome} bye={bye} />
+          <Rodape matchId={match.id} estado={estado} vencedor={vencedorNome} bye={bye} />
         </div>
 
         {ehFinal ? (

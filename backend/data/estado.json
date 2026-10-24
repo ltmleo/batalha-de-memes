@@ -1585,16 +1585,18 @@
       "meme_a_id": 27,
       "meme_b_id": 8,
       "winner_id": null,
-      "video_path": null,
+      "video_path": "backend/media/clips/match_1.mp4",
       "tiktok_url": null,
       "instagram_url": null,
       "youtube_url": null,
       "publicado_em": null,
       "deadline": null,
-      "status": "pendente",
+      "status": "pronto",
       "votos_a": 0,
       "votos_b": 0,
-      "id": 1
+      "id": 1,
+      "capa_path": "backend/media/clips/match_1_capa.png",
+      "duracao": 52.87
     },
     {
       "tournament_id": 1,

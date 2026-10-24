@@ -1,0 +1,21 @@
+[project]
+name = "batalha-de-memes"
+version = "0.2.0"
+description = "Pipeline da Batalha de Memes: catálogo, chaveamento, montagem de vídeo e apuração"
+requires-python = ">=3.11"
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+# E741: `l` (largura) é nome de campo do layout desde o início
+ignore = ["E501", "E741"]

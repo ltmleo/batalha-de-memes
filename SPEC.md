@@ -41,9 +41,12 @@ batalha-de-memes/
         bracket.py       # sorteio das chaves + propagação
         downloader.py    # yt-dlp + crop 9:16 (+ progresso p/ barra)
         assembler.py     # ffmpeg (montagem; cover/contain; montar_match)
+        kit.py           # assets procedurais (gancho, capa, selos, CTA, encerramento)
+        vote_parser.py   # apuração A vs B a partir de arquivo de comentários (feito)
+        publicacao.py    # legenda + pacote da rodada (publicação assistida) (feito)
+        validacao.py     # validação de catálogo/estado (feito)
         scraper.py       # comentários TikTok        (a implementar)
-        vote_parser.py   # apuração A vs B            (a implementar)
-        publisher.py     # upload/publicação          (a implementar)
+        publisher.py     # upload via API oficial     (a implementar)
       workers/pipeline.py
     data/
       memes/             # catálogo editável por temporada (entrada do seed)
@@ -83,6 +86,14 @@ desfocado — em `media/clips/`. Trechos já baixados são cacheados.
 - Quem não tem adversário recebe *bye* e avança automaticamente.
 
 ## 3. Montagem (`assembler.py`, ffmpeg)
+
+> **Atualização:** a montagem agora é por segmentos definidos em
+> `data/roteiro.json` (padrão gancho → A → versus → B → encerramento), com
+> transições `xfade`, `loudnorm` nos memes, barra de progresso e o kit
+> procedural de `services/kit.py` (gancho, capa, selos A/B, CTA "COMENTE A/B",
+> encerramento com os memes). Detalhes no README, seção "Como o vídeo final é
+> montado". O texto abaixo descreve a composição dentro da moldura, que segue igual.
+
 Sequência **abertura → meme A → versus → meme B** (+ encerramento opcional), com a
 moldura `assets/moldura2.png` e os clipes dos memes no "telão". O clipe `videos/versus.mp4`
 (transição "VS") entra **entre os dois memes**, exibido em **tela cheia** (sem passar
@@ -178,5 +189,7 @@ tráfego para o site (ranking/votação) e "inscrição de memes" patrocinada.
 1. `catalog.py` + `bracket.py` + CLI com chaveamento. **(feito neste scaffold)**
 2. `downloader.py` + `assembler.py`: gerar um match manualmente. **(scaffold pronto)**
 3. Editor visual desktop (área do vídeo na moldura, título, cover/contain, gerar vídeo). **(feito)**
-4. `scraper.py` + `vote_parser.py` com coleta simulada.
-5. `pipeline.py` automatiza o ciclo; `publisher.py` fecha.
+4. Kit de vídeo procedural + roteiro + `vote_parser.py` (apuração por arquivo),
+   `rodada`/`publicar`/`apurar`/`status`/`doctor`/`validar`, testes e CI. **(feito)**
+5. `scraper.py` (coleta automática dos comentários) alimentando o `apurar`.
+6. `publisher.py` (Content Posting API) substitui a publicação assistida.

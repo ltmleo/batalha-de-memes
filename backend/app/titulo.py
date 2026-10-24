@@ -126,46 +126,89 @@ def tamanho(texto: str, layout: Layout | None = None) -> int:
 
 def _gradiente(largura: int, altura: int, y0: int, y1: int) -> Image.Image:
     """Gradiente vertical (topo -> base) com as cores do título."""
+    return _gradiente_cores(largura, altura, y0, y1, COR_TOPO, COR_BASE)
+
+
+def _gradiente_cores(
+    largura: int, altura: int, y0: int, y1: int, topo: tuple, base: tuple
+) -> Image.Image:
     img = Image.new("RGB", (largura, altura))
     desenho = ImageDraw.Draw(img)
     span = max(1, y1 - y0)
     for y in range(altura):
         t = min(max((y - y0) / span, 0.0), 1.0)
-        cor = tuple(round(COR_TOPO[i] + (COR_BASE[i] - COR_TOPO[i]) * t) for i in range(3))
+        cor = tuple(round(topo[i] + (base[i] - topo[i]) * t) for i in range(3))
         desenho.line([(0, y), (largura, y)], fill=cor)
     return img
+
+
+def encaixar(texto: str, largura_max: float, teto: int, linhas_max: int = LINHAS_MAX) -> tuple[list[str], int]:
+    """(linhas, tamanho) do maior texto que cabe em ``largura_max`` (até 2 linhas).
+
+    Versão genérica do ajuste do título, usada pelo kit de vídeo (gancho,
+    encerramento, selos) para encaixar nomes em caixas de largura fixa.
+    """
+    prep = preparar(texto)
+    if not prep:
+        return [], 0
+    tamanho_1 = _maior_1linha(prep, largura_max, teto)
+    if linhas_max < 2 or tamanho_1 >= 0.8 * teto:
+        return [prep], tamanho_1
+    em_duas = _melhor_2linhas(prep, largura_max, int(teto * 0.8))
+    if em_duas is not None and em_duas[1] > tamanho_1:
+        return em_duas
+    return [prep], tamanho_1
+
+
+def pintar(
+    camada: Image.Image,
+    linhas: list[str],
+    tamanho_fonte: int,
+    centro: tuple[float, float],
+    topo: tuple = COR_TOPO,
+    base: tuple = COR_BASE,
+    contorno: int = CONTORNO,
+    sombra: tuple[int, int] = SOMBRA,
+) -> None:
+    """Desenha ``linhas`` centradas em ``centro`` no estilo do título.
+
+    Gradiente vertical ``topo``→``base`` no interior, contorno e sombra pretos.
+    Texto já deve estar preparado (``preparar``) ou ser só caixa-alta ASCII.
+    """
+    if not linhas or tamanho_fonte <= 0:
+        return
+    fonte = _fonte_pil(tamanho_fonte)
+    espaco = ESPACO_LINHA * tamanho_fonte
+    y0 = centro[1] - espaco * (len(linhas) - 1) / 2
+    posicoes = [(round(centro[0]), round(y0 + i * espaco)) for i in range(len(linhas))]
+
+    desenho = ImageDraw.Draw(camada)
+    if sombra != (0, 0):
+        for (x, y), linha in zip(posicoes, linhas):
+            desenho.text((x + sombra[0], y + sombra[1]), linha, font=fonte,
+                         fill=COR_CONTORNO + (150,), anchor="mm")
+    if contorno > 0:
+        for (x, y), linha in zip(posicoes, linhas):
+            desenho.text((x, y), linha, font=fonte, fill=COR_CONTORNO + (255,), anchor="mm",
+                         stroke_width=contorno, stroke_fill=COR_CONTORNO + (255,))
+
+    mascara = Image.new("L", camada.size, 0)
+    mascara_desenho = ImageDraw.Draw(mascara)
+    for (x, y), linha in zip(posicoes, linhas):
+        mascara_desenho.text((x, y), linha, font=fonte, fill=255, anchor="mm")
+    caixa = mascara.getbbox()
+    if caixa is not None:
+        gradiente = _gradiente_cores(camada.width, camada.height, caixa[1], caixa[3], topo, base)
+        gradiente = gradiente.convert("RGBA")
+        gradiente.putalpha(mascara)
+        camada.alpha_composite(gradiente)
 
 
 def _imagem(texto: str, t_y: float, t_larg: float, t_fonte: int) -> Image.Image:
     layout = Layout(titulo_y=t_y, titulo_largura=t_larg, titulo_fonte=t_fonte)
     camada = Image.new("RGBA", (LARGURA, ALTURA), (0, 0, 0, 0))
     linhas, tamanho_fonte = _dispor(texto, layout)
-    if not linhas:
-        return camada
-
-    fonte = _fonte_pil(tamanho_fonte)
-    espaco = ESPACO_LINHA * tamanho_fonte
-    y0 = layout.px_titulo_y() - espaco * (len(linhas) - 1) / 2
-    posicoes = [(LARGURA // 2, round(y0 + i * espaco)) for i in range(len(linhas))]
-
-    desenho = ImageDraw.Draw(camada)
-    if SOMBRA != (0, 0):
-        for (x, y), linha in zip(posicoes, linhas):
-            desenho.text((x + SOMBRA[0], y + SOMBRA[1]), linha, font=fonte,
-                         fill=COR_CONTORNO + (150,), anchor="mm")
-    for (x, y), linha in zip(posicoes, linhas):
-        desenho.text((x, y), linha, font=fonte, fill=COR_CONTORNO + (255,), anchor="mm",
-                     stroke_width=CONTORNO, stroke_fill=COR_CONTORNO + (255,))
-
-    mascara = Image.new("L", (LARGURA, ALTURA), 0)
-    mascara_desenho = ImageDraw.Draw(mascara)
-    for (x, y), linha in zip(posicoes, linhas):
-        mascara_desenho.text((x, y), linha, font=fonte, fill=255, anchor="mm")
-    caixa = mascara.getbbox()
-    if caixa is not None:
-        gradiente = _gradiente(LARGURA, ALTURA, caixa[1], caixa[3]).convert("RGBA")
-        gradiente.putalpha(mascara)
-        camada.alpha_composite(gradiente)
+    pintar(camada, linhas, tamanho_fonte, (LARGURA // 2, layout.px_titulo_y()))
     return camada
 
 

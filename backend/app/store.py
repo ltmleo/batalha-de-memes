@@ -8,6 +8,8 @@ arquivo, e o site estático consome o mesmo JSON em tempo de build.
 from __future__ import annotations
 
 import json
+import os
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -45,9 +47,7 @@ class Estado:
 
     def salvar(self, caminho: Path | None = None) -> Path:
         caminho = Path(caminho or CAMINHO_ESTADO)
-        caminho.parent.mkdir(parents=True, exist_ok=True)
-        texto = json.dumps(self.para_dict(), ensure_ascii=False, indent=2)
-        caminho.write_text(texto + "\n", encoding="utf-8")
+        gravar_json_atomico(caminho, self.para_dict())
         return caminho
 
     # -- utilidades -----------------------------------------------------
@@ -74,6 +74,22 @@ class Estado:
             (m for m in self.matches if m["tournament_id"] == torneio_id),
             key=lambda m: (m["round"], m["posicao"]),
         )
+
+
+def gravar_json_atomico(caminho: Path, dados: Any) -> None:
+    """Grava JSON num ``.tmp`` e troca de uma vez (``os.replace``).
+
+    Se o processo cair no meio (render longo, Ctrl+C), o arquivo antigo fica
+    intacto em vez de um JSON truncado.
+    """
+    caminho.parent.mkdir(parents=True, exist_ok=True)
+    texto = json.dumps(dados, ensure_ascii=False, indent=2) + "\n"
+    with tempfile.NamedTemporaryFile(
+        "w", encoding="utf-8", dir=caminho.parent, prefix=f".{caminho.name}.", suffix=".tmp",
+        delete=False,
+    ) as tmp:
+        tmp.write(texto)
+    os.replace(tmp.name, caminho)
 
 
 def agora() -> str:

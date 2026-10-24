@@ -2,9 +2,10 @@
 
 import { Fragment, useEffect, useState } from "react";
 
-// Cronômetro digital da votação. O alvo é o próximo domingo 23:59 (hora local);
-// o primeiro render é neutro ("--") e só o cliente conta, evitando divergência
-// de hidratação no export estático.
+// Cronômetro digital da votação. O alvo é o `deadline` do confronto (ISO,
+// gravado por `app.cli publicar`); sem ele, o próximo domingo 23:59 (hora
+// local). O primeiro render é neutro ("--") e só o cliente conta, evitando
+// divergência de hidratação no export estático.
 
 const ETAPAS = ["dias", "horas", "min", "seg"] as const;
 
@@ -28,16 +29,17 @@ function duplas(ms: number): string[] {
   ].map((n) => String(n).padStart(2, "0"));
 }
 
-export function Countdown() {
+export function Countdown({ alvo: prazo }: { alvo?: string | null } = {}) {
   const [valores, setValores] = useState<string[] | null>(null);
 
   useEffect(() => {
-    const alvo = alvoFechamento();
+    const fixo = prazo ? Date.parse(prazo) : NaN;
+    const alvo = Number.isFinite(fixo) ? fixo : alvoFechamento();
     const tick = () => setValores(duplas(alvo - Date.now()));
     tick();
     const id = window.setInterval(tick, 1000);
     return () => window.clearInterval(id);
-  }, []);
+  }, [prazo]);
 
   const digitos = valores ?? ["--", "--", "--", "--"];
 

@@ -1,14 +1,16 @@
-# Publica o site estático em https://ltmleo.github.io/batalha-de-memes/
+# Checagens + publicação do site estático em https://ltmleo.github.io/batalha-de-memes/
 #
-# A cada push na master: build do Next (export estático para frontend/out),
-# upload do artefato e deploy no GitHub Pages (Actions).
+# A cada push/PR: testes e lint do backend, validação do catálogo/estado e
+# checagem de tipos do frontend. Só depois disso, e só em push na master, o
+# build do Next (export estático para frontend/out) vai para o GitHub Pages.
 #
 # Ative uma única vez em Settings → Pages → Source: "GitHub Actions".
-name: Publicar no GitHub Pages
+name: Checar e publicar
 
 on:
   push:
     branches: ["master", "main"]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -17,11 +19,38 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: "pages-${{ github.ref }}"
   cancel-in-progress: true
 
 jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+
+      - name: Instalar dependências
+        run: pip install -r requirements-dev.txt
+
+      - name: Lint (ruff)
+        run: ruff check app tests
+
+      - name: Testes (pytest)
+        run: pytest -q
+
+      - name: Validar catálogo e estado
+        run: python -m app.cli validar --so-erros
+
   build:
+    needs: backend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -38,18 +67,24 @@ jobs:
         run: npm ci
         working-directory: frontend
 
+      - name: Checar tipos (tsc)
+        run: npx tsc --noEmit
+        working-directory: frontend
+
       - name: Build estático (export)
         # Lê backend/data/estado.json em tempo de build e gera frontend/out/
         run: npm run build
         working-directory: frontend
 
       - name: Empacotar artefato (frontend/out)
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: frontend/out
 
   deploy:
     needs: build
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

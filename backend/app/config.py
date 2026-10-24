@@ -18,7 +18,6 @@ ABERTURA_PATH = VIDEOS_DIR / "abertura.mp4"
 ENCERRAMENTO_PATH = VIDEOS_DIR / "encerramento.mp4"
 VERSUS_PATH = VIDEOS_DIR / "versus.mp4"
 MOLDURA_PATH = ASSETS_DIR / "moldura2.png"
-FONTE_PATH = Path("C:/Windows/Fonts/arial.ttf")
 # Fonte de display do título (empacotada no repo; ver assets/fonts/LEIA-ME.txt)
 FONTE_TITULO_PATH = ASSETS_DIR / "fonts" / "Dream MMA.ttf"
 
@@ -29,6 +28,19 @@ CATALOGO_DIR = DATA_DIR / "memes"
 
 # Layout da montagem (área do vídeo na moldura, preenchimento) — editável no editor
 CAMINHO_LAYOUT = DATA_DIR / "layout.json"
+
+# Roteiro do vídeo (sequência, transições, áudio, encode) — editável à mão
+CAMINHO_ROTEIRO = DATA_DIR / "roteiro.json"
+
+# Assets gerados pelo kit de vídeo (gancho, selos, capa...) — cache, git-ignored
+KIT_DIR = TMP_DIR / "kit"
+
+# Comentários brutos (entrada da apuração) e saídas para publicação
+RAW_DATA_DIR = DATA_DIR / "raw"
+PUBLICAR_DIR = MEDIA_DIR / "publicar"
+
+# Capas publicadas no site (versionadas: o build do Pages precisa delas)
+CAPAS_SITE_DIR = REPO_DIR / "frontend" / "public" / "capas"
 
 for _dir in (DATA_DIR, MEDIA_DIR, RAW_DIR, CLIPS_DIR, TMP_DIR):
     _dir.mkdir(parents=True, exist_ok=True)

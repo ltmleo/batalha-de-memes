@@ -6,6 +6,7 @@ import { MotionProvider } from "@/components/MotionProvider";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { listarTorneios } from "@/lib/estado";
+import { urlAbsoluta } from "@/lib/site";
 
 
 const sans = Space_Grotesk({
@@ -26,10 +27,22 @@ const display = Outfit({
   display: "swap",
 });
 
+const DESCRICAO =
+  "Batalha de memes em formato de Copa do Mundo: vote no ringue, acompanhe o chaveamento e visite o cemitério dos caídos.";
+
 export const metadata = {
+  metadataBase: new URL(urlAbsoluta("/")),
   title: "Copa do Meme — a Copa do Mundo da internet",
-  description:
-    "Batalha de memes em formato de Copa do Mundo: vote no ringue, acompanhe o chaveamento e visite o cemitério dos caídos.",
+  description: DESCRICAO,
+  openGraph: {
+    title: "Copa do Meme — a Copa do Mundo da internet",
+    description: DESCRICAO,
+    url: urlAbsoluta("/"),
+    siteName: "Batalha de Memes",
+    locale: "pt_BR",
+    type: "website",
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -75,6 +75,13 @@ export default function Home() {
   const vivos = rodadas.length ? stats.totalMemes : 0;
 
   const faseNome = fase?.rodada.titulo ?? "A disputa";
+  // prazo real: o deadline mais próximo entre os duelos abertos (app.cli publicar)
+  const agoraMs = Date.now();
+  const prazo =
+    noRingue
+      .map((m) => m.deadline)
+      .filter((d): d is string => Boolean(d) && Date.parse(d as string) > agoraMs)
+      .sort()[0] ?? null;
 
   return (
     <HomeMotion>
@@ -138,7 +145,7 @@ export default function Home() {
 
             <div className="hero-crono">
               <span className="hero-crono-rot mono">a votação encerra em</span>
-              <Countdown />
+              <Countdown alvo={prazo} />
             </div>
 
             <div className="hero-actions">
@@ -245,7 +252,7 @@ export default function Home() {
                   return (
                     <article className="mini-duelo home-scale" key={m.id}>
                       <header className="mini-duelo-topo mono">
-                        ao vivo · confronto #{m.posicao + 1}
+                        <Link href={`/match/${m.id}`}>ao vivo · confronto #{m.posicao + 1} →</Link>
                       </header>
                       <div className="mini-duelo-corpo">
                         {a ? (

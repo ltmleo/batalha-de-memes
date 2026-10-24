@@ -10,12 +10,24 @@ const CAMINHO =
 
 const VAZIO: Estado = { memes: [], tournaments: [], matches: [], votes: [] };
 
+// O JSON não muda durante o build: lê e parseia uma vez só (cada página e
+// cada helper chamava o parse de novo). Em `next dev` relê a cada requisição
+// para refletir edições no arquivo sem reiniciar o servidor.
+let cache: Estado | null = null;
+
 export function carregarEstado(): Estado {
+  if (cache && process.env.NODE_ENV === "production") return cache;
   try {
-    return JSON.parse(readFileSync(CAMINHO, "utf-8")) as Estado;
+    cache = JSON.parse(readFileSync(CAMINHO, "utf-8")) as Estado;
   } catch {
-    return VAZIO;
+    cache = VAZIO;
   }
+  return cache;
+}
+
+/** Um confronto pelo id (ou null). */
+export function obterMatch(id: number): Match | null {
+  return carregarEstado().matches.find((m) => m.id === id) ?? null;
 }
 
 export function listarTorneios(): Tournament[] {

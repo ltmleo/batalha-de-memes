@@ -21,8 +21,8 @@ from typing import Any
 
 from PIL import Image, ImageTk
 
-from ..config import CLIPS_DIR, MOLDURA_PATH
 from .. import titulo
+from ..config import CLIPS_DIR, MOLDURA_PATH
 from ..layout import Layout, carregar_layout, salvar_layout
 from ..services import assembler, downloader
 from ..services.catalog import carregar_catalogo
@@ -45,9 +45,10 @@ def _hhmmss(segundos: float) -> str:
 class Editor(tk.Tk):
     """Janela do editor: preview à esquerda, controles à direita."""
 
-    def __init__(self) -> None:
+    def __init__(self, match_id: int | None = None) -> None:
         super().__init__()
         self.title("Batalha de Memes — editor de montagem")
+        self._match_inicial = match_id
         self.resizable(False, False)
 
         self.estado = Estado.carregar()
@@ -224,6 +225,8 @@ class Editor(tk.Tk):
     # --------------------------------------------------------------- dados
     def _carregar_matches(self, manter_selecao: bool = True) -> None:
         selecionado = self.match.get("id") if (manter_selecao and self.match) else None
+        if selecionado is None:
+            selecionado, self._match_inicial = self._match_inicial, None
         completos = [
             m for m in self.estado.matches if m.get("meme_a_id") and m.get("meme_b_id")
         ]
@@ -713,9 +716,9 @@ class Editor(tk.Tk):
         self.barra_status.config(text=msg)
 
 
-def executar() -> None:
-    """Abre o editor (bloqueia até fechar a janela)."""
-    Editor().mainloop()
+def executar(match_id: int | None = None) -> None:
+    """Abre o editor (bloqueia até fechar a janela), opcionalmente num confronto."""
+    Editor(match_id).mainloop()
 
 
 if __name__ == "__main__":

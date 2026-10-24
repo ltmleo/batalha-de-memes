@@ -1,0 +1,52 @@
+{
+  "sequencia": [
+    "gancho",
+    "a",
+    "versus",
+    "b",
+    "encerramento"
+  ],
+  "transicao": "fade",
+  "transicao_duracao": 0.25,
+  "gancho_duracao": 1.6,
+  "loudnorm": true,
+  "lufs": -14.0,
+  "selo": true,
+  "cta_segundos": 3.0,
+  "barra_progresso": true,
+  "duracao_max": 60.0,
+  "crf": 18,
+  "preset": "medium",
+  "audio_kbps": 192,
+  "encerramento": {
+    "painel_a": [
+      176,
+      714,
+      306,
+      690
+    ],
+    "painel_b": [
+      598,
+      714,
+      306,
+      690
+    ],
+    "rotulo_a": [
+      196,
+      604,
+      286,
+      82
+    ],
+    "rotulo_b": [
+      604,
+      604,
+      286,
+      82
+    ],
+    "vs": [
+      540,
+      1000,
+      118
+    ]
+  }
+}

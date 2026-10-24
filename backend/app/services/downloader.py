@@ -6,7 +6,6 @@ import os
 import shutil
 import subprocess
 from pathlib import Path
-
 from typing import Any, Callable
 
 from ..config import CLIPS_DIR, MEDIA_DIR, RAW_DIR

@@ -9,12 +9,12 @@ meme se enfrentam, o público vota nos comentários e o vencedor avança no chav
 - **Site:** Next.js em **export estático** (`output: "export"`): o build lê
   `data/estado.json` e gera HTML/CSS/JS puros em `frontend/out/`.
 
-Status atual: catálogo, chaveamento e CLI prontos; `downloader.py` e `assembler.py`
-já geram um vídeo de confronto (abertura + moldura + título + clipes) e há um
-**editor visual desktop** (`app.cli editor`) para ajustar a área do vídeo na
-moldura, o título e o preenchimento (cover/contain). Coleta de votos
-do TikTok (`scraper`/`vote_parser`) e publicação (`publisher`) ainda não
-implementados — ver `SPEC.md`.
+Status atual: catálogo, chaveamento, montagem de vídeo (com **kit procedural**:
+gancho, selos, CTA, encerramento personalizado e capa — sem IA), editor desktop,
+**apuração de votos por arquivo de comentários** (`apurar`), montagem da rodada em
+lote com pacote de publicação (`rodada`) e página de cada confronto no site.
+Ainda não implementados: coleta automática dos comentários do TikTok (`scraper`)
+e upload pela API oficial (`publisher`) — ver `SPEC.md`.
 
 ---
 
@@ -47,9 +47,9 @@ e alimenta o estado via `seed` (insere novos memes e atualiza os existentes por 
 
 | Caminho | Para quê |
 | --- | --- |
-| `videos/abertura.mp4` | Intro (vertical 1080x1920) concatenada no início do vídeo |
+| `videos/abertura.mp4` | Vinheta da marca (vertical 1080x1920) — fora da sequência padrão; inclua `"abertura"` em `data/roteiro.json` para usar |
 | `videos/versus.mp4` | Transição "VS" (vertical 1080x1920) em tela cheia, **entre** o clipe A e o clipe B (sem moldura, sem título) |
-| `videos/encerramento.mp4` | Encerramento (vertical 1080x1920) concatenado no fim, se existir |
+| `videos/encerramento.mp4` | Encerramento "Quem ganha?" (vertical 1080x1920); o kit encaixa fotos e nomes dos memes nos painéis MEME 1/MEME 2 |
 | `assets/moldura2.png` | Moldura 9:16 com **janela transparente** — o clipe aparece por trás dela |
 | `assets/fonts/Dream MMA.ttf` | Fonte de display do título (empacotada; ver `assets/fonts/LEIA-ME.txt`) |
 | `C:\Windows\Fonts\arial.ttf` | Fonte usada fora do título |
@@ -146,9 +146,71 @@ Arquivos gerados (git-ignored):
 | `mostrar --torneio N` | Mostra o chaveamento |
 | `vencedor --match N --winner M` | Define vencedor e propaga |
 | `montar --match N` | Baixa, normaliza e monta o vídeo |
-| `editor` | Abre o editor visual desktop |
+| `painel` | Abre o painel de duelos (gerar, publicar e apurar a rodada) |
+| `editor [--match N]` | Abre o editor visual desktop (opcionalmente já num confronto) |
+| `rodada --torneio N` | Monta todos os confrontos da rodada atual e gera o pacote de publicação |
+| `publicar --match N --tiktok URL [--horas 48]` | Grava links, `publicado_em` e o prazo (`deadline`) da votação |
+| `apurar --match N --arquivo ARQ [--definir-vencedor]` | Conta os votos de um `.txt`/`.csv`/`.json` de comentários |
+| `status` | Próxima ação (montar / publicar / apurar) de cada confronto da rodada |
+| `legenda --match N` | Imprime a legenda pronta (texto, prazo, link e hashtags) |
+| `doctor` | Checa Python, ffmpeg, idade do yt-dlp, assets e dados |
+| `validar [--so-erros]` | Valida catálogo e estado (usado no CI) |
+| `prebaixar [--ids ...]` | Baixa/normaliza os clipes de todos os memes ativos (acha links quebrados cedo) |
+| `video --match N --tiktok URL ...` | Só grava os links de um confronto |
+
+### Ciclo de uma rodada
+
+```powershell
+.\.venv\Scripts\python.exe -m app.cli rodada --torneio 1
+# -> media/publicar/torneio_1_rodada_R/: match_N.mp4, match_N_capa.png,
+#    match_N_legenda.txt e manifest.json (suba os vídeos no TikTok/Reels/Shorts)
+.\.venv\Scripts\python.exe -m app.cli publicar --match 5 --tiktok https://www.tiktok.com/@.../video/...
+# ...prazo encerrado: exporte/cole os comentários num arquivo
+.\.venv\Scripts\python.exe -m app.cli apurar --match 5 --arquivo comentarios.txt --definir-vencedor
+.\.venv\Scripts\python.exe -m app.cli status
+```
+
+Formato do `.txt` de comentários: uma linha por comentário, `usuario: texto`.
+Votos válidos: comentário que é só `A`/`B`/`1`/`2`, frases como "voto no A",
+"time B", 🅰️/🅱️ ou o nome do meme; um voto por usuário (o primeiro válido), só
+dentro do prazo. Empate é desfeito pelo `seed` do torneio. O bruto fica em
+`data/raw/` (git-ignored); o `estado.json` guarda só os votos válidos, sem texto.
+
+### Testes e lint
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+.\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe -m ruff check app tests
+```
+
+O CI (`.github/workflows/deploy.yml`) roda testes, lint, `validar` e `tsc` antes
+de publicar o site.
 
 ---
+
+## Painel de duelos (desktop)
+
+A tela do dia a dia: **dê dois cliques em `painel.bat`** na raiz do repositório
+(ou rode `python -m app.cli painel` em `backend/`).
+
+- escolha o **torneio** e a **rodada** (abre na rodada em andamento); a lista
+  mostra cada confronto com a situação — *a gerar*, *pronto p/ publicar*,
+  *em votação* (com prazo), *apurar agora* (prazo vencido) ou o vencedor —,
+  duração (fundo laranja se passar do limite do `roteiro.json`) e placar;
+- **Gerar vídeo dos selecionados** (Ctrl/Shift para vários) ou **Gerar a rodada**
+  (todos os pendentes): fila em segundo plano com barra de progresso e log; uma
+  falha não para a fila e **Cancelar fila** para depois do vídeo atual;
+- **Prévia da capa** gera só o kit (gancho + capa, ~6 s) para conferir antes de
+  renderizar; **Ajustar no editor…** abre o editor de montagem já no confronto
+  (salve lá e aperte **F5** no painel);
+- **Abrir vídeo** (ou duplo clique na linha) e **Copiar legenda**;
+- **Publicar…** grava os links (TikTok/Reels/Shorts) e o prazo da votação, e
+  copia a legenda;
+- **Apurar comentários…** lê o arquivo `.txt/.csv/.json`, mostra o placar e
+  oferece definir o vencedor; **Vencedor: A/B** define na mão;
+- **Pacote da rodada** junta vídeos, capas, legendas e `manifest.json` numa pasta
+  e a abre.
 
 ## Editor visual (desktop)
 
@@ -257,36 +319,43 @@ $env:ESTADO_JSON = "C:\caminho\para\estado.json"; npm run build
 ```
 batalha-de-memes/
   assets/moldura2.png       # moldura usada na montagem (janela transparente)
-  videos/abertura.mp4       # intro
-  videos/versus.mp4         # transição "VS" entre os dois memes
+  assets/fonts/             # Dream MMA (título e kit)
+  assets/_rascunhos/        # artes não usadas (git-ignored, só local)
+  videos/                   # abertura, versus, encerramento (1080x1920)
   backend/
     app/
-      cli.py                # CLI do pipeline (seed, torneio, vencedor, montar, editor...)
-      config.py             # caminhos (estado, mídia, moldura, fontes, layout, tmp)
+      cli.py                # CLI do pipeline (seed, torneio, rodada, apurar, status, doctor...)
+      config.py             # caminhos (estado, mídia, moldura, fontes, layout, roteiro, tmp)
       layout.py             # geometria da montagem (data/layout.json)
+      roteiro.py            # sequência/transições/áudio/encode (data/roteiro.json)
       titulo.py             # título: fonte de meme, gradiente, quebra de linha
-      store.py              # lê/grava data/estado.json (fonte única da verdade)
-      editor/
-        app.py              # editor visual desktop (Tkinter)
-        preview.py          # preview PIL + frame exato (ffmpeg)
+      store.py              # lê/grava data/estado.json (gravação atômica)
+      editor/               # painel de duelos + editor de montagem (Tkinter)
       services/
         catalog.py          # lê data/memes/*.json -> estado
         bracket.py          # sorteio das chaves + propagação do vencedor
         downloader.py       # yt-dlp + normalização 9:16   (CLI: --id)
-        assembler.py        # ffmpeg: abertura + moldura + título (CLI: --a --b)
+        midia.py            # utilitários ffmpeg (duração, áudio, quadro)
+        kit.py              # kit procedural: gancho, capa, selos, CTA, encerramento
+        assembler.py        # ffmpeg: segmentos + transições + loudnorm (CLI: --a --b)
+        vote_parser.py      # apuração A vs B a partir de comentários
+        publicacao.py       # legenda + pacote/manifest da rodada
+        validacao.py        # validação de catálogo e estado
+    tests/                  # pytest (bracket, votos, layout/roteiro, grafo do ffmpeg)
     data/
       memes/                # catálogo editável por temporada (entrada do seed)
-        temporada-1.json
-        temporada-2.json
-        temporada-3.json
       estado.json           # estado da aplicação (fonte única da verdade)
       layout.json           # layout da montagem (criado ao salvar no editor)
-    media/                  # cache de clipes (git-ignored)
-    requirements.txt
+      roteiro.json          # roteiro do vídeo (editável à mão)
+      raw/                  # comentários brutos e apurações (git-ignored)
+    media/                  # cache de clipes, vídeos e pacotes de publicação (git-ignored)
+    requirements.txt / requirements-dev.txt / pyproject.toml
   frontend/                 # Next.js (App Router) com output: "export"
+    app/match/[id]/         # página do confronto (link da bio/legenda)
     lib/estado.ts           # lê data/estado.json em tempo de build
+    public/capas/           # capas dos confrontos (geradas pelo pipeline, versionadas)
     out/                    # site estático gerado (git-ignored)
-  tmp/                      # saída temporária (git-ignored)
+  tmp/                      # saída temporária e cache do kit (git-ignored)
   SPEC.md                   # especificação e roadmap
 ```
 
@@ -294,35 +363,39 @@ batalha-de-memes/
 
 ## Como o vídeo final é montado
 
-Cada clipe é exibido, em sequência: **abertura → meme A → versus → meme B** (o
-`videos/versus.mp4` é a transição "VS" entre os dois memes; sem ele, a sequência é
-**A → B**).
-Sobre cada clipe aplica-se a moldura (`assets/moldura2.png`). Como a moldura tem
-**fundo transparente (janela)**, o clipe é composto **por trás dela** — o vídeo
-aparece pela janela e as bordas opacas fazem o acabamento. (Se a moldura for opaca
-— sem canal alfa —, mantém-se o comportamento antigo: a moldura vai ao fundo e o
-clipe por cima.) A composição fica assim:
+A sequência vem de `backend/data/roteiro.json` (padrão:
+**gancho → meme A → versus → meme B → encerramento**), com transição `fade` de
+0,25 s entre os segmentos (`xfade`/`acrossfade`; `"transicao": "corte"` volta ao
+corte seco). Segmentos cujo arquivo não existe são pulados.
 
-- o clipe preenchendo a área do "telão" definida em `backend/data/layout.json`
-  (padrão: 11%–89% da largura × 25%–81% da altura) em `cover` (recorte central:
-  ocupa todo o espaço, mesmo cortando as bordas) ou `contain` (encaixa e completa
-  com barras pretas) — sem fundo desfocado;
-- o título centralizado (padrão: centro a 18% da altura) com a fonte de display
-  **Dream MMA** (caixa-alta, **gradiente dourado + contorno preto**), renderizado
-  em PNG e sobreposto. O tamanho é automático: mede a largura **na fonte real** e,
-  se ficaria pequeno demais numa linha, **quebra em até duas linhas** — nomes
-  longos não estouram a margem. O texto é o `titulo_a`/`titulo_b` do confronto
-  (quando definido no editor) ou o nome do meme;
-- o áudio original de cada clipe.
+### Kit procedural (`app/services/kit.py`, sem IA)
 
-Reescalas usam `flags=lanczos` para manter a nitidez (sem aspecto "borrado").
+Gerado por confronto com PIL + ffmpeg e cacheado em `tmp/kit/<hash>/`:
 
-O layout (área + preenchimento + enquadramento do título) é editável no editor
-desktop e fica em `backend/data/layout.json`; o estilo do título (fonte, cores,
-contorno, quebra de linha) fica em `backend/app/titulo.py` e os caminhos em
-`backend/app/config.py`.
+| Asset | O que é |
+| --- | --- |
+| `gancho.mp4` | 1,6 s: os dois memes entram pelos lados, o "VS" bate no centro (flash + tremida), fase/jogo no topo, "QUEM VENCE / COMENTE A OU B" embaixo; whoosh + impacto **sintetizados** no ffmpeg |
+| `capa.png` | Último quadro do gancho — capa do TikTok/Reels; copiada para `frontend/public/capas/` (página do confronto e `og:image`) |
+| `selo_a/b.png` | Badge A/B no canto do telão durante cada meme |
+| `cta_a/b.png` | Faixa "COMENTE A/B" nos últimos `cta_segundos` de cada meme |
+| `encerramento.png` | Fotos e nomes dos memes nos painéis do `encerramento.mp4` (geometria em `roteiro.json` → `encerramento`) |
 
----
+Para conferir o visual sem renderizar o vídeo: `python -m app.services.kit --match N`.
+
+### Composição dos memes
+
+- a moldura (`assets/moldura2.png`) tem **janela transparente**: o clipe é
+  composto por trás dela, na área de `data/layout.json` (editor desktop), em
+  `cover` (recorte central) ou `contain` (barras pretas);
+- título com a fonte **Dream MMA** (gradiente dourado + contorno), tamanho
+  automático com quebra em até duas linhas (`app/titulo.py`);
+- áudio dos memes normalizado a **-14 LUFS** (`loudnorm`), então um meme não
+  estoura enquanto o outro some;
+- barra de progresso dourada no topo do vídeo inteiro (retenção).
+
+Encode: H.264 high, `crf 18`, `preset medium`, GOP 2 s, AAC 192k, `+faststart`
+(ajustáveis em `roteiro.json`). O `montar_match` grava `video_path`, `capa_path`
+e `duracao` no confronto e avisa se passar de `duracao_max` (60 s).
 
 ## Problemas comuns
 

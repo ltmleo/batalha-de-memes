@@ -17,6 +17,21 @@ def _ordem_sementes(tamanho: int) -> list[int]:
     return ordem
 
 
+def jogavel(match: dict[str, Any]) -> bool:
+    """Confronto com os dois memes definidos e ainda sem resultado."""
+    return (
+        match["status"] not in ("finalizado", "cancelado")
+        and bool(match.get("meme_a_id"))
+        and bool(match.get("meme_b_id"))
+    )
+
+
+def rodada_atual(estado: Estado, torneio_id: int) -> int | None:
+    """Menor rodada com confronto jogável (None = terminado/aguardando)."""
+    rodadas = [m["round"] for m in estado.matches_do_torneio(torneio_id) if jogavel(m)]
+    return min(rodadas) if rodadas else None
+
+
 def definir_vencedor(estado: Estado, match: dict[str, Any], winner_id: int) -> None:
     """Marca o vencedor e o propaga para a próxima rodada (slot A/B pela paridade)."""
     match["winner_id"] = winner_id
@@ -33,6 +48,10 @@ def definir_vencedor(estado: Estado, match: dict[str, Any], winner_id: int) -> N
         None,
     )
     if proximo is None:
+        # era a final: a temporada acabou
+        torneio = estado.buscar_torneio(match["tournament_id"])
+        if torneio is not None:
+            torneio["status"] = "finalizado"
         return
     if match["posicao"] % 2 == 0:
         proximo["meme_a_id"] = winner_id

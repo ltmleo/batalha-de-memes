@@ -19,3 +19,13 @@ frontend/out/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Rascunhos de arte (fora do git; ficam só na máquina)
+assets/_rascunhos/
+
+# Python tooling
+.pytest_cache/
+.ruff_cache/
+
+# TypeScript incremental build
+*.tsbuildinfo

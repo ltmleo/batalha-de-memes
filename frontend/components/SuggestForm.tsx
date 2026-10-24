@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 
+import { REPO_URL } from "@/lib/site";
+
 /**
- * Formulário de sugestão de candidato. Sem backend: o envio abre o app de
- * e-mail do visitante com a mensagem pronta (padrão de site estático).
+ * Formulário de sugestão de candidato. Sem backend: o envio abre uma issue
+ * pré-preenchida no GitHub do projeto (precisa de conta no GitHub), onde a
+ * sugestão fica registrada e pode ser discutida antes de entrar no catálogo.
  */
 export function SuggestForm() {
   const [nome, setNome] = useState("");
@@ -15,14 +18,14 @@ export function SuggestForm() {
     const corpo = [
       "Candidato sugerido pelo site:",
       "",
-      `  Meme: ${nome.trim() || "—"}`,
-      `  Dica de vídeo original: ${dica.trim() || "—"}`,
+      `- **Meme:** ${nome.trim() || "—"}`,
+      `- **Vídeo original / dica:** ${dica.trim() || "—"}`,
     ].join("\n");
-    window.location.href =
-      "mailto:?subject=" +
-      encodeURIComponent("Sugestão de meme — Batalha de Memes") +
-      "&body=" +
-      encodeURIComponent(corpo);
+    const url =
+      `${REPO_URL}/issues/new?labels=sugestao` +
+      `&title=${encodeURIComponent(`Sugestão de meme: ${nome.trim()}`)}` +
+      `&body=${encodeURIComponent(corpo)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -45,7 +48,7 @@ export function SuggestForm() {
         />
       </label>
       <button className="btn btn--primary btn--sm" type="submit">
-        Sugerir candidato
+        Sugerir no GitHub ↗
       </button>
     </form>
   );

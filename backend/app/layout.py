@@ -121,8 +121,8 @@ def carregar_layout(caminho: Path | None = None) -> Layout:
 
 
 def salvar_layout(layout: Layout, caminho: Path | None = None) -> Path:
+    from .store import gravar_json_atomico
+
     caminho = Path(caminho or CAMINHO_LAYOUT)
-    caminho.parent.mkdir(parents=True, exist_ok=True)
-    texto = json.dumps(layout.normalizar().para_dict(), ensure_ascii=False, indent=2)
-    caminho.write_text(texto + "\n", encoding="utf-8")
+    gravar_json_atomico(caminho, layout.normalizar().para_dict())
     return caminho
